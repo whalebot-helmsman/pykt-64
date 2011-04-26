@@ -26,7 +26,7 @@ setup(name='pykt',
         packages= find_packages(),
         ext_modules = [
             Extension('pykt',
-            sources=['pykt/pykt.c', 'pykt/db.c', 'pykt/protocol.c'],
+            sources=['pykt/pykt.c', 'pykt/db.c', 'pykt/http.c'],
             include_dirs=include_dirs,
             library_dirs=library_dirs,
             define_macros=[("DEVELOP",None)],

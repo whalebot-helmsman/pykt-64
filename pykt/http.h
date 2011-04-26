@@ -1,5 +1,5 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef HTTP_H
+#define HTTP_H
 
 #include "pykt.h"
 

@@ -1,4 +1,4 @@
-#include "protocol.h"
+#include "http.h"
 
 
 
@@ -19,7 +19,11 @@ connect_socket(char *host, int port)
     
     snprintf(strport, sizeof (strport), "%d", port);
     
-    if ((err = getaddrinfo(host, strport, &hints, &res)) == -1) {
+    Py_BEGIN_ALLOW_THREADS
+    err = getaddrinfo(host, strport, &hints, &res);
+    Py_END_ALLOW_THREADS
+
+    if (err == -1) {
         PyErr_SetFromErrno(PyExc_IOError);
         return -1;
     }
