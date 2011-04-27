@@ -5,4 +5,5 @@
 \.DS_Store$
 ^env$
 ^docs/_buil
+^TODO
 

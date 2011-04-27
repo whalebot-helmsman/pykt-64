@@ -3,6 +3,9 @@
 
 #include "pykt.h"
 
+#define CRLF "\r\n"
+#define DELIM ": "
+
 typedef struct iovec iovec_t;
 
 typedef struct {

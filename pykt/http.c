@@ -120,3 +120,34 @@ writev_bucket(data_bucket *bucket){
     return 1;
 }
 
+static inline data_bucket *
+create_data_bucket(int fd, int cnt){
+
+    data_bucket *bucket;
+    bucket = PyMem_Malloc(sizeof(data_bucket));
+    memset(bucket, 0, sizeof(data_bucket));
+    
+    bucket->fd = fd;
+    bucket->iov = (iovec_t *)PyMem_Malloc(sizeof(iovec_t) * cnt);
+    bucket->iov_size = cnt;
+    return bucket;
+}
+
+static inline void
+free_data_bucket(data_bucket *bucket)
+{
+    PyMem_Free(bucket->iov);
+    PyMem_Free(bucket);
+}
+
+
+static inline void
+set2bucket(data_bucket *bucket, char *buf, size_t len)
+{
+    bucket->iov[bucket->iov_cnt].iov_base = buf;
+    bucket->iov[bucket->iov_cnt].iov_len = len;
+    bucket->iov_cnt++;
+    bucket->total += len;
+    bucket->total_size += len;
+}
+
