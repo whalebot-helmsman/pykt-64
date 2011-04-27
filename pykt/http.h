@@ -2,27 +2,30 @@
 #define HTTP_H
 
 #include "pykt.h"
+#include "bucket.h"
 
 #define CRLF "\r\n"
 #define DELIM ": "
+#define SPACE " "
 
-typedef struct iovec iovec_t;
+#define METHOD_GET "GET "
+#define METHOD_POST "POST "
+#define METHOD_PUT "PUT "
+#define METHOD_DELETE "DELETE "
 
-typedef struct {
-    int fd;
-    iovec_t *iov;
-    uint32_t iov_cnt;
-    uint32_t iov_size;
-    uint32_t total;
-    uint32_t total_size;
-    uint8_t sended;
-} data_bucket;
+#define HTTP_10 " HTTP/1.0"
+#define HTTP_11 " HTTP/1.1"
+
+#define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U"
+
+#define KT_MODE_ADD "X-Kt-Mode : add" 
+#define KT_MODE_REPLACE "X-Kt-Mode : replace" 
+
+#define KT_FIELD_NAME "X-Kt-Xt" 
 
 inline int 
 connect_socket(char *host, int port);
 
-inline int 
-writev_bucket(data_bucket *bucket);
 
 #endif 
 
