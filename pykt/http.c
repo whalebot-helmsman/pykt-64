@@ -36,7 +36,7 @@ open_http_connection(DBObject *db)
 }
 
 inline void
-request_http(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len)
+set_request_path(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len)
 {
     data_bucket *bucket = connection->bucket;
     set2bucket(bucket, method, method_len);
@@ -122,9 +122,10 @@ set_newline(data_bucket *bucket)
     set2bucket(bucket, CRLF, 2);
 }
 
-static inline void
-set_header(data_bucket *bucket, char *name, size_t name_len, char *value, size_t value_len)
+inline void
+add_header(http_connection *connection, char *name, size_t name_len, char *value, size_t value_len)
 {
+    data_bucket *bucket = connection->bucket;
     set2bucket(bucket, name, name_len);
     set2bucket(bucket, DELIM, 2);
     set2bucket(bucket, value, value_len);
