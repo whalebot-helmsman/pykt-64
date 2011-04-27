@@ -24,12 +24,6 @@ free_data_bucket(data_bucket *bucket);
 inline void
 set2bucket(data_bucket *bucket, char *buf, size_t len);
 
-inline void
-newline2bucket(data_bucket *bucket);
-
-inline void
-set_header(data_bucket *bucket, char *name, size_t name_len, char *value, size_t value_len);
-
 inline int 
 writev_bucket(data_bucket *bucket);
 

@@ -73,3 +73,18 @@ connect_socket(char *host, int port)
     return fd;
 }
 
+static inline void
+set_newline(data_bucket *bucket)
+{
+    set2bucket(bucket, CRLF, 2);
+}
+
+static inline void
+set_header(data_bucket *bucket, char *name, size_t name_len, char *value, size_t value_len)
+{
+    set2bucket(bucket, name, name_len);
+    set2bucket(bucket, DELIM, 2);
+    set2bucket(bucket, value, value_len);
+    set2bucket(bucket, CRLF, 2);
+}
+

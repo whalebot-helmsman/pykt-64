@@ -1,9 +1,5 @@
 #include "bucket.h"
 
-#define CRLF "\r\n"
-#define DELIM ": "
-#define SPACE " "
-
 inline int 
 writev_bucket(data_bucket *bucket){
     int ret;
@@ -52,7 +48,8 @@ writev_bucket(data_bucket *bucket){
 }
 
 inline data_bucket *
-create_data_bucket(int fd, int cnt){
+create_data_bucket(int fd, int cnt)
+{
 
     data_bucket *bucket;
     bucket = PyMem_Malloc(sizeof(data_bucket));
@@ -72,12 +69,6 @@ free_data_bucket(data_bucket *bucket)
 }
 
 inline void
-newline2bucket(data_bucket *bucket)
-{
-    set2bucket(bucket, CRLF, 2);
-}
-
-inline void
 set2bucket(data_bucket *bucket, char *buf, size_t len)
 {
     bucket->iov[bucket->iov_cnt].iov_base = buf;
@@ -87,14 +78,5 @@ set2bucket(data_bucket *bucket, char *buf, size_t len)
     bucket->total_size += len;
 }
 
-
-inline void
-set_header(data_bucket *bucket, char *name, size_t name_len, char *value, size_t value_len)
-{
-    set2bucket(bucket, name, name_len);
-    set2bucket(bucket, DELIM, 2);
-    set2bucket(bucket, value, value_len);
-    set2bucket(bucket, CRLF, 2);
-}
 
 
