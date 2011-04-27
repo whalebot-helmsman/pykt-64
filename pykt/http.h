@@ -32,6 +32,10 @@ typedef struct {
 inline http_connection *
 open_http_connection(DBObject *db);
 
+inline void
+request_http(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len);
+
+
 #endif 
 
 

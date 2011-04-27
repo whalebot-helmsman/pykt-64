@@ -32,9 +32,17 @@ open_http_connection(DBObject *db)
         return NULL;
     }
     connection->bucket = bucket;
-    return bucket;
+    return connection;
 }
 
+inline void
+request_http(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len)
+{
+    data_bucket *bucket = connection->bucket;
+    set2bucket(bucket, method, method_len);
+    set2bucket(bucket, path, path_len);
+    set2bucket(bucket, HTTP_10, sizeof(HTTP_10));
+}
 
 
 static inline int 
