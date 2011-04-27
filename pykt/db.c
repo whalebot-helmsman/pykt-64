@@ -91,7 +91,7 @@ PyTypeObject DBObjectType = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    DBObject_init,                      /* tp_init */
+    (initproc)DBObject_init,                      /* tp_init */
     0,                         /* tp_alloc */
     DBObject_new,                           /* tp_new */
 };

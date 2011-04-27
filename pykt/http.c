@@ -1,8 +1,15 @@
 #include "http.h"
 
+#define BUF_SIZE 1024 * 4
 
 static inline int 
 connect_socket(char *host, int port);
+
+static inline int 
+send_request(http_connection *con);
+
+static inline int 
+recv_response(http_connection *con);
 
 inline http_connection *
 open_http_connection(DBObject *db)
@@ -24,7 +31,8 @@ open_http_connection(DBObject *db)
         }
         return NULL;
     }
-    bucket = create_data_bucket(fd, 32);
+
+    bucket = create_data_bucket(fd, 24);
     if(bucket == NULL){
         if(connection){
             PyMem_Free(connection);
@@ -36,9 +44,17 @@ open_http_connection(DBObject *db)
 }
 
 inline void
-set_request_path(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len)
+close_http_connection(http_connection *con)
 {
-    data_bucket *bucket = connection->bucket;
+    data_bucket *bucket = con->bucket;
+    close(bucket->fd);
+}
+
+inline void
+set_request_path(http_connection *con, char *method, size_t method_len, char *path, size_t path_len)
+{
+    data_bucket *bucket = con->bucket;
+
     set2bucket(bucket, method, method_len);
     set2bucket(bucket, path, path_len);
     set2bucket(bucket, HTTP_10, sizeof(HTTP_10));
@@ -117,18 +133,91 @@ connect_socket(char *host, int port)
 }
 
 inline void
-add_crlf(http_connection *connection)
+add_crlf(http_connection *con)
 {
-    set2bucket(connection->bucket, CRLF, 2);
+    set2bucket(con->bucket, CRLF, 2);
 }
 
 inline void
-add_header(http_connection *connection, char *name, size_t name_len, char *value, size_t value_len)
+add_header(http_connection *con, char *name, size_t name_len, char *value, size_t value_len)
 {
-    data_bucket *bucket = connection->bucket;
+    data_bucket *bucket = con->bucket;
     set2bucket(bucket, name, name_len);
     set2bucket(bucket, DELIM, 2);
     set2bucket(bucket, value, value_len);
     set2bucket(bucket, CRLF, 2);
 }
 
+inline PyObject * 
+request(http_connection *con)
+{
+   int ret;
+   ret = send_request(con);
+   
+   if(ret < 0){
+       //error
+   }
+   ret = recv_response(con);
+   return NULL;
+}
+
+static inline int 
+send_request(http_connection *con)
+{
+    int ret;
+    
+    data_bucket *bucket = con->bucket;
+    
+    ret = writev_bucket(bucket);
+    switch(ret){
+        case 0:
+            //EWOULDBLOCK or EAGAIN
+            //TODO trampoline hook 
+            break;
+        case -1:
+            //IO Error
+            //TODO PyErr
+            return -1;
+        default:
+            break;
+    }
+    return 1;
+}
+
+static inline int 
+recv_response(http_connection *con)
+{
+    return 1;
+}
+
+static inline int 
+recv_data(http_connection *con)
+{
+    char buf[BUF_SIZE];
+    ssize_t r;
+
+    data_bucket *bucket = con->bucket;
+
+    Py_BEGIN_ALLOW_THREADS
+    r = read(bucket->fd, buf, sizeof(buf));
+    Py_END_ALLOW_THREADS
+
+    switch(r){
+        case 0:
+            //close  or EAGAIN
+            break;
+        case -1:
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { /* try again later */
+                //TODO trampoline
+                break;
+            } else {
+                PyErr_SetFromErrno(PyExc_IOError);
+                //TODO close connection
+            }
+            return -1;
+        default:
+            break;
+    }
+
+
+}
