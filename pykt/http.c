@@ -1,8 +1,43 @@
 #include "http.h"
 
 
+static inline int 
+connect_socket(char *host, int port);
 
-inline int 
+inline http_connection *
+open_http_connection(DBObject *db)
+{
+
+    http_connection *connection;
+    data_bucket *bucket;
+    int fd;
+
+    connection = PyMem_Malloc(sizeof(http_connection));
+    if(connection == NULL){
+        return NULL;
+    }
+    memset(connection, 0, sizeof(http_connection));
+    fd = connect_socket(db->host, db->port);
+    if(fd < 0){
+        if(connection){
+            PyMem_Free(connection);
+        }
+        return NULL;
+    }
+    bucket = create_data_bucket(fd, 32);
+    if(bucket == NULL){
+        if(connection){
+            PyMem_Free(connection);
+        }
+        return NULL;
+    }
+    connection->bucket = bucket;
+    return bucket;
+}
+
+
+
+static inline int 
 connect_socket(char *host, int port)
 {
     struct addrinfo hints, *res, *ai;

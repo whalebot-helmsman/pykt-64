@@ -2,6 +2,7 @@
 #define HTTP_H
 
 #include "pykt.h"
+#include "db.h"
 #include "bucket.h"
 
 #define CRLF "\r\n"
@@ -23,9 +24,13 @@
 
 #define KT_FIELD_NAME "X-Kt-Xt" 
 
-inline int 
-connect_socket(char *host, int port);
 
+typedef struct {
+    data_bucket *bucket;
+} http_connection;
+
+inline http_connection *
+open_http_connection(DBObject *db);
 
 #endif 
 
