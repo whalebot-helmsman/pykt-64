@@ -5,14 +5,16 @@
 
 
 inline PyObject* 
-call_echo(DBObject *db){
-    data_bucket *bucket;
-    bucket = create_data_bucket(db->fd, 10);
-    set2bucket(bucket, METHOD_POST, sizeof(METHOD_POST));
-    set2bucket(bucket, ECHO_URL, sizeof(ECHO_URL));
-    set2bucket(bucket, HTTP_10, sizeof(HTTP_10));
-    newline2bucket(bucket);
-    newline2bucket(bucket);
+call_echo(DBObject *db)
+{
+    http_connection *con;
+    con = open_http_connection(db);
+    if(con == NULL){
+        // 1. MemoryError
+        // 2. IOError
+        return NULL;
+    }
+    set_request_path(con, METHOD_POST, sizeof(METHOD_POST), ECHO_URL, sizeof(ECHO_URL));
     
     return NULL;
 

@@ -14,8 +14,8 @@
 #define METHOD_PUT "PUT "
 #define METHOD_DELETE "DELETE "
 
-#define HTTP_10 " HTTP/1.0"
-#define HTTP_11 " HTTP/1.1"
+#define HTTP_10 " HTTP/1.0\r\n"
+#define HTTP_11 " HTTP/1.1\r\n"
 
 #define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U"
 
@@ -38,6 +38,8 @@ set_request_path(http_connection *connection, char *method, size_t method_len, c
 inline void
 add_header(http_connection *connection, char *name, size_t name_len, char *value, size_t value_len);
 
+inline void
+add_crlf(http_connection *connection);
 //inline void * 
 //request(http_connection *connection);
 

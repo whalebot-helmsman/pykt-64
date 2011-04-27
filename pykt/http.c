@@ -116,10 +116,10 @@ connect_socket(char *host, int port)
     return fd;
 }
 
-static inline void
-set_newline(data_bucket *bucket)
+inline void
+add_crlf(http_connection *connection)
 {
-    set2bucket(bucket, CRLF, 2);
+    set2bucket(connection->bucket, CRLF, 2);
 }
 
 inline void
