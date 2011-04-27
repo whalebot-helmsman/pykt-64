@@ -27,7 +27,7 @@ setup(name='pykt',
         ext_modules = [
             Extension('pykt',
             sources=['pykt/pykt.c', 'pykt/db.c', 'pykt/bucket.c', 
-                'pykt/http.c', 'pykt/rpc.c'],
+                'pykt/http.c', 'pykt/rpc.c', 'pykt/buffer.c'],
             include_dirs=include_dirs,
             library_dirs=library_dirs,
             define_macros=[("DEVELOP",None)],
