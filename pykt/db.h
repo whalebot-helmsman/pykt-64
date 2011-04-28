@@ -7,7 +7,6 @@
 
 typedef struct {
     PyObject_HEAD
-    int fd;
     char *host;
     int port;
     double timeout;

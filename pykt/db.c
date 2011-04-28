@@ -27,39 +27,47 @@ DBObject_init(DBObject *self, PyObject *args, PyObject *kwds)
 static inline void
 DBObject_dealloc(DBObject *self)
 {
+    if(self->con){
+        close_http_connection(self->con);
+        self->con = NULL;
+    }
     self->ob_type->tp_free((PyObject*)self);
 }
 
 static inline PyObject* 
 DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *result;
     char *host = NULL;
-    int port;
+    int port = 0;
     double timeout;
-    //http_connection *con;
+    http_connection *con;
 
     static char *kwlist[] = {"host", "port", "timeout", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sid", kwlist, &host, &port, &timeout)){
         return NULL; 
     }
+    
+    DEBUG("DBObject_open %s : %d", host, port);
+    
     if(!host){
         host = DEFAULT_HOST;
     }
-    if(!port){
+    if(port == 0){
         port = DEFAULT_PORT;
     }
     if(!timeout){
         timeout = DEFAULT_TIMEOUT;
     }
-    
+    con = open_http_connection(host, port);
+    if(con == NULL){
+        return NULL;
+    }
     self->host = host;
     self->port = port;
     self->timeout = timeout;
-
-	result = Py_True;
-	Py_INCREF(result);
-    return result;
+    self->con = con;
+	Py_INCREF(self);
+    return (PyObject *)self;
 }
 
 static PyMethodDef DBObject_methods[] = {

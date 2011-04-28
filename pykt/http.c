@@ -22,6 +22,7 @@ open_http_connection(const char *host, int port)
     http_connection *con;
     //data_bucket *bucket;
     int fd;
+    DEBUG("open_http_connection %s : %d", host, port);
 
     con = PyMem_Malloc(sizeof(http_connection));
     if(con == NULL){
@@ -87,8 +88,9 @@ connect_socket(const char *host, int port)
     int err;
     int fd;
     char strport[7];
-
     
+    DEBUG("connect_socket %s : %d", host, port);
+   
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -101,6 +103,7 @@ connect_socket(const char *host, int port)
     Py_END_ALLOW_THREADS
 
     if (err == -1) {
+        DEBUG("error getaddrinfo");
         PyErr_SetFromErrno(PyExc_IOError);
         return -1;
     }
@@ -111,8 +114,8 @@ connect_socket(const char *host, int port)
         fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
         Py_END_ALLOW_THREADS
         
-        if (fd < 0){
-            return -1;
+        if (fd == -1){
+            continue;
         }
 
         if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag,
@@ -135,7 +138,7 @@ connect_socket(const char *host, int port)
         if (err < 0) {
             close(fd);
             fd = -1;
-           continue;
+            continue;
         }
         break;
     }
