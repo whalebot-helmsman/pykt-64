@@ -15,39 +15,51 @@ inline http_connection *
 open_http_connection(DBObject *db)
 {
 
-    http_connection *connection;
+    http_connection *con;
     data_bucket *bucket;
     int fd;
 
-    connection = PyMem_Malloc(sizeof(http_connection));
-    if(connection == NULL){
+    con = PyMem_Malloc(sizeof(http_connection));
+    if(con == NULL){
+        PyErr_NoMemory();
         return NULL;
     }
-    memset(connection, 0, sizeof(http_connection));
+    memset(con, 0, sizeof(http_connection));
+
     fd = connect_socket(db->host, db->port);
     if(fd < 0){
-        if(connection){
-            PyMem_Free(connection);
+        if(con){
+            //TODO IOError 
+            close_http_connection(con);
         }
         return NULL;
     }
 
     bucket = create_data_bucket(fd, 24);
     if(bucket == NULL){
-        if(connection){
-            PyMem_Free(connection);
+        if(con){
+            //TODO IOError 
+            close_http_connection(con);
         }
         return NULL;
     }
-    connection->bucket = bucket;
-    return connection;
+    con->bucket = bucket;
+    con->fd = fd;
+    return con;
 }
 
 inline void
 close_http_connection(http_connection *con)
 {
-    data_bucket *bucket = con->bucket;
-    close(bucket->fd);
+    if(con->bucket){
+        free_data_bucket(con->bucket);
+        con->bucket = NULL;
+    }
+
+    if(con->fd > 0){
+        close(con->fd);
+    }
+    PyMem_Free(con);
 }
 
 inline void

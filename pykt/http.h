@@ -4,6 +4,7 @@
 #include "pykt.h"
 #include "db.h"
 #include "bucket.h"
+#include "http_parser.h"
 
 #define CRLF "\r\n"
 #define DELIM ": "
@@ -26,7 +27,9 @@
 
 
 typedef struct {
+    int fd;
     data_bucket *bucket;
+    http_parser *parser;
 } http_connection;
 
 inline http_connection *

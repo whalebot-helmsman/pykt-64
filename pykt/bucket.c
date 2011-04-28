@@ -52,11 +52,23 @@ create_data_bucket(int fd, int cnt)
 {
 
     data_bucket *bucket;
+    iovec_t *iov;
+
     bucket = PyMem_Malloc(sizeof(data_bucket));
+    if(bucket == NULL){
+        PyErr_NoMemory();
+        return NULL;
+    }
     memset(bucket, 0, sizeof(data_bucket));
     
     bucket->fd = fd;
-    bucket->iov = (iovec_t *)PyMem_Malloc(sizeof(iovec_t) * cnt);
+    iov = (iovec_t *)PyMem_Malloc(sizeof(iovec_t) * cnt);
+    if(iov == NULL){
+        PyMem_Free(bucket);
+        PyErr_NoMemory();
+        return NULL;
+    }
+    bucket->iov = iov;
     bucket->iov_size = cnt;
     return bucket;
 }
