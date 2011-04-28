@@ -25,6 +25,7 @@
 #ifdef DEVELOP
 #define DEBUG(...) \
     do { \
+        printf("DEBUG: "); \
         printf(__VA_ARGS__); \
         printf("\n"); \
     } while(0)
