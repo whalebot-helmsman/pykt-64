@@ -19,7 +19,7 @@ DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 }
 
 static inline int
-DBObject_init(DBObject *type, PyObject *args, PyObject *kwds)
+DBObject_init(DBObject *self, PyObject *args, PyObject *kwds)
 {
     return 0;
 }
@@ -33,9 +33,11 @@ DBObject_dealloc(DBObject *self)
 static inline PyObject* 
 DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
 {
+    PyObject *result;
     char *host = NULL;
     int port;
     double timeout;
+    //http_connection *con;
 
     static char *kwlist[] = {"host", "port", "timeout", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sid", kwlist, &host, &port, &timeout)){
@@ -50,10 +52,14 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     if(!timeout){
         timeout = DEFAULT_TIMEOUT;
     }
+    
     self->host = host;
     self->port = port;
     self->timeout = timeout;
-    return (PyObject *)self;
+
+	result = Py_True;
+	Py_INCREF(result);
+    return result;
 }
 
 static PyMethodDef DBObject_methods[] = {

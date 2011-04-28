@@ -8,7 +8,7 @@ inline PyObject*
 call_echo(DBObject *db)
 {
     http_connection *con;
-    con = open_http_connection(db);
+    con = open_http_connection(db->host, db->port);
     if(con == NULL){
         // 1. MemoryError
         // 2. IOError

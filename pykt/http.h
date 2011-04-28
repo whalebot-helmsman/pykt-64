@@ -2,7 +2,6 @@
 #define HTTP_H
 
 #include "pykt.h"
-#include "db.h"
 #include "bucket.h"
 #include "http_parser.h"
 
@@ -33,7 +32,7 @@ typedef struct {
 } http_connection;
 
 inline http_connection *
-open_http_connection(DBObject *db);
+open_http_connection(const char *host, int port);
 
 inline void
 close_http_connection(http_connection *con);

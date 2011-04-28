@@ -4,7 +4,7 @@
 #define BUF_SIZE 1024 * 4
 
 static inline int 
-connect_socket(char *host, int port);
+connect_socket(const char *host, int port);
 
 static inline int 
 send_request(http_connection *con);
@@ -16,11 +16,11 @@ static inline int
 recv_response(http_connection *con);
 
 inline http_connection *
-open_http_connection(DBObject *db)
+open_http_connection(const char *host, int port)
 {
 
     http_connection *con;
-    data_bucket *bucket;
+    //data_bucket *bucket;
     int fd;
 
     con = PyMem_Malloc(sizeof(http_connection));
@@ -30,7 +30,7 @@ open_http_connection(DBObject *db)
     }
     memset(con, 0, sizeof(http_connection));
 
-    fd = connect_socket(db->host, db->port);
+    fd = connect_socket(host, port);
     if(fd < 0){
         if(con){
             //TODO IOError 
@@ -38,7 +38,8 @@ open_http_connection(DBObject *db)
         }
         return NULL;
     }
-
+    
+    /*
     bucket = create_data_bucket(fd, 24);
     if(bucket == NULL){
         if(con){
@@ -48,6 +49,7 @@ open_http_connection(DBObject *db)
         return NULL;
     }
     con->bucket = bucket;
+    */
     con->fd = fd;
     return con;
 }
@@ -78,7 +80,7 @@ set_request_path(http_connection *con, char *method, size_t method_len, char *pa
 
 
 static inline int 
-connect_socket(char *host, int port)
+connect_socket(const char *host, int port)
 {
     struct addrinfo hints, *res, *ai;
     int flag = 1;
