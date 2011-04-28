@@ -51,8 +51,8 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
         timeout = DEFAULT_TIMEOUT;
     }
     self->host = host;
-    self->port;
-    self->timeout;
+    self->port = port;
+    self->timeout = timeout;
     return (PyObject *)self;
 }
 
