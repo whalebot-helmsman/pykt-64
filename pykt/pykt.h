@@ -32,7 +32,7 @@
 #define DEBUG(...) do{}while(0)
 #endif
 
-
+extern PyObject *wait_callback;
 
 
 
