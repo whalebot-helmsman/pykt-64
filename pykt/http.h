@@ -34,7 +34,7 @@ typedef struct {
 inline http_connection *
 open_http_connection(const char *host, int port);
 
-inline void
+inline int
 close_http_connection(http_connection *con);
 
 inline void

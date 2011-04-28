@@ -7,7 +7,17 @@ def test_init():
 def test_open():
     db = KyotoTycoon()
     db = db.open()
-    print db
+    assert db != None
 
-test_open()
+def test_close():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.close()
+    assert ret 
+
+def test_non_connect_close():
+    db = KyotoTycoon()
+    ret = db.close()
+    assert ret == False
+
 

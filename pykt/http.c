@@ -45,9 +45,10 @@ open_http_connection(const char *host, int port)
     return con;
 }
 
-inline void
+inline int
 close_http_connection(http_connection *con)
 {
+    int ret = 0;
     DEBUG("close_http_connection %p", con);
     if(con->bucket){
         free_data_bucket(con->bucket);
@@ -58,8 +59,10 @@ close_http_connection(http_connection *con)
         close(con->fd);
         DEBUG("close con fd:%d", con->fd);
         con->fd = -1;
+        ret = 1;
     }
     PyMem_Free(con);
+    return ret;
 }
 
 inline void

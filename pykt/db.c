@@ -73,8 +73,27 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     return (PyObject *)self;
 }
 
+static inline PyObject* 
+DBObject_close(DBObject *self, PyObject *args)
+{
+    PyObject *result;
+    result = Py_False;
+
+    DEBUG("DBObject_close self %p", self);
+    if(self->con){
+        if(close_http_connection(self->con) > 0){
+            self->con = NULL;
+            result = Py_True;
+        }
+    }
+    Py_INCREF(result);
+    return result;
+
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
+    {"close", DBObject_close, METH_NOARGS, 0},
     {NULL, NULL}
 };
 
