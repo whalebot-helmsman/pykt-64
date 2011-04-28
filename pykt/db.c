@@ -4,6 +4,15 @@
 #define DEFAULT_PORT 1978
 #define DEFAULT_TIMEOUT 30
 
+static inline int
+is_opened(DBObject *self)
+{
+    if(self->con){
+        return 1;
+    }
+    PyErr_SetString(PyExc_IOError, "not opend database");
+    return 0;
+}
 
 static inline PyObject *
 DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
@@ -91,9 +100,26 @@ DBObject_close(DBObject *self, PyObject *args)
 
 }
 
+static inline PyObject* 
+DBObject_echo(DBObject *self, PyObject *args)
+{
+    PyObject *result;
+    result = Py_False;
+
+    DEBUG("DBObject_echo self %p", self);
+    if(!is_opened(self)){
+        return NULL;
+    }
+
+    Py_INCREF(result);
+    return result;
+
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
-    {"close", DBObject_close, METH_NOARGS, 0},
+    {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
+    {"echo", DBObject_echo, METH_NOARGS, 0},
     {NULL, NULL}
 };
 

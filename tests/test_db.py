@@ -20,4 +20,13 @@ def test_non_connect_close():
     ret = db.close()
     assert ret == False
 
+def test_err_echo():
+    db = KyotoTycoon()
+    try:
+        ret = db.echo()
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
 
