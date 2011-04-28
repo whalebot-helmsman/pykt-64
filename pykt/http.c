@@ -1,4 +1,5 @@
 #include "http.h"
+#include "response.h"
 
 #define BUF_SIZE 1024 * 4
 
@@ -7,6 +8,9 @@ connect_socket(char *host, int port);
 
 static inline int 
 send_request(http_connection *con);
+
+static inline int 
+recv_data(http_connection *con);
 
 static inline int 
 recv_response(http_connection *con);
@@ -199,6 +203,19 @@ send_request(http_connection *con)
 static inline int 
 recv_response(http_connection *con)
 {
+    http_parser *parser;
+    int ret;
+    parser = init_parser(con);
+    if(parser == NULL){
+        //alloc error
+        return -1;
+    }
+    con->parser = parser;
+    con->parser->data = con;
+    while(1){
+        ret = recv_data(con);
+
+    }
     return 1;
 }
 
@@ -216,8 +233,8 @@ recv_data(http_connection *con)
 
     switch(r){
         case 0:
-            //close  or EAGAIN
-            break;
+            //close  
+            return 1;
         case -1:
             if (errno == EAGAIN || errno == EWOULDBLOCK) { /* try again later */
                 //TODO trampoline
@@ -230,6 +247,7 @@ recv_data(http_connection *con)
         default:
             break;
     }
-
+    execute_parse(con, buf, r);
+    return 0;
 
 }
