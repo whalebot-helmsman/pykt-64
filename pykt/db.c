@@ -15,6 +15,7 @@ DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
         return NULL;
     }
     
+    DEBUG("DBObject_new self %p", self);
     return (PyObject *)self;
 }
 
@@ -27,6 +28,7 @@ DBObject_init(DBObject *self, PyObject *args, PyObject *kwds)
 static inline void
 DBObject_dealloc(DBObject *self)
 {
+    DEBUG("DBObject_dealloc self %p", self);
     if(self->con){
         close_http_connection(self->con);
         self->con = NULL;
@@ -47,7 +49,8 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
         return NULL; 
     }
     
-    DEBUG("DBObject_open %s : %d", host, port);
+    DEBUG("DBObject_open self %p", self);
+    DEBUG("DBObject_open args %s, %d", host, port);
     
     if(!host){
         host = DEFAULT_HOST;

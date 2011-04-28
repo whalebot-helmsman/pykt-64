@@ -20,9 +20,8 @@ open_http_connection(const char *host, int port)
 {
 
     http_connection *con;
-    //data_bucket *bucket;
     int fd;
-    DEBUG("open_http_connection %s : %d", host, port);
+    DEBUG("open_http_connection args %s:%d", host, port);
 
     con = PyMem_Malloc(sizeof(http_connection));
     if(con == NULL){
@@ -30,6 +29,7 @@ open_http_connection(const char *host, int port)
         return NULL;
     }
     memset(con, 0, sizeof(http_connection));
+    DEBUG("open_http_connection %p", con);
 
     fd = connect_socket(host, port);
     if(fd < 0){
@@ -40,24 +40,15 @@ open_http_connection(const char *host, int port)
         return NULL;
     }
     
-    /*
-    bucket = create_data_bucket(fd, 24);
-    if(bucket == NULL){
-        if(con){
-            //TODO IOError 
-            close_http_connection(con);
-        }
-        return NULL;
-    }
-    con->bucket = bucket;
-    */
     con->fd = fd;
+    DEBUG("open  con fd:%d", con->fd);
     return con;
 }
 
 inline void
 close_http_connection(http_connection *con)
 {
+    DEBUG("close_http_connection %p", con);
     if(con->bucket){
         free_data_bucket(con->bucket);
         con->bucket = NULL;
@@ -65,6 +56,8 @@ close_http_connection(http_connection *con)
 
     if(con->fd > 0){
         close(con->fd);
+        DEBUG("close con fd:%d", con->fd);
+        con->fd = -1;
     }
     PyMem_Free(con);
 }
@@ -89,7 +82,7 @@ connect_socket(const char *host, int port)
     int fd;
     char strport[7];
     
-    DEBUG("connect_socket %s : %d", host, port);
+    DEBUG("connect_socket %s:%d", host, port);
    
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
