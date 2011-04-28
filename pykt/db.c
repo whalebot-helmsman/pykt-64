@@ -11,6 +11,9 @@ DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     DBObject *self;
 
     self = (DBObject *)type->tp_alloc(type, 0);
+    if(self == NULL){
+        return NULL;
+    }
     
     return (PyObject *)self;
 }
@@ -24,6 +27,7 @@ DBObject_init(DBObject *type, PyObject *args, PyObject *kwds)
 static inline void
 DBObject_dealloc(DBObject *self)
 {
+    self->ob_type->tp_free((PyObject*)self);
 }
 
 static inline PyObject* 
@@ -46,6 +50,9 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     if(!timeout){
         timeout = DEFAULT_TIMEOUT;
     }
+    self->host = host;
+    self->port;
+    self->timeout;
     return (PyObject *)self;
 }
 
