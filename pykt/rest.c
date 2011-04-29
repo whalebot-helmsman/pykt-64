@@ -1,5 +1,6 @@
 #include "rest.h"
 #include "request.h"
+#include "util.h"
 
 inline PyObject* 
 rest_call_put(DBObject *db, PyObject *key, PyObject *value)
@@ -38,6 +39,11 @@ rest_call_put(DBObject *db, PyObject *key, PyObject *value)
     PyString_AsStringAndSize(temp_val, &cval, &val_len);
 
     snprintf(strlength, sizeof (strlength), "%d", val_len);
+
+    char *a;
+    size_t b;
+    a = urlencode(cval, val_len);
+    DEBUG("encode %s", a);
 
     set_request_path(con, METHOD_PUT, LEN(METHOD_PUT), ckey, key_len);
     add_content_length(con, strlength, strlen(strlength));
