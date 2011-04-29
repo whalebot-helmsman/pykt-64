@@ -7,6 +7,6 @@
 
 
 inline PyObject* 
-rest_call_put(DBObject *db, PyObject *key, PyObject *val);
+rest_call_put(DBObject *db, char *key, char *val);
 
 #endif

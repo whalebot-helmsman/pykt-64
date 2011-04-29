@@ -120,11 +120,12 @@ DBObject_echo(DBObject *self, PyObject *args)
 static inline PyObject* 
 DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *val, *expire;
+    PyObject *expire;
+    char *key, *val;
     PyObject *result;
 
     static char *kwlist[] = {"key", "value", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|O", kwlist, &key, &val, &expire)){
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss|O", kwlist, &key, &val, &expire)){
         return NULL; 
     }
     
