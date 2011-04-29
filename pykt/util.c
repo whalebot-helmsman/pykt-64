@@ -1,6 +1,6 @@
 #include "util.h"
 
-static char hex[] = "0123456789abcdef";
+static char hex[] = "0123456789ABCDEF";
 
 static inline int
 hex2int(int i)
@@ -46,8 +46,8 @@ tohex(char code) {
   return hex[code & 15];
 }
 
-inline char * 
-urlencode(char *str, size_t len)
+inline void 
+urlencode(char *str, size_t len, char **s, size_t *s_len)
 {  
     char *pstr = str;
     char *buf = PyMem_Malloc(len * 3 + 1);
@@ -65,8 +65,8 @@ urlencode(char *str, size_t len)
         }
         pstr++;
     }
-    //buflen = &pbuf - buf;
-    *pbuf = '\0';
-    return buf;
+    *s_len = pbuf - buf;
+    *pbuf++ = '\0';
+    *s = buf;
 }
 

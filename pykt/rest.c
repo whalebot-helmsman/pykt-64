@@ -42,8 +42,8 @@ rest_call_put(DBObject *db, PyObject *key, PyObject *value)
 
     char *a;
     size_t b;
-    a = urlencode(cval, val_len);
-    DEBUG("encode %s", a);
+    urlencode(cval, val_len, &a, &b);
+    DEBUG("encode %s : len %d %d", a, b, strlen(a));
 
     set_request_path(con, METHOD_PUT, LEN(METHOD_PUT), ckey, key_len);
     add_content_length(con, strlength, strlen(strlength));

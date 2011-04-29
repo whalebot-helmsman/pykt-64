@@ -1,44 +1,13 @@
 #include "buffer.h"
+#include "util.h"
 
 #define LIMIT_MAX 1024 * 1024 * 1024
-
-#define MAXFREELIST 128
-
-static buffer *buffer_free_list[MAXFREELIST];
-static int numfree = 0;
-
-inline void
-buffer_list_fill(void)
-{
-    buffer *buf;
-	while (numfree < MAXFREELIST) {
-        buf = (buffer *)PyMem_Malloc(sizeof(buffer));
-		buffer_free_list[numfree++] = buf;
-	}
-}
-
-inline void
-buffer_list_clear(void)
-{
-	buffer *op;
-
-	while (numfree) {
-		op = buffer_free_list[--numfree];
-		PyMem_Free(op);
-	}
-}
 
 static inline buffer*
 alloc_buffer(void)
 {
     buffer *buf;
-	if (numfree) {
-		buf = buffer_free_list[--numfree];
-        DEBUG("use pooled buf %p\n", buf);
-    }else{
-        buf = (buffer *)PyMem_Malloc(sizeof(buffer));
-        DEBUG("alloc buf %p\n", buf);
-    }
+    buf = (buffer *)PyMem_Malloc(sizeof(buffer));
     memset(buf, 0, sizeof(buffer));
     return buf;
 }
@@ -46,46 +15,9 @@ alloc_buffer(void)
 static inline void
 dealloc_buffer(buffer *buf)
 {
-	if (numfree < MAXFREELIST){
-        DEBUG("back to buffer pool %p\n", buf);
-		buffer_free_list[numfree++] = buf;
-    }else{
-	    PyMem_Free(buf);
-    }
+    PyMem_Free(buf);
 }
 
-static inline int
-hex2int(int i)
-{
-    i = toupper(i);
-    i = i - '0';
-    if(i > 9){ 
-        i = i - 'A' + '9' + 1;
-    }
-    return i;
-}
-
-static inline int
-urldecode(char *buf, int len)
-{
-    int c, c1;
-    char *s0, *t;
-    t = s0 = buf;
-    while(len >0){
-        c = *buf++;
-        if(c == '%' && len > 2){
-            c = *buf++;
-            c1 = c;
-            c = *buf++;
-            c = hex2int(c1) * 16 + hex2int(c);
-            len -= 2;
-        }
-        *t++ = c;
-        len--;
-    }
-    *t = 0;
-    return t - s0;
-}
 
 inline buffer *
 new_buffer(size_t buf_size, size_t limit)

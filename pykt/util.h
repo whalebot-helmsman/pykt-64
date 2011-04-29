@@ -6,7 +6,7 @@
 inline int
 urldecode(char *buf, int len);
 
-inline char * 
-urlencode(char *str, size_t len);
+inline void 
+urlencode(char *str, size_t len, char **s, size_t *s_len);
 
 #endif 
