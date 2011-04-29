@@ -1,4 +1,5 @@
 #include "rpc.h"
+#include "request.h"
 
 #define ECHO_URL "/rpc/echo"
 

@@ -1,5 +1,6 @@
 #include "db.h"
 #include "rpc.h"
+#include "rest.h"
 
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_PORT 1978
@@ -116,10 +117,28 @@ DBObject_echo(DBObject *self, PyObject *args)
 
 }
 
+static inline PyObject* 
+DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key, *val, *expire;
+    PyObject *result;
+
+    static char *kwlist[] = {"key", "value", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|O", kwlist, &key, &val, &expire)){
+        return NULL; 
+    }
+    
+    DEBUG("DBObject_set self %p", self);
+    result = rest_call_put(self, key, val);
+    Py_INCREF(result);
+    return result;
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
-    {"echo", DBObject_echo, METH_NOARGS, 0},
+    {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
+    {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 

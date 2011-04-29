@@ -40,18 +40,6 @@ open_http_connection(const char *host, int port);
 inline int
 close_http_connection(http_connection *con);
 
-inline void
-set_request_path(http_connection *connection, char *method, size_t method_len, char *path, size_t path_len);
-
-inline void
-add_header(http_connection *connection, char *name, size_t name_len, char *value, size_t value_len);
-
-inline void
-end_header(http_connection *connection);
-
-inline void
-add_crlf(http_connection *connection);
-
 inline int  
 request(http_connection *connection);
 
