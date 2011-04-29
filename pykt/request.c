@@ -7,7 +7,16 @@ set_request_path(http_connection *con, char *method, size_t method_len, char *pa
 
     set2bucket(bucket, method, method_len);
     set2bucket(bucket, path, path_len);
-    set2bucket(bucket, HTTP_10, LEN(HTTP_10));
+    set2bucket(bucket, HTTP_11, LEN(HTTP_11));
+    set2bucket(bucket, CONNECTION_KEEP_ALIVE, LEN(CONNECTION_KEEP_ALIVE));
+}
+
+inline void
+add_content_length(http_connection *con, char *value, size_t value_len)
+{
+    data_bucket *bucket = con->bucket;
+    set2bucket(bucket, CONTENT_LENGTH, LEN(CONTENT_LENGTH));
+    set2bucket(bucket, value, value_len);
     set2bucket(bucket, CRLF, 2);
 }
 

@@ -14,10 +14,12 @@
 #define METHOD_PUT "PUT "
 #define METHOD_DELETE "DELETE "
 
-#define HTTP_10 " HTTP/1.0"
-#define HTTP_11 " HTTP/1.1"
+#define HTTP_10 " HTTP/1.0\r\n"
+#define HTTP_11 " HTTP/1.1\r\n"
 
-#define CONTENT_LENGTH "Content-Length"
+#define CONTENT_LENGTH "Content-Length: "
+
+#define CONNECTION_KEEP_ALIVE "Connection: keep-alive\r\n"
 
 #define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U"
 

@@ -11,6 +11,9 @@ inline void
 add_header(http_connection *connection, char *name, size_t name_len, char *value, size_t value_len);
 
 inline void
+add_content_length(http_connection *con, char *value, size_t value_len);
+
+inline void
 end_header(http_connection *connection);
 
 inline void
