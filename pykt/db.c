@@ -128,6 +128,9 @@ DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ss|O", kwlist, &key, &val, &expire)){
         return NULL; 
     }
+    if(!is_opened(self)){
+        return NULL;
+    }
     
     DEBUG("DBObject_set self %p", self);
     result = rest_call_put(self, key, val);

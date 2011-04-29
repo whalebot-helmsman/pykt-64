@@ -42,3 +42,11 @@ add_header(http_connection *con, char *name, size_t name_len, char *value, size_
     set2bucket(bucket, CRLF, 2);
 }
 
+inline void
+add_body(http_connection *con, char *value, size_t value_len)
+{
+    data_bucket *bucket = con->bucket;
+    set2bucket(bucket, value, value_len);
+    set2bucket(bucket, CRLF, 2);
+
+}

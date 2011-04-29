@@ -208,7 +208,7 @@ recv_response(http_connection *con)
     
     DEBUG("response status code %d", parser->status_code);
 
-    if(parser->status_code != 200){
+    if(parser->status_code != 200 && parser->status_code != 201){
         //TODO Error
         goto error;
     }

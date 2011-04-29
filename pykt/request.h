@@ -19,5 +19,8 @@ end_header(http_connection *connection);
 inline void
 add_crlf(http_connection *connection);
 
+inline void
+add_body(http_connection *con, char *value, size_t value_len);
+
 #endif
 

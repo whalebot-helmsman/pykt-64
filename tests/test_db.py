@@ -37,3 +37,20 @@ def test_echo():
     db.close()
     assert ret 
 
+def test_err_set():
+    db = KyotoTycoon()
+    try:
+        ret = db.set("A", "B")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_set():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.set("A", "B")
+    db.close()
+    assert ret 
+
