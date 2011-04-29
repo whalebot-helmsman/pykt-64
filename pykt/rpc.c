@@ -17,9 +17,7 @@ call_echo(DBObject *db)
         return NULL;
     }
     con->bucket = bucket;
-    set_request_path(con, METHOD_POST, sizeof(METHOD_POST)-1, ECHO_URL, sizeof(ECHO_URL)-1);
-    add_header(con, "Host", 4, "127.0.0.1:1978", 14);
-    add_header(con, "Accept-Encoding", 15, "identity", 8);
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), ECHO_URL, LEN(ECHO_URL));
     end_header(con);
     
     request(con);

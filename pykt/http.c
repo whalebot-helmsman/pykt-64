@@ -72,7 +72,7 @@ set_request_path(http_connection *con, char *method, size_t method_len, char *pa
 
     set2bucket(bucket, method, method_len);
     set2bucket(bucket, path, path_len);
-    set2bucket(bucket, HTTP_10, sizeof(HTTP_10)-1);
+    set2bucket(bucket, HTTP_10, LEN(HTTP_10));
     set2bucket(bucket, CRLF, 2);
 }
 

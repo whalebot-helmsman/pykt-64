@@ -33,6 +33,8 @@
 #define DEBUG(...) do{}while(0)
 #endif
 
+#define LEN(x) sizeof(x) -1
+
 extern PyObject *wait_callback;
 
 
