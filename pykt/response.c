@@ -60,6 +60,9 @@ headers_complete_cb (http_parser *p)
 static inline int
 message_complete_cb (http_parser *p)
 {
+    http_connection *con;
+    con = (http_connection *)p->data;
+    con->response_complete = 1;
     return 0;
 }
 
@@ -102,6 +105,6 @@ execute_parse(http_connection *con, const char *buf, size_t len)
 inline int 
 parser_finish(http_connection *con)
 {
-    return 0;
+    return con->response_complete;
 }
 

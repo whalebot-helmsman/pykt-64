@@ -172,7 +172,7 @@ add_header(http_connection *con, char *name, size_t name_len, char *value, size_
     set2bucket(bucket, CRLF, 2);
 }
 
-inline PyObject * 
+inline int  
 request(http_connection *con)
 {
    int ret;
@@ -183,14 +183,9 @@ request(http_connection *con)
    
    if(ret < 0){
        //error
-       return NULL;
+       return ret;
    }
-   ret = recv_response(con);
-   if(ret < 0){
-       //error
-       return NULL;
-   }
-   return NULL;
+   return recv_response(con);
 }
 
 static inline int 
@@ -233,8 +228,36 @@ recv_response(http_connection *con)
     
     con->parser = parser;
     con->parser->data = con;
-    ret = recv_data(con);
+    while(1){
+        ret = recv_data(con);
+        if(ret > 0){
+            //complete
+            break;
+        }
+        if(ret < 0){
+            //TODO Error
+            goto error;
+        }
+    }
+    
+    DEBUG("response status code %d", parser->status_code);
+
+    if(parser->status_code != 200){
+        //TODO Error
+        goto error;
+    }
+    if(con->parser){
+        PyMem_Free(con->parser);
+        con->parser = NULL;
+    }
+    
     return 1;
+error:
+    if(con->parser){
+        PyMem_Free(con->parser);
+        con->parser = NULL;
+    }
+    return -1;
 }
 
 static inline int 
@@ -242,6 +265,7 @@ recv_data(http_connection *con)
 {
     char buf[BUF_SIZE];
     ssize_t r;
+    int nread;
 
     data_bucket *bucket = con->bucket;
 
@@ -267,7 +291,15 @@ recv_data(http_connection *con)
         default:
             break;
     }
-    execute_parse(con, buf, r);
+    nread = execute_parse(con, buf, r);
+    if(nread != r){
+        //TODO error
+        return -1;
+    }
+    if(parser_finish(con) > 0){
+        //complete
+        return 1;
+    }
     return 0;
 
 }

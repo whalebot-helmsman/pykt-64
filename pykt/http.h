@@ -31,6 +31,7 @@ typedef struct {
     int fd;
     data_bucket *bucket;
     http_parser *parser;
+    uint8_t response_complete;
 } http_connection;
 
 inline http_connection *
@@ -51,7 +52,7 @@ end_header(http_connection *connection);
 inline void
 add_crlf(http_connection *connection);
 
-inline PyObject *  
+inline int  
 request(http_connection *connection);
 
 #endif 
