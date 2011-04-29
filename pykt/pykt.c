@@ -22,6 +22,18 @@ set_wait_callback(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+inline void
+call_wait_callback(int fd, int type)
+{
+    PyObject *result, *args;
+    if(wait_callback){
+        args = Py_BuildValue("(ii)", fd, type);
+        result = PyObject_CallFunction(wait_callback, NULL);
+        Py_DECREF(args);
+        Py_XDECREF(result);
+    }
+}
+
 static PyMethodDef PyKtMethods[] = {
     {"set_wait_callback", set_wait_callback, METH_VARARGS, "set wait callback"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
@@ -44,4 +56,6 @@ initpykt(void)
     Py_INCREF(&DBObjectType);
     PyModule_AddObject(m, "KyotoTycoon", (PyObject *)&DBObjectType);
 
+    PyModule_AddIntConstant(m, "WAIT_READ", WAIT_READ);
+    PyModule_AddIntConstant(m, "WAIT_WRITE", WAIT_WRITE);
 }

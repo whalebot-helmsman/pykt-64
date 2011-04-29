@@ -35,8 +35,12 @@
 
 #define LEN(x) sizeof(x) -1
 
+#define WAIT_READ 1
+#define WAIT_WRITE 2
+
 extern PyObject *wait_callback;
 
-
+inline void
+call_wait_callback(int fd, int type);
 
 #endif 

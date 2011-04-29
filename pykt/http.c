@@ -199,11 +199,10 @@ send_request(http_connection *con)
     switch(ret){
         case 0:
             //EWOULDBLOCK or EAGAIN
-            //TODO trampoline hook 
-            break;
+            call_wait_callback(con->fd, WAIT_WRITE);
+            return send_request(con);
         case -1:
             //IO Error
-            //TODO PyErr
             return -1;
         default:
             break;
@@ -281,11 +280,10 @@ recv_data(http_connection *con)
             return 1;
         case -1:
             if (errno == EAGAIN || errno == EWOULDBLOCK) { /* try again later */
-                //TODO trampoline
-                break;
+                call_wait_callback(con->fd, WAIT_READ);
+                return 0;
             } else {
                 PyErr_SetFromErrno(PyExc_IOError);
-                //TODO close connection
             }
             return -1;
         default:
@@ -293,13 +291,14 @@ recv_data(http_connection *con)
     }
     nread = execute_parse(con, buf, r);
     if(nread != r){
-        //TODO error
+        PyErr_SetString(PyExc_IOError,"parse error\n");
         return -1;
     }
     if(parser_finish(con) > 0){
         //complete
         return 1;
     }
+    //continue
     return 0;
 
 }
