@@ -110,7 +110,7 @@ DBObject_echo(DBObject *self, PyObject *args)
     if(!is_opened(self)){
         return NULL;
     }
-    result = call_echo(self);
+    result = rpc_call_echo(self);
     Py_INCREF(result);
     return result;
 

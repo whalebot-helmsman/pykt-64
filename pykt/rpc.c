@@ -5,7 +5,7 @@
 
 
 inline PyObject* 
-call_echo(DBObject *db)
+rpc_call_echo(DBObject *db)
 {
     http_connection *con;
     data_bucket *bucket;

@@ -7,7 +7,7 @@
 
 
 inline PyObject* 
-call_echo(DBObject *db);
+rpc_call_echo(DBObject *db);
 
 #endif
 
