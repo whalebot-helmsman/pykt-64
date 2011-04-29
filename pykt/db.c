@@ -1,4 +1,5 @@
 #include "db.h"
+#include "rpc.h"
 
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_PORT 1978
@@ -104,13 +105,12 @@ static inline PyObject*
 DBObject_echo(DBObject *self, PyObject *args)
 {
     PyObject *result;
-    result = Py_False;
 
     DEBUG("DBObject_echo self %p", self);
     if(!is_opened(self)){
         return NULL;
     }
-
+    result = call_echo(self);
     Py_INCREF(result);
     return result;
 

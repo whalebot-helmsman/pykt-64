@@ -72,7 +72,8 @@ set_request_path(http_connection *con, char *method, size_t method_len, char *pa
 
     set2bucket(bucket, method, method_len);
     set2bucket(bucket, path, path_len);
-    set2bucket(bucket, HTTP_10, sizeof(HTTP_10));
+    set2bucket(bucket, HTTP_10, sizeof(HTTP_10)-1);
+    set2bucket(bucket, CRLF, 2);
 }
 
 
@@ -156,6 +157,12 @@ add_crlf(http_connection *con)
 }
 
 inline void
+end_header(http_connection *con)
+{
+    add_crlf(con);
+}
+
+inline void
 add_header(http_connection *con, char *name, size_t name_len, char *value, size_t value_len)
 {
     data_bucket *bucket = con->bucket;
@@ -169,12 +176,20 @@ inline PyObject *
 request(http_connection *con)
 {
    int ret;
+
+   DEBUG("request http_connection %p", con);
+
    ret = send_request(con);
    
    if(ret < 0){
        //error
+       return NULL;
    }
    ret = recv_response(con);
+   if(ret < 0){
+       //error
+       return NULL;
+   }
    return NULL;
 }
 
@@ -198,6 +213,7 @@ send_request(http_connection *con)
         default:
             break;
     }
+    DEBUG("sended request data. http_connection %p", con);
     return 1;
 }
 
@@ -206,17 +222,18 @@ recv_response(http_connection *con)
 {
     http_parser *parser;
     int ret;
+    
+    DEBUG("recv_response http_connection %p", con);
+    
     parser = init_parser(con);
     if(parser == NULL){
         //alloc error
         return -1;
     }
+    
     con->parser = parser;
     con->parser->data = con;
-    while(1){
-        ret = recv_data(con);
-
-    }
+    ret = recv_data(con);
     return 1;
 }
 
@@ -229,8 +246,10 @@ recv_data(http_connection *con)
     data_bucket *bucket = con->bucket;
 
     Py_BEGIN_ALLOW_THREADS
-    r = read(bucket->fd, buf, sizeof(buf));
+    r = read(con->fd, buf, sizeof(buf));
     Py_END_ALLOW_THREADS
+
+    DEBUG("read data fd:%d read:%d buf:%s", con->fd, r, buf);
 
     switch(r){
         case 0:

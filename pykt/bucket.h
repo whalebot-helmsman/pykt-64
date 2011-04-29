@@ -22,7 +22,7 @@ inline void
 free_data_bucket(data_bucket *bucket);
 
 inline void
-set2bucket(data_bucket *bucket, char *buf, size_t len);
+set2bucket(data_bucket *bucket, char *buf, const size_t len);
 
 inline int 
 writev_bucket(data_bucket *bucket);

@@ -30,3 +30,10 @@ def test_err_echo():
     except:
         assert False
 
+def test_echo():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.echo()
+    db.close()
+    assert ret 
+

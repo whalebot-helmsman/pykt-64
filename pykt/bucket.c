@@ -4,6 +4,8 @@ inline int
 writev_bucket(data_bucket *bucket){
     int ret;
     int i = 0;
+    
+    DEBUG("writev_bucket total_size:%d iov_cnt:%d", bucket->total_size, bucket->iov_cnt);
 
     Py_BEGIN_ALLOW_THREADS
     ret = writev(bucket->fd, bucket->iov, bucket->iov_cnt);
@@ -83,6 +85,9 @@ free_data_bucket(data_bucket *bucket)
 inline void
 set2bucket(data_bucket *bucket, char *buf, size_t len)
 {
+    
+    //DEBUG("set2bucket buf: %s, len: %d", buf, len);
+    
     bucket->iov[bucket->iov_cnt].iov_base = buf;
     bucket->iov[bucket->iov_cnt].iov_len = len;
     bucket->iov_cnt++;

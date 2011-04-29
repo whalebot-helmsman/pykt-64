@@ -86,8 +86,7 @@ init_parser(http_connection *con)
         return NULL;
     }
 
-    memset(con->parser, 0, sizeof(http_parser));
-
+    memset(parser, 0, sizeof(http_parser));
     http_parser_init(parser, HTTP_RESPONSE);
     return parser;
 }
