@@ -1,6 +1,5 @@
 #include "response.h"
 
-
 static inline int
 message_begin_cb(http_parser *p)
 {
@@ -48,12 +47,38 @@ fragment_cb(http_parser *p, const char *buf, size_t len)
 static inline int
 body_cb(http_parser *p, const char *buf, size_t len)
 {
+    http_connection *con;
+    buffer_result ret = MEMORY_ERROR;
+    
+    con = (http_connection *)p->data;
+    ret = write2buf(con->response_body, buf, len);
+    switch(ret){
+        case MEMORY_ERROR:
+            con->response_status = RES_MEMORY_ERROR;
+            return -1;
+        case LIMIT_OVER:
+            con->response_status = RES_MEMORY_ERROR;
+            return -1;
+        default:
+            break;
+    }
+
     return 0;
 }
 
 static inline int
 headers_complete_cb (http_parser *p)
 {
+    buffer *buf;
+    http_connection *con;
+    
+    con = (http_connection *)p->data;
+
+    //DEBUG("headers_complete_cb length:%d", p->content_length);
+
+    buf = new_buffer(p->content_length, 0);
+    con->response_body = buf;
+    con->status_code = p->status_code;
     return 0;
 }
 
@@ -61,8 +86,9 @@ static inline int
 message_complete_cb (http_parser *p)
 {
     http_connection *con;
+    
     con = (http_connection *)p->data;
-    con->response_complete = 1;
+    con->response_status = RES_SUCCESS;
     return 0;
 }
 
@@ -83,12 +109,6 @@ inline http_parser *
 init_parser(http_connection *con)
 {
     http_parser *parser;
-    buffer *buf;
-
-    buf = new_buffer(4096, 0);
-    if(buf == NULL){
-        return NULL;
-    }
 
     parser = (http_parser *)PyMem_Malloc(sizeof(http_parser));
     if(parser == NULL){
@@ -100,9 +120,7 @@ init_parser(http_connection *con)
     http_parser_init(parser, HTTP_RESPONSE);
     
     con->parser = parser;
-    con->response_body = buf;
     con->parser->data = con;
-
     return parser;
 }
 
@@ -117,6 +135,6 @@ execute_parse(http_connection *con, const char *buf, size_t len)
 inline int 
 parser_finish(http_connection *con)
 {
-    return con->response_complete;
+    return con->response_status == RES_SUCCESS;
 }
 

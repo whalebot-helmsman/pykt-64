@@ -30,12 +30,20 @@
 #define KT_FIELD_NAME "X-Kt-Xt" 
 
 
+typedef enum{
+    RES_INIT = 0,
+    RES_READY,
+    RES_SUCCESS,
+    RES_MEMORY_ERROR,
+} response_status_type;
+
 typedef struct {
     int fd;
     data_bucket *bucket;
     http_parser *parser;
-    uint8_t response_complete;
     buffer *response_body;
+    int status_code;
+    response_status_type response_status;
 } http_connection;
 
 inline http_connection *

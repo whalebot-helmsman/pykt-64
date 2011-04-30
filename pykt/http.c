@@ -29,6 +29,8 @@ open_http_connection(const char *host, int port)
         return NULL;
     }
     memset(con, 0, sizeof(http_connection));
+    con->response_status = RES_INIT;
+
     DEBUG("open_http_connection %p", con);
 
     fd = connect_socket(host, port);
@@ -202,7 +204,7 @@ recv_response(http_connection *con, int status_code)
         //alloc error
         return -1;
     }
-     
+    con->response_status = RES_READY;     
     while(1){
         ret = recv_data(con);
         if(ret > 0){
@@ -218,7 +220,7 @@ recv_response(http_connection *con, int status_code)
     DEBUG("response status code %d", parser->status_code);
 
     if(parser->status_code != status_code){
-        //TODO Error
+        
         goto error;
     }
     if(con->parser){
@@ -268,11 +270,15 @@ recv_data(http_connection *con)
         PyErr_SetString(PyExc_IOError,"parse error\n");
         return -1;
     }
-    if(parser_finish(con) > 0){
-        //complete
-        return 1;
+    
+    switch(con->response_status){
+        case RES_SUCCESS:
+            return 1;
+        case RES_READY:
+            return 0;
+        default:
+            return -1;
     }
-    //continue
     return 0;
 
 }

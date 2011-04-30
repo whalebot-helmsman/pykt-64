@@ -93,7 +93,7 @@ getPyString(buffer *buf)
 {
     PyObject *o;
     o = PyString_FromStringAndSize(buf->buf, buf->len);
-    free_buffer(buf);
+    //free_buffer(buf);
     return o;
 }
 
