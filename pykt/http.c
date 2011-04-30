@@ -52,6 +52,10 @@ free_http_data(http_connection *con)
         free_data_bucket(con->bucket);
         con->bucket = NULL;
     }
+    if(con->response_body){
+        free_buffer(con->response_body);
+        con->response_body = NULL;
+    }
 }
 
 inline int
