@@ -13,7 +13,7 @@ static inline int
 recv_data(http_connection *con);
 
 static inline int 
-recv_response(http_connection *con);
+recv_response(http_connection *con, int status_code);
 
 inline http_connection *
 open_http_connection(const char *host, int port)
@@ -147,7 +147,7 @@ connect_socket(const char *host, int port)
 }
 
 inline int  
-request(http_connection *con)
+request(http_connection *con, int status_code)
 {
    int ret;
 
@@ -159,7 +159,7 @@ request(http_connection *con)
        //error
        return ret;
    }
-   return recv_response(con);
+   return recv_response(con, status_code);
 }
 
 static inline int 
@@ -186,7 +186,7 @@ send_request(http_connection *con)
 }
 
 static inline int 
-recv_response(http_connection *con)
+recv_response(http_connection *con, int status_code)
 {
     http_parser *parser;
     int ret;
@@ -215,7 +215,7 @@ recv_response(http_connection *con)
     
     DEBUG("response status code %d", parser->status_code);
 
-    if(parser->status_code != 200 && parser->status_code != 201){
+    if(parser->status_code != status_code){
         //TODO Error
         goto error;
     }

@@ -21,7 +21,7 @@ rpc_call_echo(DBObject *db)
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), ECHO_URL, LEN(ECHO_URL));
     end_header(con);
     
-    if(request(con) > 0){
+    if(request(con, 200) > 0){
         result = Py_True;
     }
     

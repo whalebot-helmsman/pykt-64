@@ -46,7 +46,7 @@ inline void
 free_http_data(http_connection *con);
 
 inline int  
-request(http_connection *connection);
+request(http_connection *connection, int status_code);
 
 #endif 
 

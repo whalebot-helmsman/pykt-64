@@ -31,7 +31,7 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     set_request_path(con, METHOD_GET, LEN(METHOD_GET), encbuf, encbuf_len);
     end_header(con);
     
-    if(request(con) > 0){
+    if(request(con, 200) > 0){
         result = Py_True;
     }
     
@@ -87,7 +87,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     end_header(con);
     add_body(con, val, val_len);
     
-    if(request(con) > 0){
+    if(request(con, 201) > 0){
         result = Py_True;
     }
     
