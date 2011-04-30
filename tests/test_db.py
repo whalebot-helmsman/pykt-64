@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pykt import KyotoTycoon
 
 def test_init():
@@ -50,7 +51,38 @@ def test_err_set():
 def test_set():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.set("A", "B")
+    ret = db.set("A", "B" * 100)
     db.close()
     assert ret 
+
+def test_set_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.set("あいうえお", "かきくけこ")
+    db.close()
+    assert ret 
+
+def test_err_get():
+    db = KyotoTycoon()
+    try:
+        ret = db.get("A")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_get():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.get("A")
+    db.close()
+    assert ret
+
+def test_get_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.get("あいうえお")
+    db.close()
+    assert ret
 

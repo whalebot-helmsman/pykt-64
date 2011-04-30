@@ -26,6 +26,7 @@ rpc_call_echo(DBObject *db)
     }
     //free_data_bucket(bucket);
     //con->bucket = NULL;
+    Py_INCREF(result);
     return result;
 
 }

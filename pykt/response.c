@@ -1,52 +1,52 @@
 #include "response.h"
 
 
-int
+static inline int
 message_begin_cb(http_parser *p)
 {
     return 0;
 }
 
 static inline int
-header_field_cb (http_parser *p, const char *buf, size_t len)
+header_field_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }
 
 static inline int
-header_value_cb (http_parser *p, const char *buf, size_t len)
+header_value_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }
 
 static inline int
-request_path_cb (http_parser *p, const char *buf, size_t len)
+request_path_cb(http_parser *p, const char *buf, size_t len)
 {
 
     return 0;
 }
 
 static inline int
-request_url_cb (http_parser *p, const char *buf, size_t len)
+request_url_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }
 
 static inline int
-query_string_cb (http_parser *p, const char *buf, size_t len)
+query_string_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }
 
 static inline int
-fragment_cb (http_parser *p, const char *buf, size_t len)
+fragment_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }
 
 
 static inline int
-body_cb (http_parser *p, const char *buf, size_t len)
+body_cb(http_parser *p, const char *buf, size_t len)
 {
     return 0;
 }

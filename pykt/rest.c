@@ -10,8 +10,9 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     char *key, *encbuf;
     Py_ssize_t key_len;
     size_t encbuf_len;
-    PyObject *result = NULL, *temp_key ;
+    PyObject *result = NULL;
 
+    result = Py_False;
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
         return NULL;
@@ -24,8 +25,7 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     }
     con->bucket = bucket;
 
-    temp_key = PyString_AsEncodedObject(keyObj, "utf-8", "strict");
-    PyString_AsStringAndSize(temp_key, &key, &key_len);
+    PyString_AsStringAndSize(keyObj, &key, &key_len);
     urlencode(key, key_len, &encbuf, &encbuf_len);
 
     set_request_path(con, METHOD_GET, LEN(METHOD_GET), encbuf, encbuf_len);
@@ -36,7 +36,7 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     }
     
     PyMem_Free(encbuf);
-    Py_DECREF(temp_key);
+    Py_INCREF(result);
     return result;
 }
 
@@ -49,7 +49,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     char *key, *val, *encbuf;
     Py_ssize_t key_len, val_len;
     size_t encbuf_len;
-    PyObject *result, *temp_key, *temp_val;
+    PyObject *result, *temp_val;
     
     result = Py_False;
 
@@ -69,15 +69,17 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     }
     con->bucket = bucket;
 
-    temp_key = PyString_AsEncodedObject(keyObj, "utf-8", "strict");
     temp_val = PyObject_Str(valueObj);
+    DEBUG("temp_val %p", temp_val);
     
-    PyString_AsStringAndSize(temp_key, &key, &key_len);
+    PyString_AsStringAndSize(keyObj, &key, &key_len);
+    
     PyString_AsStringAndSize(temp_val, &val, &val_len);
     //get content-length str
     snprintf(strlength, sizeof (strlength), "%d", val_len);
 
     urlencode(key, key_len, &encbuf, &encbuf_len);
+    DEBUG("urlencode key %s", encbuf);
 
     set_request_path(con, METHOD_PUT, LEN(METHOD_PUT), encbuf, encbuf_len);
     add_content_length(con, strlength, strlen(strlength));
@@ -89,7 +91,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     }
     
     PyMem_Free(encbuf);
-    Py_DECREF(temp_key);
     Py_DECREF(temp_val);
+    Py_INCREF(result);
     return result;
 }
