@@ -16,7 +16,7 @@ typedef struct _buffer {
     size_t limit;
 } buffer;
 
-inline buffer *
+inline buffer * 
 new_buffer(size_t buf_size, size_t limit);
 
 inline buffer_result

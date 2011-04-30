@@ -3,6 +3,7 @@
 
 #include "pykt.h"
 #include "bucket.h"
+#include "buffer.h"
 #include "http_parser.h"
 
 #define CRLF "\r\n"
@@ -34,6 +35,7 @@ typedef struct {
     data_bucket *bucket;
     http_parser *parser;
     uint8_t response_complete;
+    buffer *response_body;
 } http_connection;
 
 inline http_connection *

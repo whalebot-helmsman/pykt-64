@@ -25,8 +25,18 @@ new_buffer(size_t buf_size, size_t limit)
     buffer *buf;
     
     buf = alloc_buffer();
+    if(buf == NULL){
+        PyErr_NoMemory();
+        return NULL;
+    }
 
     buf->buf = PyMem_Malloc(sizeof(char) * buf_size);
+    if(buf->buf == NULL){
+        dealloc_buffer(buf);
+        PyErr_NoMemory();
+        return NULL;
+    }
+    
     buf->buf_size = buf_size;
     if(limit){
         buf->limit = limit;

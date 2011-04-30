@@ -192,15 +192,13 @@ recv_response(http_connection *con, int status_code)
     int ret;
     
     DEBUG("recv_response http_connection %p", con);
-    
+
     parser = init_parser(con);
     if(parser == NULL){
         //alloc error
         return -1;
     }
-    
-    con->parser = parser;
-    con->parser->data = con;
+     
     while(1){
         ret = recv_data(con);
         if(ret > 0){

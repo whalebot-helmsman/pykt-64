@@ -83,6 +83,13 @@ inline http_parser *
 init_parser(http_connection *con)
 {
     http_parser *parser;
+    buffer *buf;
+
+    buf = new_buffer(4096, 0);
+    if(buf == NULL){
+        return NULL;
+    }
+
     parser = (http_parser *)PyMem_Malloc(sizeof(http_parser));
     if(parser == NULL){
         PyErr_NoMemory();
@@ -91,6 +98,11 @@ init_parser(http_connection *con)
 
     memset(parser, 0, sizeof(http_parser));
     http_parser_init(parser, HTTP_RESPONSE);
+    
+    con->parser = parser;
+    con->response_body = buf;
+    con->parser->data = con;
+
     return parser;
 }
 
