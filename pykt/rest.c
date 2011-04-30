@@ -35,6 +35,7 @@ rest_call_get(DBObject *db, PyObject *keyObj)
         result = Py_True;
     }
     
+    free_http_data(con);
     PyMem_Free(encbuf);
     Py_INCREF(result);
     return result;
@@ -90,6 +91,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
         result = Py_True;
     }
     
+    free_http_data(con);
     PyMem_Free(encbuf);
     Py_DECREF(temp_val);
     Py_INCREF(result);

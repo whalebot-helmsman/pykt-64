@@ -24,8 +24,9 @@ rpc_call_echo(DBObject *db)
     if(request(con) > 0){
         result = Py_True;
     }
-    //free_data_bucket(bucket);
-    //con->bucket = NULL;
+    
+    free_http_data(con);
+
     Py_INCREF(result);
     return result;
 

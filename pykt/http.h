@@ -42,6 +42,9 @@ open_http_connection(const char *host, int port);
 inline int
 close_http_connection(http_connection *con);
 
+inline void 
+free_http_data(http_connection *con);
+
 inline int  
 request(http_connection *connection);
 

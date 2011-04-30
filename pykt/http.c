@@ -45,15 +45,22 @@ open_http_connection(const char *host, int port)
     return con;
 }
 
+inline void
+free_http_data(http_connection *con)
+{
+    if(con->bucket){
+        free_data_bucket(con->bucket);
+        con->bucket = NULL;
+    }
+}
+
 inline int
 close_http_connection(http_connection *con)
 {
     int ret = 0;
     DEBUG("close_http_connection %p", con);
-    if(con->bucket){
-        free_data_bucket(con->bucket);
-        con->bucket = NULL;
-    }
+    
+    free_http_data(con);
 
     if(con->fd > 0){
         close(con->fd);
