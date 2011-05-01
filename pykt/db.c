@@ -113,7 +113,19 @@ DBObject_echo(DBObject *self, PyObject *args)
     }
     result = rpc_call_echo(self);
     return result;
+}
 
+static inline PyObject* 
+DBObject_report(DBObject *self, PyObject *args)
+{
+    PyObject *result;
+
+    DEBUG("DBObject_report self %p", self);
+    if(!is_opened(self)){
+        return NULL;
+    }
+    result = rpc_call_report(self);
+    return result;
 }
 
 static inline PyObject* 
@@ -196,11 +208,12 @@ DBObject_delete(DBObject *self, PyObject *args, PyObject *kwargs)
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
-    {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"get", (PyCFunction)DBObject_get, METH_VARARGS|METH_KEYWORDS, 0},
     {"head", (PyCFunction)DBObject_head, METH_VARARGS|METH_KEYWORDS, 0},
     {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
     {"delete", (PyCFunction)DBObject_delete, METH_VARARGS|METH_KEYWORDS, 0},
+    {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
+    {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
     {NULL, NULL}
 };
 
