@@ -51,7 +51,7 @@ def test_err_set():
 def test_set():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.set("A", "B" * 100)
+    ret = db.set("A", "B")
     db.close()
     assert ret 
 
@@ -77,12 +77,51 @@ def test_get():
     db = db.open()
     ret = db.get("A")
     db.close()
-    assert ret
+    assert ret == "B"
+
+def test_get_notfound():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.get("A"* 10)
+    db.close()
+    assert ret == None
 
 def test_get_utf8():
     db = KyotoTycoon()
     db = db.open()
     ret = db.get("あいうえお")
     db.close()
+    assert ret == "かきくけこ"
+
+def test_err_head():
+    db = KyotoTycoon()
+    try:
+        ret = db.head("A")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_head():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.head("A")
+    db.close()
     assert ret
+
+def test_head_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.head("あいうえお")
+    db.close()
+    assert ret
+
+def test_head_notfound():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.head("A"* 10)
+    db.close()
+    assert ret == False
+
 

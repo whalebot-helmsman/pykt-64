@@ -2,6 +2,7 @@
 #include "request.h"
 #include "util.h"
 
+
 inline PyObject* 
 rest_call_get(DBObject *db, PyObject *keyObj)
 {
@@ -37,6 +38,52 @@ rest_call_get(DBObject *db, PyObject *keyObj)
         if(con->response_status == RES_SUCCESS){
             if(con->status_code == 404){
                 result = Py_None;
+                Py_INCREF(result);
+            }
+        }
+    }
+    
+    free_http_data(con);
+    PyMem_Free(encbuf);
+
+    return result;
+}
+
+inline PyObject* 
+rest_call_head(DBObject *db, PyObject *keyObj)
+{
+    http_connection *con;
+    data_bucket *bucket;
+    char *key, *encbuf;
+    Py_ssize_t key_len;
+    size_t encbuf_len;
+    PyObject *result = NULL;
+
+    if(!PyString_Check(keyObj)){
+        PyErr_SetString(PyExc_TypeError, "key must be string ");
+        return NULL;
+    }
+
+    con = db->con;
+    bucket = create_data_bucket(con->fd, 24);
+    if(bucket == NULL){
+        return NULL;
+    }
+    con->bucket = bucket;
+
+    PyString_AsStringAndSize(keyObj, &key, &key_len);
+    urlencode(key, key_len, &encbuf, &encbuf_len);
+
+    set_request_path(con, METHOD_GET, LEN(METHOD_GET), encbuf, encbuf_len);
+    end_header(con);
+    
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            if(con->status_code == 404){
+                result = Py_False;
                 Py_INCREF(result);
             }
         }
