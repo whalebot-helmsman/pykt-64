@@ -20,6 +20,7 @@
 #define HTTP_11 " HTTP/1.1\r\n"
 
 #define CONTENT_LENGTH "Content-Length: "
+#define KT_XT "X-Kt-Xt: " 
 
 #define CONNECTION_KEEP_ALIVE "Connection: keep-alive\r\n"
 

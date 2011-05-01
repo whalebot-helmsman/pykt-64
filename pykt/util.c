@@ -70,3 +70,11 @@ urlencode(char *str, size_t len, char **s, size_t *s_len)
     *s = buf;
 }
 
+inline uint64_t
+get_expire_time(int val)
+{
+    time_t now;
+    now = time(NULL);
+    //DEBUG("time %d", now);
+    return now + val;
+}

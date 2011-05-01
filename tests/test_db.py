@@ -156,4 +156,3 @@ def test_delete_notfound():
     db.close()
     assert ret == False
 
-test_head()

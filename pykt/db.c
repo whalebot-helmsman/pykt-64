@@ -119,11 +119,12 @@ DBObject_echo(DBObject *self, PyObject *args)
 static inline PyObject* 
 DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *value, *expire;
+    PyObject *key, *value;
     PyObject *result;
+    int expire = 0;
 
     static char *kwlist[] = {"key", "value", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|O", kwlist, &key, &value, &expire)){
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &key, &value, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
@@ -131,7 +132,7 @@ DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_set self %p", self);
-    result = rest_call_put(self, key, value);
+    result = rest_call_put(self, key, value, expire);
     return result;
 }
 

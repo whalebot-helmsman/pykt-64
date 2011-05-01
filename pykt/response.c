@@ -79,6 +79,9 @@ headers_complete_cb (http_parser *p)
     buf = new_buffer(p->content_length, 0);
     con->response_body = buf;
     con->status_code = p->status_code;
+    if(con->head){
+        con->response_status = RES_SUCCESS;
+    }
     return 0;
 }
 

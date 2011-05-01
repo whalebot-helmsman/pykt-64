@@ -93,16 +93,19 @@ rest_call_head(DBObject *db, PyObject *keyObj)
     
     free_http_data(con);
     PyMem_Free(encbuf);
-
+    
     return result;
 }
 
 inline PyObject* 
-rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
+rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
 {
     http_connection *con;
     data_bucket *bucket;
-    char strlength[10];
+    char content_length[10];
+    char xt[14];
+    uint64_t expire_time = 0;
+
     char *key, *val, *encbuf;
     Py_ssize_t key_len, val_len;
     size_t encbuf_len;
@@ -128,16 +131,25 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     temp_val = PyObject_Str(valueObj);
     
     PyString_AsStringAndSize(keyObj, &key, &key_len);
-    
     PyString_AsStringAndSize(temp_val, &val, &val_len);
-    //get content-length str
-    snprintf(strlength, sizeof (strlength), "%d", val_len);
 
     urlencode(key, key_len, &encbuf, &encbuf_len);
     DEBUG("urlencode key %s", encbuf);
 
     set_request_path(con, METHOD_PUT, LEN(METHOD_PUT), encbuf, encbuf_len);
-    add_content_length(con, strlength, strlen(strlength));
+    
+    //get content-length str
+    snprintf(content_length, sizeof (content_length), "%d", val_len);
+    add_content_length(con, content_length, strlen(content_length));
+    
+    if(expire > 0){
+        expire_time = get_expire_time(expire);
+        //set X-Kt-Kt
+        snprintf(xt, sizeof (xt), "%llu", expire_time);
+        DEBUG("expire %s", xt);
+        add_kt_xt(con, xt, strlen(xt));
+    }
+    
     end_header(con);
     add_body(con, val, val_len);
     
