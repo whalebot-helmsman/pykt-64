@@ -24,7 +24,7 @@
 
 #define CONNECTION_KEEP_ALIVE "Connection: keep-alive\r\n"
 
-#define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U"
+#define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U\r\n"
 
 #define KT_MODE_ADD "X-Kt-Mode : add" 
 #define KT_MODE_REPLACE "X-Kt-Mode : replace" 

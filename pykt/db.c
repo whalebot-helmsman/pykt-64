@@ -105,34 +105,29 @@ DBObject_close(DBObject *self, PyObject *args)
 static inline PyObject* 
 DBObject_echo(DBObject *self, PyObject *args)
 {
-    PyObject *result;
 
     DEBUG("DBObject_echo self %p", self);
     if(!is_opened(self)){
         return NULL;
     }
-    result = rpc_call_echo(self);
-    return result;
+    return rpc_call_echo(self);
 }
 
 static inline PyObject* 
 DBObject_report(DBObject *self, PyObject *args)
 {
-    PyObject *result;
 
     DEBUG("DBObject_report self %p", self);
     if(!is_opened(self)){
         return NULL;
     }
-    result = rpc_call_report(self);
-    return result;
+    return rpc_call_report(self);
 }
 
 static inline PyObject* 
 DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key, *value;
-    PyObject *result;
     int expire = 0;
 
     static char *kwlist[] = {"key", "value", "expire", NULL};
@@ -144,15 +139,13 @@ DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_set self %p", self);
-    result = rest_call_put(self, key, value, expire);
-    return result;
+    return rest_call_put(self, key, value, expire);
 }
 
 static inline PyObject* 
 DBObject_get(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key;
-    PyObject *result;
 
     static char *kwlist[] = {"key", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &key)){
@@ -163,15 +156,13 @@ DBObject_get(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_get self %p", self);
-    result = rest_call_get(self, key);
-    return result;
+    return rest_call_get(self, key);
 }
 
 static inline PyObject* 
 DBObject_head(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key;
-    PyObject *result;
 
     static char *kwlist[] = {"key", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &key)){
@@ -182,15 +173,13 @@ DBObject_head(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_head self %p", self);
-    result = rest_call_head(self, key);
-    return result;
+    return rest_call_head(self, key);
 }
 
 static inline PyObject* 
 DBObject_delete(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key;
-    PyObject *result;
 
     static char *kwlist[] = {"key", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &key)){
@@ -201,8 +190,25 @@ DBObject_delete(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_delete self %p", self);
-    result = rest_call_delete(self, key);
-    return result;
+    return rest_call_delete(self, key);
+}
+
+static inline PyObject* 
+DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key;
+    int num = 0, expire = 0;
+
+    static char *kwlist[] = {"key", "num", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi|i", kwlist, &key, &num, &expire)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_increment self %p", self);
+    return rpc_call_increment(self, key, num, expire);
 }
 
 static PyMethodDef DBObject_methods[] = {
@@ -214,6 +220,7 @@ static PyMethodDef DBObject_methods[] = {
     {"delete", (PyCFunction)DBObject_delete, METH_VARARGS|METH_KEYWORDS, 0},
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
+    {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 

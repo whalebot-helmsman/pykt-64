@@ -14,6 +14,9 @@ inline void
 add_content_length(http_connection *con, char *value, size_t value_len);
 
 inline void
+add_kt_content_type(http_connection *con);
+
+inline void
 add_kt_xt(http_connection *con, char *value, size_t value_len);
 
 inline void

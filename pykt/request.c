@@ -21,6 +21,13 @@ add_content_length(http_connection *con, char *value, size_t value_len)
 }
 
 inline void
+add_kt_content_type(http_connection *con)
+{
+    data_bucket *bucket = con->bucket;
+    set2bucket(bucket, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+}
+
+inline void
 add_kt_xt(http_connection *con, char *value, size_t value_len)
 {
     data_bucket *bucket = con->bucket;
