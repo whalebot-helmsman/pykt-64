@@ -139,15 +139,19 @@ def test_delete():
     db = KyotoTycoon()
     db = db.open()
     ret = db.delete("A")
+    val = db.get("A")
     db.close()
     assert ret == True
+    assert val == None
 
 def test_delete_utf8():
     db = KyotoTycoon()
     db = db.open()
     ret = db.delete("あいうえお")
+    val = db.get("あいうえお")
     db.close()
     assert ret == True
+    assert val == None
 
 def test_delete_notfound():
     db = KyotoTycoon()
