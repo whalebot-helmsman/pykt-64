@@ -277,6 +277,9 @@ recv_data(http_connection *con)
         case RES_SUCCESS:
             return 1;
         case RES_READY:
+            if(con->head){
+                return 1;
+            }
             return 0;
         default:
             return -1;

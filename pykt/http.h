@@ -11,6 +11,7 @@
 #define SPACE " "
 
 #define METHOD_GET "GET "
+#define METHOD_HEAD "HEAD "
 #define METHOD_POST "POST "
 #define METHOD_PUT "PUT "
 #define METHOD_DELETE "DELETE "
@@ -45,6 +46,7 @@ typedef struct {
     buffer *response_body;
     int status_code;
     response_status_type response_status;
+    uint8_t head;
 } http_connection;
 
 inline http_connection *

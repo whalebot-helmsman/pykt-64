@@ -173,6 +173,25 @@ DBObject_head(DBObject *self, PyObject *args, PyObject *kwargs)
     return result;
 }
 
+static inline PyObject* 
+DBObject_delete(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key;
+    PyObject *result;
+
+    static char *kwlist[] = {"key", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &key)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_delete self %p", self);
+    result = rest_call_delete(self, key);
+    return result;
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -180,6 +199,7 @@ static PyMethodDef DBObject_methods[] = {
     {"get", (PyCFunction)DBObject_get, METH_VARARGS|METH_KEYWORDS, 0},
     {"head", (PyCFunction)DBObject_head, METH_VARARGS|METH_KEYWORDS, 0},
     {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
+    {"delete", (PyCFunction)DBObject_delete, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 

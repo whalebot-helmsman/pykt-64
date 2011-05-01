@@ -108,14 +108,14 @@ def test_head():
     db = db.open()
     ret = db.head("A")
     db.close()
-    assert ret
+    assert ret  == True
 
 def test_head_utf8():
     db = KyotoTycoon()
     db = db.open()
     ret = db.head("あいうえお")
     db.close()
-    assert ret
+    assert ret == True
 
 def test_head_notfound():
     db = KyotoTycoon()
@@ -125,3 +125,35 @@ def test_head_notfound():
     assert ret == False
 
 
+def test_err_delete():
+    db = KyotoTycoon()
+    try:
+        ret = db.delete("A")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_delete():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.delete("A")
+    db.close()
+    assert ret == True
+
+def test_delete_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.delete("あいうえお")
+    db.close()
+    assert ret == True
+
+def test_delete_notfound():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.delete("A"* 10)
+    db.close()
+    assert ret == False
+
+test_head()

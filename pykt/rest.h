@@ -15,4 +15,7 @@ rest_call_head(DBObject *db, PyObject *keyObj);
 inline PyObject* 
 rest_call_put(DBObject *db, PyObject *key, PyObject *value);
 
+inline PyObject* 
+rest_call_delete(DBObject *db, PyObject *keyObj);
+
 #endif
