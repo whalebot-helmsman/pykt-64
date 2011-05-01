@@ -255,19 +255,21 @@ recv_data(http_connection *con)
             //close  
             return 1;
         case -1:
-            if (errno == EAGAIN || errno == EWOULDBLOCK) { /* try again later */
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 call_wait_callback(con->fd, WAIT_READ);
                 return 0;
             } else {
                 PyErr_SetFromErrno(PyExc_IOError);
             }
+            con->response_status = RES_HTTP_ERROR;
             return -1;
         default:
             break;
     }
     nread = execute_parse(con, buf, r);
     if(nread != r){
-        PyErr_SetString(PyExc_IOError,"parse error\n");
+        PyErr_SetString(PyExc_IOError,"HTTP response parse error");
+        con->response_status = RES_HTTP_ERROR;
         return -1;
     }
     

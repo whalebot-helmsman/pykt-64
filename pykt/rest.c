@@ -34,9 +34,11 @@ rest_call_get(DBObject *db, PyObject *keyObj)
         result = getPyString(con->response_body);
         DEBUG("response body %s", getString(con->response_body));
     }else{
-        if(con->status_code == 404){
-            result = Py_None;
-            Py_INCREF(result);
+        if(con->response_status == RES_SUCCESS){
+            if(con->status_code == 404){
+                result = Py_None;
+                Py_INCREF(result);
+            }
         }
     }
     
@@ -55,9 +57,8 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     char *key, *val, *encbuf;
     Py_ssize_t key_len, val_len;
     size_t encbuf_len;
-    PyObject *result, *temp_val;
+    PyObject *result = NULL, *temp_val;
     
-    result = Py_False;
 
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
@@ -76,7 +77,6 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     con->bucket = bucket;
 
     temp_val = PyObject_Str(valueObj);
-    //DEBUG("temp_val %p", temp_val);
     
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     
@@ -94,11 +94,16 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj)
     
     if(request(con, 201) > 0){
         result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            result = Py_False;;
+            Py_INCREF(result);
+        }
     }
     
     free_http_data(con);
     PyMem_Free(encbuf);
     Py_DECREF(temp_val);
-    Py_INCREF(result);
     return result;
 }

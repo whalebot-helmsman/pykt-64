@@ -35,6 +35,7 @@ typedef enum{
     RES_READY,
     RES_SUCCESS,
     RES_MEMORY_ERROR,
+    RES_HTTP_ERROR,
 } response_status_type;
 
 typedef struct {
