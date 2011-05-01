@@ -47,6 +47,4 @@ add_body(http_connection *con, char *value, size_t value_len)
 {
     data_bucket *bucket = con->bucket;
     set2bucket(bucket, value, value_len);
-    set2bucket(bucket, CRLF, 2);
-
 }
