@@ -1,6 +1,7 @@
 #include "rpc.h"
 #include "request.h"
 #include "util.h"
+#include "tsv.h"
 
 #define ECHO_URL "/rpc/echo"
 #define REPORT_URL "/rpc/report"
@@ -56,8 +57,8 @@ rpc_call_report(DBObject *db)
     end_header(con);
     
     if(request(con, 200) > 0){
-        result = getPyString(con->response_body);
-        DEBUG("response body %s", getString(con->response_body));
+        result = convert2dict(con->response_body);
+        //DEBUG("response body %s", getString(con->response_body));
     }else{
         if(con->response_status == RES_SUCCESS){
             result = Py_False;;
@@ -84,8 +85,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     Py_ssize_t key_len;
     size_t encbuf_len, xt_len = 0, addnum_len;
     uint32_t body_len = 10;
-
-    PyObject *result = NULL;
+    PyObject *result = NULL, *dict = NULL, *temp = NULL ;
 
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
@@ -114,7 +114,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
         expire_time = get_expire_time(expire);
         //set X-Kt-Kt
         snprintf(xt, sizeof (xt), "%llu", expire_time);
-        DEBUG("expire %s", xt);
+        //DEBUG("expire %s", xt);
         xt_len = strlen(xt);
         body_len += xt_len;
         body_len += 5;
@@ -140,8 +140,14 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     if(request(con, 200) > 0){
-        result = getPyString(con->response_body);
-        DEBUG("response body %s", getString(con->response_body));
+        dict = convert2dict(con->response_body);
+        if(dict){
+            temp = PyDict_GetItemString(dict, "num");
+            if(temp){
+                result = PyNumber_Int(temp);
+            }
+        }
+        //DEBUG("response body %s", getString(con->response_body));
     }else{
         //TODO 450 (the existing record was not compatible).
         if(con->response_status == RES_SUCCESS){

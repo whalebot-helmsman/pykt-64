@@ -37,14 +37,14 @@
 
     action error {
         ctx->error = 1;
-        printf("error \n");
+        //printf("error \n");
         fbreak;
     }
 
     CRLF = ('\r\n' | '\n');
     TAB = ('\t' | ' ')+;
 
-    keystr = ([^\r\n ]+);
+    keystr = ([^\r\n \t]+);
     valstr = ([^\r\n]+);
     dot = '.'; 
     integer = digit+ %integer;
