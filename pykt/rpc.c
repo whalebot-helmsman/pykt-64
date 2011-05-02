@@ -9,6 +9,8 @@
 #define STATUS_URL "/rpc/status"
 #define CLEAR_URL "/rpc/clear"
 #define ADD_URL "/rpc/add"
+#define REPLACE_URL "/rpc/replace"
+#define APPEND_URL "/rpc/append"
 
 static inline int
 set_error(http_connection *con)
@@ -209,8 +211,8 @@ rpc_call_clear(DBObject *db, char *db_name, Py_ssize_t db_len)
     return result;
 }
 
-inline PyObject* 
-rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+static inline PyObject* 
+add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
 {
     http_connection *con;
     char *key, *val, *encbuf, *db_name;
@@ -266,7 +268,7 @@ rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj
     }
 
 
-    set_request_path(con, METHOD_POST, LEN(METHOD_POST), ADD_URL, LEN(ADD_URL));
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), url, url_len);
     snprintf(content_length, sizeof (content_length), "%d", body_len);
     add_content_length(con, content_length, strlen(content_length));
     add_kt_content_type(con);
@@ -306,6 +308,24 @@ rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj
     Py_DECREF(temp_val);
 
     return result;
+}
+
+inline PyObject* 
+rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+{
+    return add_internal(db, ADD_URL, LEN(ADD_URL), keyObj, valueObj, dbObj, expire);
+}
+
+inline PyObject* 
+rpc_call_replace(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+{
+    return add_internal(db, REPLACE_URL, LEN(REPLACE_URL), keyObj, valueObj, dbObj, expire);
+}
+
+inline PyObject* 
+rpc_call_append(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+{
+    return add_internal(db, APPEND_URL, LEN(APPEND_URL), keyObj, valueObj, dbObj, expire);
 }
 
 inline PyObject* 

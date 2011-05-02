@@ -22,6 +22,12 @@ inline PyObject*
 rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire);
 
 inline PyObject* 
+rpc_call_replace(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire);
+
+inline PyObject* 
+rpc_call_append(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire);
+
+inline PyObject* 
 rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire);
 
 #endif

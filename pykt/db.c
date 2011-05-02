@@ -251,7 +251,7 @@ DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
     PyObject *key, *value, *db_name = NULL;
     int expire = 0;
 
-    DEBUG("DBObject_clear self %p", self);
+    DEBUG("DBObject_add self %p", self);
     static char *kwlist[] = {"key", "value", "xt", "db", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
         return NULL; 
@@ -260,6 +260,40 @@ DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
     return rpc_call_add(self, key, value, db_name, expire);
+}
+
+static inline PyObject* 
+DBObject_replace(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key, *value, *db_name = NULL;
+    int expire = 0;
+
+    DEBUG("DBObject_replace self %p", self);
+    static char *kwlist[] = {"key", "value", "xt", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    return rpc_call_replace(self, key, value, db_name, expire);
+}
+
+static inline PyObject* 
+DBObject_append(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key, *value, *db_name = NULL;
+    int expire = 0;
+
+    DEBUG("DBObject_append self %p", self);
+    static char *kwlist[] = {"key", "value", "xt", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    return rpc_call_append(self, key, value, db_name, expire);
 }
 
 static PyMethodDef DBObject_methods[] = {
@@ -274,6 +308,8 @@ static PyMethodDef DBObject_methods[] = {
     {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
     {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
     {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
+    {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
+    {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
