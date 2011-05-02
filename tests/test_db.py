@@ -62,6 +62,20 @@ def test_set_utf8():
     db.close()
     assert ret 
 
+def test_set_large_key():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.set("L" * 1024 * 4, "L")
+    db.close()
+    assert ret 
+
+def test_set_large():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.set("L", "L" * 1024 * 1024 * 5)
+    db.close()
+    assert ret 
+
 def test_err_get():
     db = KyotoTycoon()
     try:
