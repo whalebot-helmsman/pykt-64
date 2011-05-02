@@ -248,7 +248,7 @@ recv_data(http_connection *con)
     r = read(con->fd, buf, sizeof(buf));
     Py_END_ALLOW_THREADS
 
-    DEBUG("read data fd:%d read:%d buf:%s", con->fd, r, buf);
+    DEBUG("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
 
     switch(r){
         case 0:
