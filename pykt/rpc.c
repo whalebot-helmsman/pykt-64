@@ -52,11 +52,11 @@ get_num(http_connection *con)
 }
 
 static inline int
-init_bucket(http_connection *con)
+init_bucket(http_connection *con, int size)
 {
     data_bucket *bucket;
 
-    bucket = create_data_bucket(con->fd, 16);
+    bucket = create_data_bucket(con->fd, size);
     if(bucket == NULL){
         return -1;
     }
@@ -73,7 +73,7 @@ rpc_call_echo(DBObject *db)
 
     con = db->con;
     
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), ECHO_URL, LEN(ECHO_URL));
@@ -103,7 +103,7 @@ rpc_call_report(DBObject *db)
     PyObject *result = NULL;
 
     con = db->con;
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), REPORT_URL, LEN(REPORT_URL));
@@ -134,7 +134,7 @@ rpc_call_status(DBObject *db, char *db_name, Py_ssize_t db_len)
     uint32_t body_len = 0;
 
     con = db->con;
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
 
@@ -176,7 +176,7 @@ rpc_call_clear(DBObject *db, char *db_name, Py_ssize_t db_len)
     uint32_t body_len = 0;
 
     con = db->con;
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
 
@@ -214,7 +214,7 @@ rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj
 {
     http_connection *con;
     char *key, *val, *encbuf, *db_name;
-    Py_ssize_t key_len, val_len, db_name_len;
+    Py_ssize_t key_len, val_len, db_name_len = 0;
     char content_length[12];
     char xt[14];
     uint64_t expire_time = 0;
@@ -222,6 +222,7 @@ rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj
     uint32_t body_len = 12;
     PyObject *result = NULL, *temp_val;
 
+    DEBUG("rpc_call_add %p %p %p %d", keyObj, valueObj, dbObj, expire);
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
         return NULL;
@@ -236,7 +237,7 @@ rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj
     }
 
     con = db->con;
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 24) < 0){
         return NULL;
     }
     
@@ -328,7 +329,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     con = db->con;
-    if(init_bucket(con) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
     

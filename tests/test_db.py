@@ -298,7 +298,7 @@ def test_add_utf8():
 def test_add_large_key():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.add("L" * 1024 , "L")
+    ret = db.add("L" * 1024 * 4 , "L")
     db.close()
     assert ret 
 
