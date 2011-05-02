@@ -194,13 +194,30 @@ DBObject_delete(DBObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static inline PyObject* 
+DBObject_remove(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key;
+
+    static char *kwlist[] = {"key", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &key)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_remove self %p", self);
+    return rest_call_delete(self, key);
+}
+
+static inline PyObject* 
 DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key;
-    int num = 0, expire = 0;
+    int num = 1, expire = 0;
 
     static char *kwlist[] = {"key", "num", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi|i", kwlist, &key, &num, &expire)){
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &key, &num, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
@@ -218,6 +235,7 @@ static PyMethodDef DBObject_methods[] = {
     {"head", (PyCFunction)DBObject_head, METH_VARARGS|METH_KEYWORDS, 0},
     {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
     {"delete", (PyCFunction)DBObject_delete, METH_VARARGS|METH_KEYWORDS, 0},
+    {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
