@@ -175,3 +175,69 @@ def test_remove_notfound():
     db.close()
     assert ret == False
 
+
+def test_err_report():
+    db = KyotoTycoon()
+    try:
+        ret = db.report()
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_report():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.report()
+    db.close()
+    assert ret 
+
+def test_err_status():
+    db = KyotoTycoon()
+    try:
+        ret = db.status()
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_status():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.status()
+    db.close()
+    assert ret 
+
+def test_err_increment():
+    db = KyotoTycoon()
+    try:
+        ret = db.increment("I")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_increment():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment("I")
+    db.close()
+    assert ret == 1
+
+def test_increment_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment("インクリメント")
+    db.close()
+    assert ret == 1
+
+def test_increment_arg():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment("I", 100)
+    db.close()
+    assert ret == 101
+
