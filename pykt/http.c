@@ -50,6 +50,7 @@ open_http_connection(const char *host, int port)
 inline void
 free_http_data(http_connection *con)
 {
+    DEBUG("free_http_data %p", con);
     if(con->bucket){
         free_data_bucket(con->bucket);
         con->bucket = NULL;

@@ -72,12 +72,14 @@ create_data_bucket(int fd, int cnt)
     }
     bucket->iov = iov;
     bucket->iov_size = cnt;
+    DEBUG("create_data_bucket %p", bucket);
     return bucket;
 }
 
 inline void
 free_data_bucket(data_bucket *bucket)
 {
+    DEBUG("free_data_bucket %p", bucket);
     PyMem_Free(bucket->iov);
     PyMem_Free(bucket);
 }

@@ -7,19 +7,72 @@
 #define REPORT_URL "/rpc/report"
 #define INCREMENT_URL "/rpc/increment"
 
+static inline int
+set_error(http_connection *con)
+{
+    PyObject *dict, *temp;
+    char *msg;
+
+    dict = convert2dict(con->response_body);
+    if(dict){
+        temp = PyDict_GetItemString(dict, "ERROR");
+        if(temp){
+            msg = PyString_AsString(temp);
+            if(msg){
+                PyErr_SetString(KtException, msg);
+                return 1;
+            }else{
+                //TypeError
+                return -1;
+            }
+
+        }
+    }
+    PyErr_SetString(KtException, "could not set error ");
+    
+    return -1;
+}
+
+static inline PyObject*
+get_num(http_connection *con)
+{
+    PyObject *dict, *temp;
+    dict = convert2dict(con->response_body);
+    if(dict){
+        temp = PyDict_GetItemString(dict, "num");
+        if(temp){
+            return PyNumber_Int(temp);
+        }
+    }
+    return NULL;
+
+}
+
+static inline int
+init_bucket(http_connection *con)
+{
+    data_bucket *bucket;
+
+    bucket = create_data_bucket(con->fd, 16);
+    if(bucket == NULL){
+        return -1;
+    }
+    con->bucket = bucket;
+    return 1;
+}
+
+
 inline PyObject* 
 rpc_call_echo(DBObject *db)
 {
     http_connection *con;
-    data_bucket *bucket;
     PyObject *result = NULL;
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 8);
-    if(bucket == NULL){
+    
+    if(init_bucket(con) < 0){
         return NULL;
     }
-    con->bucket = bucket;
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), ECHO_URL, LEN(ECHO_URL));
     end_header(con);
     
@@ -44,25 +97,22 @@ rpc_call_report(DBObject *db)
 {
 
     http_connection *con;
-    data_bucket *bucket;
     PyObject *result = NULL;
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 8);
-    if(bucket == NULL){
+    if(init_bucket(con) < 0){
         return NULL;
     }
-    con->bucket = bucket;
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), REPORT_URL, LEN(REPORT_URL));
     end_header(con);
     
     if(request(con, 200) > 0){
         result = convert2dict(con->response_body);
-        //DEBUG("response body %s", getString(con->response_body));
     }else{
         if(con->response_status == RES_SUCCESS){
-            result = Py_False;;
-            Py_INCREF(result);
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
         }
     }
     
@@ -76,7 +126,6 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
 {
 
     http_connection *con;
-    data_bucket *bucket;
     char *key, *encbuf;
     char content_length[12];
     char addnum[12];
@@ -85,7 +134,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     Py_ssize_t key_len;
     size_t encbuf_len, xt_len = 0, addnum_len;
     uint32_t body_len = 10;
-    PyObject *result = NULL, *dict = NULL, *temp = NULL ;
+    PyObject *result = NULL;
 
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
@@ -93,11 +142,9 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 24);
-    if(bucket == NULL){
+    if(init_bucket(con) < 0){
         return NULL;
     }
-    con->bucket = bucket;
     
     //url encode key
     PyString_AsStringAndSize(keyObj, &key, &key_len);
@@ -140,19 +187,12 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     if(request(con, 200) > 0){
-        dict = convert2dict(con->response_body);
-        if(dict){
-            temp = PyDict_GetItemString(dict, "num");
-            if(temp){
-                result = PyNumber_Int(temp);
-            }
-        }
-        //DEBUG("response body %s", getString(con->response_body));
+        result = get_num(con);
     }else{
-        //TODO 450 (the existing record was not compatible).
-        if(con->response_status == RES_SUCCESS){
-            result = Py_False;;
-            Py_INCREF(result);
+        if(con->status_code == 450){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
         }
     }
     
