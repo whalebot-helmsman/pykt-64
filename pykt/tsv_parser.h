@@ -3,7 +3,7 @@
 
 #include "pykt.h"
 
-typedef void (*record_cb)(void *data, const char *key, size_t key_len, const char *val, size_t val_len);
+typedef void (*record_cb)(void *ctx, const char *key, size_t key_len, const char *val, size_t val_len);
 
 typedef struct {
 	int cs;
@@ -19,6 +19,12 @@ typedef struct {
 
     void *user;
 } tsv_ctx;
+
+inline void 
+tsv_init(tsv_ctx *ctx);
+
+inline size_t 
+tsv_execute(tsv_ctx *ctx, const char* data, size_t len, size_t off);
 
 #endif
 

@@ -23,7 +23,7 @@
 
     action value {
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, fpc));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, fpc));
         }
     }
 
@@ -61,17 +61,16 @@
 
 %% write data;
 
-void 
-tsv_init(tsv_ctx *ctx, void* user)
+inline void 
+tsv_init(tsv_ctx *ctx)
 {
 
 	int cs = 0;
 	%% write init;
 	ctx->cs = cs;
-	ctx->user = user;
 }
 
-size_t 
+inline size_t 
 tsv_execute(tsv_ctx *ctx, const char* data, size_t len, size_t off)
 {
     const char *p, *pe, *eof;

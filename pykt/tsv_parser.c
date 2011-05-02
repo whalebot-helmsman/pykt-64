@@ -22,8 +22,8 @@ static const int tsv_en_main = 5;
 
 #line 63 "tsv_parser.rl"
 
-void 
-tsv_init(tsv_ctx *ctx, void* user)
+inline void 
+tsv_init(tsv_ctx *ctx)
 {
 
 	int cs = 0;
@@ -35,10 +35,9 @@ tsv_init(tsv_ctx *ctx, void* user)
 
 #line 70 "tsv_parser.rl"
 	ctx->cs = cs;
-	ctx->user = user;
 }
 
-size_t 
+inline size_t 
 tsv_execute(tsv_ctx *ctx, const char* data, size_t len, size_t off)
 {
     const char *p, *pe, *eof;
@@ -54,7 +53,7 @@ tsv_execute(tsv_ctx *ctx, const char* data, size_t len, size_t off)
     assert(pe - p == len - off && "pointers aren't same distance");
 
 	
-#line 58 "tsv_parser.c"
+#line 57 "tsv_parser.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -64,7 +63,7 @@ tr16:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st5;
@@ -76,7 +75,7 @@ tr20:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st5;
@@ -88,7 +87,7 @@ tr25:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st5;
@@ -96,7 +95,7 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 100 "tsv_parser.c"
+#line 99 "tsv_parser.c"
 	switch( (*p) ) {
 		case 10: goto tr2;
 		case 13: goto tr2;
@@ -113,7 +112,7 @@ st1:
 	if ( ++p == pe )
 		goto _test_eof1;
 case 1:
-#line 117 "tsv_parser.c"
+#line 116 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr1;
 		case 10: goto tr2;
@@ -131,7 +130,7 @@ st2:
 	if ( ++p == pe )
 		goto _test_eof2;
 case 2:
-#line 135 "tsv_parser.c"
+#line 134 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr5;
 		case 10: goto tr2;
@@ -152,7 +151,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 156 "tsv_parser.c"
+#line 155 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr15;
 		case 10: goto tr16;
@@ -181,7 +180,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 185 "tsv_parser.c"
+#line 184 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr5;
 		case 10: goto tr16;
@@ -195,7 +194,7 @@ tr17:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st3;
@@ -207,7 +206,7 @@ tr21:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st3;
@@ -219,7 +218,7 @@ tr26:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	goto st3;
@@ -227,7 +226,7 @@ st3:
 	if ( ++p == pe )
 		goto _test_eof3;
 case 3:
-#line 231 "tsv_parser.c"
+#line 230 "tsv_parser.c"
 	if ( (*p) == 10 )
 		goto st5;
 	goto st0;
@@ -239,7 +238,7 @@ tr2:
         {p++; cs = 0; goto _out;}
     }
 	goto st0;
-#line 243 "tsv_parser.c"
+#line 242 "tsv_parser.c"
 st0:
 cs = 0;
 	goto _out;
@@ -271,7 +270,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 275 "tsv_parser.c"
+#line 274 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr11;
 		case 10: goto tr16;
@@ -292,7 +291,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 296 "tsv_parser.c"
+#line 295 "tsv_parser.c"
 	switch( (*p) ) {
 		case 10: goto tr16;
 		case 13: goto tr17;
@@ -309,7 +308,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 313 "tsv_parser.c"
+#line 312 "tsv_parser.c"
 	switch( (*p) ) {
 		case 10: goto tr20;
 		case 13: goto tr21;
@@ -351,7 +350,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 355 "tsv_parser.c"
+#line 354 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr15;
 		case 10: goto tr20;
@@ -398,7 +397,7 @@ st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 402 "tsv_parser.c"
+#line 401 "tsv_parser.c"
 	switch( (*p) ) {
 		case 9: goto tr11;
 		case 10: goto tr2;
@@ -438,7 +437,7 @@ case 4:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	break;
@@ -461,7 +460,7 @@ case 4:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	break;
@@ -474,18 +473,18 @@ case 4:
 #line 24 "tsv_parser.rl"
 	{
 		if(ctx->on_record){
-            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
+            ctx->on_record(ctx, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, p));
         }
     }
 	break;
-#line 482 "tsv_parser.c"
+#line 481 "tsv_parser.c"
 	}
 	}
 
 	_out: {}
 	}
 
-#line 90 "tsv_parser.rl"
+#line 89 "tsv_parser.rl"
 
     ctx->cs = cs;
     ctx->nread += p - (data + off);
