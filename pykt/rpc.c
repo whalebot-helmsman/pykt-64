@@ -6,6 +6,7 @@
 #define ECHO_URL "/rpc/echo"
 #define REPORT_URL "/rpc/report"
 #define INCREMENT_URL "/rpc/increment"
+#define STATUS_URL "/rpc/status"
 
 static inline int
 set_error(http_connection *con)
@@ -104,6 +105,35 @@ rpc_call_report(DBObject *db)
         return NULL;
     }
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), REPORT_URL, LEN(REPORT_URL));
+    end_header(con);
+    
+    if(request(con, 200) > 0){
+        result = convert2dict(con->response_body);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_status(DBObject *db)
+{
+
+    http_connection *con;
+    PyObject *result = NULL;
+
+    con = db->con;
+    if(init_bucket(con) < 0){
+        return NULL;
+    }
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), STATUS_URL, LEN(STATUS_URL));
     end_header(con);
     
     if(request(con, 200) > 0){
