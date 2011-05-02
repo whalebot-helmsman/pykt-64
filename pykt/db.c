@@ -215,12 +215,18 @@ DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_status(DBObject *self, PyObject *args)
 {
+    char *db = NULL;
+    Py_ssize_t db_len;
 
     DEBUG("DBObject_status self %p", self);
+    if (!PyArg_ParseTuple(args, "|s#", &db, &db_len)){
+        return NULL;
+    }
     if(!is_opened(self)){
         return NULL;
     }
-    return rpc_call_status(self);
+    //DEBUG("optional db %s", db);
+    return rpc_call_status(self, db, db_len);
 }
 
 static PyMethodDef DBObject_methods[] = {
@@ -232,7 +238,7 @@ static PyMethodDef DBObject_methods[] = {
     {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
-    {"status", (PyCFunction)DBObject_status, METH_NOARGS|METH_VARARGS, 0},
+    {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };

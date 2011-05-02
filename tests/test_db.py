@@ -210,6 +210,13 @@ def test_status():
     db.close()
     assert ret 
 
+def test_status_db():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.status("db_0")
+    db.close()
+    assert ret 
+
 def test_err_increment():
     db = KyotoTycoon()
     try:
