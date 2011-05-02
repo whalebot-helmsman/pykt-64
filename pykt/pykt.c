@@ -2,7 +2,7 @@
 #include "db.h"
 
 PyObject *wait_callback;
-PyObject *kt_exception;
+PyObject *KtException;
 
 PyObject *
 set_wait_callback(PyObject *self, PyObject *args)
@@ -49,9 +49,9 @@ initpykt(void)
     if(PyType_Ready(&DBObjectType) < 0){ 
         return;
     }
-    kt_exception = PyErr_NewException("pykt.KtException",
+    KtException = PyErr_NewException("pykt.KtException",
 					  PyExc_IOError, NULL);
-	if (kt_exception == NULL){
+	if (KtException == NULL){
 		return;
     }
     
@@ -62,8 +62,8 @@ initpykt(void)
     Py_INCREF(&DBObjectType);
     PyModule_AddObject(m, "KyotoTycoon", (PyObject *)&DBObjectType);
 	
-    Py_INCREF(kt_exception);
-	PyModule_AddObject(m, "KtException", kt_exception);
+    Py_INCREF(KtException);
+	PyModule_AddObject(m, "KtException", KtException);
 
     PyModule_AddIntConstant(m, "WAIT_READ", WAIT_READ);
     PyModule_AddIntConstant(m, "WAIT_WRITE", WAIT_WRITE);

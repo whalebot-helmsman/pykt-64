@@ -39,7 +39,7 @@
 #define WAIT_WRITE 2
 
 extern PyObject *wait_callback;
-extern PyObject *kt_exception;
+extern PyObject *KtException;
 
 inline void
 call_wait_callback(int fd, int type);
