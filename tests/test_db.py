@@ -125,38 +125,39 @@ def test_head_notfound():
     assert ret == False
 
 
-def test_err_delete():
+
+def test_err_remove():
     db = KyotoTycoon()
     try:
-        ret = db.delete("A")
+        ret = db.remove("A")
         assert False
     except IOError:
         assert True
     except:
         assert False
 
-def test_delete():
+def test_remove():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.delete("A")
+    ret = db.remove("A")
     val = db.get("A")
     db.close()
     assert ret == True
     assert val == None
 
-def test_delete_utf8():
+def test_remove_utf8():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.delete("あいうえお")
+    ret = db.remove("あいうえお")
     val = db.get("あいうえお")
     db.close()
     assert ret == True
     assert val == None
 
-def test_delete_notfound():
+def test_remove_notfound():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.delete("A"* 10)
+    ret = db.remove("A"* 10)
     db.close()
     assert ret == False
 
