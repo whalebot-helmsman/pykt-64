@@ -1,4 +1,3 @@
-
 #include "tsv_parser.h"
 #include <assert.h>
 
@@ -14,9 +13,7 @@
     }
 
     action key {
-		if(ctx->on_key){
-            ctx->on_key(ctx->user, MARK_PTR(key_start), MARK_LEN(key_start, fpc));
-        }
+        ctx->key_len = MARK_LEN(key_start, fpc);
     }
 
     action mark_value {
@@ -25,8 +22,8 @@
     }
 
     action value {
-		if(ctx->on_value){
-            ctx->on_value(ctx->user, MARK_PTR(value_start), MARK_LEN(value_start, fpc));
+		if(ctx->on_record){
+            ctx->on_record(ctx->user, MARK_PTR(key_start), ctx->key_len, MARK_PTR(value_start), MARK_LEN(value_start, fpc));
         }
     }
 
