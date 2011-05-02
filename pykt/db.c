@@ -229,6 +229,22 @@ DBObject_status(DBObject *self, PyObject *args)
     return rpc_call_status(self, db, db_len);
 }
 
+static inline PyObject* 
+DBObject_clear(DBObject *self, PyObject *args)
+{
+    char *db = NULL;
+    Py_ssize_t db_len;
+
+    DEBUG("DBObject_clear self %p", self);
+    if (!PyArg_ParseTuple(args, "|s#", &db, &db_len)){
+        return NULL;
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    return rpc_call_clear(self, db, db_len);
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -239,6 +255,7 @@ static PyMethodDef DBObject_methods[] = {
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
     {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
+    {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };

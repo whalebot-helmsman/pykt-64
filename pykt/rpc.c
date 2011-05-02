@@ -7,6 +7,7 @@
 #define REPORT_URL "/rpc/report"
 #define INCREMENT_URL "/rpc/increment"
 #define STATUS_URL "/rpc/status"
+#define CLEAR_URL "/rpc/clear"
 
 static inline int
 set_error(http_connection *con)
@@ -151,6 +152,49 @@ rpc_call_status(DBObject *db, char *db_name, Py_ssize_t db_len)
     
     if(request(con, 200) > 0){
         result = convert2dict(con->response_body);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_clear(DBObject *db, char *db_name, Py_ssize_t db_len)
+{
+
+    http_connection *con;
+    PyObject *result = NULL;
+    char content_length[12];
+    uint32_t body_len = 0;
+
+    con = db->con;
+    if(init_bucket(con) < 0){
+        return NULL;
+    }
+
+    if(db_name){
+        body_len += 3 + db_len;
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CLEAR_URL, LEN(CLEAR_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body_len);
+    add_content_length(con, content_length, strlen(content_length));
+    end_header(con);
+    if(body_len > 0){
+        add_body(con, "DB\t", 3);
+        add_body(con, db_name, db_len);
+    }
+    
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);

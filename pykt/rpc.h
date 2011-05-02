@@ -16,6 +16,9 @@ inline PyObject*
 rpc_call_status(DBObject *db, char *db_name, Py_ssize_t db_len);
 
 inline PyObject* 
+rpc_call_clear(DBObject *db, char *db_name, Py_ssize_t db_len);
+
+inline PyObject* 
 rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire);
 
 #endif

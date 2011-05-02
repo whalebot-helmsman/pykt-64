@@ -217,6 +217,30 @@ def test_status_db():
     db.close()
     assert ret 
 
+def test_err_clear():
+    db = KyotoTycoon()
+    try:
+        ret = db.clear()
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_clear():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.clear()
+    db.close()
+    assert ret 
+
+def test_clear_db():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.clear("db_0")
+    db.close()
+    assert ret 
+
 def test_err_increment():
     db = KyotoTycoon()
     try:
