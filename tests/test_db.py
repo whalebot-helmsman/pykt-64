@@ -139,7 +139,6 @@ def test_head_notfound():
     assert ret == False
 
 
-
 def test_err_remove():
     db = KyotoTycoon()
     try:
@@ -271,4 +270,42 @@ def test_increment_arg():
     ret = db.increment("I", 100)
     db.close()
     assert ret == 101
+
+def test_err_add():
+    db = KyotoTycoon()
+    try:
+        ret = db.add("A", "B")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_add():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.add("A", "B")
+    db.close()
+    assert ret 
+
+def test_add_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.add("あいうえお", "かきくけこ")
+    db.close()
+    assert ret 
+
+def test_add_large_key():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.add("L" * 1024 , "L")
+    db.close()
+    assert ret 
+
+def test_add_large():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.add("L", "L" * 1024 * 1024 * 5)
+    db.close()
+    assert ret 
 

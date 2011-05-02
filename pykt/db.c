@@ -245,6 +245,23 @@ DBObject_clear(DBObject *self, PyObject *args)
     return rpc_call_clear(self, db, db_len);
 }
 
+static inline PyObject* 
+DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key, *value, *db_name = NULL;
+    int expire = 0;
+
+    DEBUG("DBObject_clear self %p", self);
+    static char *kwlist[] = {"key", "value", "xt", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    return rpc_call_add(self, key, value, db_name, expire);
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -256,6 +273,7 @@ static PyMethodDef DBObject_methods[] = {
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
     {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
     {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
+    {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
