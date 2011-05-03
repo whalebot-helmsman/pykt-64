@@ -61,6 +61,7 @@ add_header(http_connection *con, char *name, size_t name_len, char *value, size_
 inline void
 add_body(http_connection *con, char *value, size_t value_len)
 {
+    //DEBUG("HTTP BODY \n%.*s", value_len, value);
     data_bucket *bucket = con->bucket;
     set2bucket(bucket, value, value_len);
 }

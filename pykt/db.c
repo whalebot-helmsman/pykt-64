@@ -198,34 +198,32 @@ DBObject_remove(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_status(DBObject *self, PyObject *args)
 {
-    char *db = NULL;
-    Py_ssize_t db_len;
+    PyObject *db_name = NULL;
 
     DEBUG("DBObject_status self %p", self);
-    if (!PyArg_ParseTuple(args, "|s#", &db, &db_len)){
+    if (!PyArg_ParseTuple(args, "|O", &db_name)){
         return NULL;
     }
     if(!is_opened(self)){
         return NULL;
     }
     //DEBUG("optional db %s", db);
-    return rpc_call_status(self, db, db_len);
+    return rpc_call_status(self, db_name);
 }
 
 static inline PyObject* 
 DBObject_clear(DBObject *self, PyObject *args)
 {
-    char *db = NULL;
-    Py_ssize_t db_len;
+    PyObject *db_name = NULL;
 
     DEBUG("DBObject_clear self %p", self);
-    if (!PyArg_ParseTuple(args, "|s#", &db, &db_len)){
+    if (!PyArg_ParseTuple(args, "|O", &db_name)){
         return NULL;
     }
     if(!is_opened(self)){
         return NULL;
     }
-    return rpc_call_clear(self, db, db_len);
+    return rpc_call_clear(self, db_name);
 }
 
 static inline PyObject* 
@@ -312,11 +310,11 @@ DBObject_append(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key;
+    PyObject *key, *db_name = NULL;
     int num = 1, expire = 0;
 
-    static char *kwlist[] = {"key", "num", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &key, &num, &expire)){
+    static char *kwlist[] = {"key", "num", "expire", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iiO", kwlist, &key, &num, &expire, &db_name)){
         return NULL; 
     }
     if(!is_opened(self)){
@@ -324,18 +322,18 @@ DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_increment self %p", self);
-    return rpc_call_increment(self, key, num, expire);
+    return rpc_call_increment(self, key, db_name, num, expire);
 }
 
 static inline PyObject* 
 DBObject_increment_double(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key;
+    PyObject *key, *db_name = NULL;
     int expire = 0;
     double num = 1.0;
 
-    static char *kwlist[] = {"key", "num", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|di", kwlist, &key, &num, &expire)){
+    static char *kwlist[] = {"key", "num", "expire", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|diO", kwlist, &key, &num, &expire, &db_name)){
         return NULL; 
     }
     if(!is_opened(self)){
@@ -343,7 +341,7 @@ DBObject_increment_double(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_increment_double self %p", self);
-    return rpc_call_increment_double(self, key, num, expire);
+    return rpc_call_increment_double(self, key, db_name, num, expire);
 }
 
 static inline PyObject* 
