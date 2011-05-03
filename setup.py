@@ -30,8 +30,8 @@ setup(name='pykt',
                 'pykt/http.c', 'pykt/rpc.c', 'pykt/rest.c', 'pykt/buffer.c',
                 'pykt/http_parser.c', 'pykt/request.c', 'pykt/response.c',
                 'pykt/util.c', 'pykt/tsv_parser.c', 'pykt/tsv.c'],
-            include_dirs=include_dirs,
-            library_dirs=library_dirs,
+            #include_dirs=include_dirs,
+            #library_dirs=library_dirs,
             define_macros=[("DEVELOP",None)],
             )
         ]
