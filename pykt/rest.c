@@ -2,12 +2,23 @@
 #include "request.h"
 #include "util.h"
 
+static inline int
+init_bucket(http_connection *con, int size)
+{
+    data_bucket *bucket;
+
+    bucket = create_data_bucket(con->fd, size);
+    if(bucket == NULL){
+        return -1;
+    }
+    con->bucket = bucket;
+    return 1;
+}
 
 inline PyObject* 
 rest_call_get(DBObject *db, PyObject *keyObj)
 {
     http_connection *con;
-    data_bucket *bucket;
     char *key, *encbuf;
     Py_ssize_t key_len;
     size_t encbuf_len;
@@ -19,11 +30,9 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     }
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 16);
-    if(bucket == NULL){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
-    con->bucket = bucket;
 
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     urlencode(key, key_len, &encbuf, &encbuf_len);
@@ -53,7 +62,6 @@ inline PyObject*
 rest_call_head(DBObject *db, PyObject *keyObj)
 {
     http_connection *con;
-    data_bucket *bucket;
     char *key, *encbuf;
     Py_ssize_t key_len;
     size_t encbuf_len;
@@ -65,11 +73,9 @@ rest_call_head(DBObject *db, PyObject *keyObj)
     }
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 16);
-    if(bucket == NULL){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
-    con->bucket = bucket;
 
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     urlencode(key, key_len, &encbuf, &encbuf_len);
@@ -98,10 +104,9 @@ rest_call_head(DBObject *db, PyObject *keyObj)
 }
 
 inline PyObject* 
-rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
+rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire, kt_mode mode)
 {
     http_connection *con;
-    data_bucket *bucket;
     char content_length[10];
     char xt[14];
     uint64_t expire_time = 0;
@@ -122,11 +127,9 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
     }
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 16);
-    if(bucket == NULL){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
-    con->bucket = bucket;
 
     temp_val = PyObject_Str(valueObj);
     
@@ -142,6 +145,16 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
     snprintf(content_length, sizeof (content_length), "%d", val_len);
     add_content_length(con, content_length, strlen(content_length));
     
+    switch(mode){
+        case MODE_ADD:
+            add_header_oneline(con, X_KT_MODE_ADD, LEN(X_KT_MODE_ADD));
+            break;
+        case MODE_REPLACE:
+            add_header_oneline(con, X_KT_MODE_REPLACE, LEN(X_KT_MODE_REPLACE));
+            break;
+        default:
+            add_header_oneline(con, X_KT_MODE_SET, LEN(X_KT_MODE_SET));
+    }
     if(expire > 0){
         expire_time = get_expire_time(expire);
         //set X-Kt-Kt
@@ -173,7 +186,6 @@ inline PyObject*
 rest_call_delete(DBObject *db, PyObject *keyObj)
 {
     http_connection *con;
-    data_bucket *bucket;
     char *key, *encbuf;
     Py_ssize_t key_len;
     size_t encbuf_len;
@@ -185,11 +197,9 @@ rest_call_delete(DBObject *db, PyObject *keyObj)
     }
 
     con = db->con;
-    bucket = create_data_bucket(con->fd, 16);
-    if(bucket == NULL){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
-    con->bucket = bucket;
 
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     urlencode(key, key_len, &encbuf, &encbuf_len);

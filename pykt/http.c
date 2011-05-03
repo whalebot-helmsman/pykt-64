@@ -30,6 +30,9 @@ open_http_connection(const char *host, int port)
     }
     memset(con, 0, sizeof(http_connection));
     con->response_status = RES_INIT;
+    con->head = 0;
+    con->have_kt_error = 0;
+    con->status_code = 0;
 
     DEBUG("open_http_connection %p", con);
 
@@ -273,6 +276,11 @@ recv_data(http_connection *con)
             break;
     }
     nread = execute_parse(con, buf, r);
+    
+    if(con->response_status == RES_KT_ERROR){
+        return -1;
+    }
+    
     if(nread != r){
         PyErr_SetString(PyExc_IOError,"HTTP response parse error");
         con->response_status = RES_HTTP_ERROR;

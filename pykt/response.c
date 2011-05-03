@@ -9,12 +9,28 @@ message_begin_cb(http_parser *p)
 static inline int
 header_field_cb(http_parser *p, const char *buf, size_t len)
 {
+    http_connection *con;
+    
+    con = (http_connection *)p->data;
+    if(strncmp("X-Kt-Error", buf, 10) == 0){
+        con->have_kt_error = 1;
+    }
     return 0;
 }
 
 static inline int
 header_value_cb(http_parser *p, const char *buf, size_t len)
 {
+    http_connection *con;
+    
+    con = (http_connection *)p->data;
+    if(con->have_kt_error){
+        PyObject *value = PyString_FromStringAndSize(buf, len);
+        PyErr_SetObject(KtException, value);
+        con->response_status = RES_KT_ERROR;
+        con->have_kt_error = 0;
+        return -1;
+    }
     return 0;
 }
 

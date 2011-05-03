@@ -21,17 +21,10 @@ add_content_length(http_connection *con, char *value, size_t value_len)
 }
 
 inline void
-add_kt_content_type(http_connection *con)
-{
-    data_bucket *bucket = con->bucket;
-    set2bucket(bucket, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
-}
-
-inline void
 add_kt_xt(http_connection *con, char *value, size_t value_len)
 {
     data_bucket *bucket = con->bucket;
-    set2bucket(bucket, KT_XT, LEN(KT_XT));
+    set2bucket(bucket, X_KT_XT, LEN(X_KT_XT));
     set2bucket(bucket, value, value_len);
     set2bucket(bucket, CRLF, 2);
 }
@@ -46,6 +39,13 @@ inline void
 end_header(http_connection *con)
 {
     add_crlf(con);
+}
+
+inline void
+add_header_oneline(http_connection *con, char *value, size_t value_len)
+{
+    data_bucket *bucket = con->bucket;
+    set2bucket(bucket, value, value_len);
 }
 
 inline void

@@ -139,7 +139,7 @@ DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_set self %p", self);
-    return rest_call_put(self, key, value, expire);
+    return rest_call_put(self, key, value, expire, MODE_SET);
 }
 
 static inline PyObject* 
@@ -248,6 +248,20 @@ DBObject_clear(DBObject *self, PyObject *args)
 static inline PyObject* 
 DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
 {
+    PyObject *key, *value;
+    int expire = 0;
+
+    static char *kwlist[] = {"key", "value", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &key, &value, &expire)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_add self %p", self);
+    return rest_call_put(self, key, value, expire, MODE_ADD);
+    /*
     PyObject *key, *value, *db_name = NULL;
     int expire = 0;
 
@@ -260,11 +274,26 @@ DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
     return rpc_call_add(self, key, value, db_name, expire);
+    */
 }
 
 static inline PyObject* 
 DBObject_replace(DBObject *self, PyObject *args, PyObject *kwargs)
 {
+    PyObject *key, *value;
+    int expire = 0;
+
+    static char *kwlist[] = {"key", "value", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &key, &value, &expire)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_replace self %p", self);
+    return rest_call_put(self, key, value, expire, MODE_REPLACE);
+    /*
     PyObject *key, *value, *db_name = NULL;
     int expire = 0;
 
@@ -277,6 +306,7 @@ DBObject_replace(DBObject *self, PyObject *args, PyObject *kwargs)
         return NULL;
     }
     return rpc_call_replace(self, key, value, db_name, expire);
+    */
 }
 
 static inline PyObject* 
@@ -286,7 +316,7 @@ DBObject_append(DBObject *self, PyObject *args, PyObject *kwargs)
     int expire = 0;
 
     DEBUG("DBObject_append self %p", self);
-    static char *kwlist[] = {"key", "value", "xt", "db", NULL};
+    static char *kwlist[] = {"key", "value", "expire", "db", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
         return NULL; 
     }

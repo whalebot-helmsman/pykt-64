@@ -267,11 +267,10 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
         body_len += 5;
     }
 
-
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), url, url_len);
     snprintf(content_length, sizeof (content_length), "%d", body_len);
     add_content_length(con, content_length, strlen(content_length));
-    add_kt_content_type(con);
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
     end_header(con);
     
     if(db_name_len > 0){
@@ -379,7 +378,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     //get content-length str
     snprintf(content_length, sizeof (content_length), "%d", body_len);
     add_content_length(con, content_length, strlen(content_length));
-    add_kt_content_type(con);
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
     end_header(con);
     
     add_body(con, "key\t", 4);

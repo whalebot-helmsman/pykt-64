@@ -20,16 +20,17 @@
 #define HTTP_11 " HTTP/1.1\r\n"
 
 #define CONTENT_LENGTH "Content-Length: "
-#define KT_XT "X-Kt-Xt: " 
+#define X_KT_XT "X-Kt-Xt: " 
 
 #define CONNECTION_KEEP_ALIVE "Connection: keep-alive\r\n"
 
 #define KT_CONTENT_TYPE "Content-Type : text/tab-separated-values; colenc=U\r\n"
 
-#define KT_MODE_ADD "X-Kt-Mode : add" 
-#define KT_MODE_REPLACE "X-Kt-Mode : replace" 
+#define X_KT_MODE_SET "X-Kt-Mode : set\r\n" 
+#define X_KT_MODE_ADD "X-Kt-Mode : add\r\n" 
+#define X_KT_MODE_REPLACE "X-Kt-Mode : replace\r\n" 
 
-#define KT_FIELD_NAME "X-Kt-Xt" 
+#define X_KT_FIELD_NAME "X-Kt-Xt" 
 
 
 typedef enum{
@@ -38,6 +39,7 @@ typedef enum{
     RES_SUCCESS,
     RES_MEMORY_ERROR,
     RES_HTTP_ERROR,
+    RES_KT_ERROR,
 } response_status_type;
 
 typedef struct {
@@ -48,6 +50,7 @@ typedef struct {
     int status_code;
     response_status_type response_status;
     uint8_t head;
+    uint8_t have_kt_error;
 } http_connection;
 
 inline http_connection *
