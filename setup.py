@@ -32,6 +32,7 @@ setup(name='pykt',
                 'pykt/util.c', 'pykt/tsv_parser.c', 'pykt/tsv.c'],
             #include_dirs=include_dirs,
             #library_dirs=library_dirs,
+            #libraries=["profiler"],
             define_macros=[("DEVELOP",None)],
             )
         ]
