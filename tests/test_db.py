@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pykt import KyotoTycoon
+from pykt import KyotoTycoon, KtException
 
 def test_init():
     db = KyotoTycoon()
@@ -340,3 +340,40 @@ def test_increment_double_arg():
     print ret
     db.close()
     assert ret == 101.1
+
+def test_err_cas():
+    db = KyotoTycoon()
+    try:
+        ret = db.cas("A")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_cas():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.cas("A", oval="B", nval="C")
+    db.close()
+    assert ret == True
+
+def test_cas_few_param1():
+    db = KyotoTycoon()
+    db = db.open()
+    try:
+        ret = db.cas("A", nval="C")
+        assert False
+    except KtException:
+        assert True
+    except:
+        assert False
+    finally:
+        db.close()
+
+def test_cas_few_param2():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.cas("A", oval="C")
+    db.close()
+    assert ret == True

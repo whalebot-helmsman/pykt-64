@@ -505,7 +505,7 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     uint64_t expire_time = 0;
     size_t encbuf_len, xt_len = 0;
     uint32_t body_len = 4;
-    PyObject *result = NULL, *ovalS, *nvalS;
+    PyObject *result = NULL, *ovalS = NULL, *nvalS = NULL;
 
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
