@@ -653,7 +653,7 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     if(body == NULL){
         return NULL;
     }
-    if(init_bucket(con, 24) < 0){
+    if(init_bucket(con, 16) < 0){
         return NULL;
     }
     
