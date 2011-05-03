@@ -30,5 +30,8 @@ rpc_call_append(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *db
 inline PyObject* 
 rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire);
 
+inline PyObject* 
+rpc_call_increment_double(DBObject *db, PyObject *keyObj, double num, int expire);
+
 #endif
 

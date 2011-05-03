@@ -309,3 +309,34 @@ def test_add_large():
     db.close()
     assert ret 
 
+def test_err_increment_double():
+    db = KyotoTycoon()
+    try:
+        ret = db.increment_double("ID")
+        assert False
+    except IOError:
+        assert True
+    except:
+        assert False
+
+def test_increment_double():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment_double("ID")
+    db.close()
+    assert ret == 1.0
+
+def test_increment_double_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment_double("インクリメントd")
+    db.close()
+    assert ret == 1.0
+
+def test_increment_double_arg():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment_double("ID", 100.1)
+    print ret
+    db.close()
+    assert ret == 101.1

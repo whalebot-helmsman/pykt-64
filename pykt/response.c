@@ -29,7 +29,7 @@ header_value_cb(http_parser *p, const char *buf, size_t len)
         PyErr_SetObject(KtException, value);
         con->response_status = RES_KT_ERROR;
         con->have_kt_error = 0;
-        return -1;
+        return 0;
     }
     return 0;
 }
@@ -96,7 +96,9 @@ headers_complete_cb (http_parser *p)
     con->response_body = buf;
     con->status_code = p->status_code;
     if(con->head){
-        con->response_status = RES_SUCCESS;
+        if(con->response_status == RES_READY){
+            con->response_status = RES_SUCCESS;
+        }
     }
     return 0;
 }
@@ -107,7 +109,9 @@ message_complete_cb (http_parser *p)
     http_connection *con;
     
     con = (http_connection *)p->data;
-    con->response_status = RES_SUCCESS;
+    if(con->response_status == RES_READY){
+        con->response_status = RES_SUCCESS;
+    }
     return 0;
 }
 

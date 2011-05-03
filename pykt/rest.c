@@ -44,11 +44,10 @@ rest_call_get(DBObject *db, PyObject *keyObj)
         result = getPyString(con->response_body);
         DEBUG("response body %s", getString(con->response_body));
     }else{
-        if(con->response_status == RES_SUCCESS){
-            if(con->status_code == 404){
-                result = Py_None;
-                Py_INCREF(result);
-            }
+        if(con->status_code == 404){
+            PyErr_Clear();
+            result = Py_None;
+            Py_INCREF(result);
         }
     }
     
@@ -89,11 +88,10 @@ rest_call_head(DBObject *db, PyObject *keyObj)
         result = Py_True;
         Py_INCREF(result);
     }else{
-        if(con->response_status == RES_SUCCESS){
-            if(con->status_code == 404){
-                result = Py_False;
-                Py_INCREF(result);
-            }
+        if(con->status_code == 404){
+            PyErr_Clear();
+            result = Py_False;
+            Py_INCREF(result);
         }
     }
     
@@ -173,6 +171,16 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire, kt
         if(con->response_status == RES_SUCCESS){
             result = Py_False;;
             Py_INCREF(result);
+        }else if(con->response_status == RES_KT_ERROR){
+            switch(mode){
+                case MODE_ADD:
+                case MODE_REPLACE:
+                    break;
+                default:
+                    PyErr_Clear();
+                    result = Py_False;;
+                    Py_INCREF(result);
+            }
         }
     }
     
@@ -211,11 +219,10 @@ rest_call_delete(DBObject *db, PyObject *keyObj)
         result = Py_True;
         Py_INCREF(result);
     }else{
-        if(con->response_status == RES_SUCCESS){
-            if(con->status_code == 404){
-                result = Py_False;
-                Py_INCREF(result);
-            }
+        if(con->status_code == 404){
+            PyErr_Clear();
+            result = Py_False;
+            Py_INCREF(result);
         }
     }
     

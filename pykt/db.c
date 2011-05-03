@@ -194,23 +194,6 @@ DBObject_remove(DBObject *self, PyObject *args, PyObject *kwargs)
     return rest_call_delete(self, key);
 }
 
-static inline PyObject* 
-DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
-{
-    PyObject *key;
-    int num = 1, expire = 0;
-
-    static char *kwlist[] = {"key", "num", "expire", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &key, &num, &expire)){
-        return NULL; 
-    }
-    if(!is_opened(self)){
-        return NULL;
-    }
-    
-    DEBUG("DBObject_increment self %p", self);
-    return rpc_call_increment(self, key, num, expire);
-}
 
 static inline PyObject* 
 DBObject_status(DBObject *self, PyObject *args)
@@ -326,6 +309,44 @@ DBObject_append(DBObject *self, PyObject *args, PyObject *kwargs)
     return rpc_call_append(self, key, value, db_name, expire);
 }
 
+static inline PyObject* 
+DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key;
+    int num = 1, expire = 0;
+
+    static char *kwlist[] = {"key", "num", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &key, &num, &expire)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_increment self %p", self);
+    return rpc_call_increment(self, key, num, expire);
+}
+
+static inline PyObject* 
+DBObject_increment_double(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key;
+    int expire = 0;
+    double num = 1.0;
+
+    static char *kwlist[] = {"key", "num", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|di", kwlist, &key, &num, &expire)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_increment_double self %p", self);
+    return rpc_call_increment_double(self, key, num, expire);
+}
+
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -341,6 +362,7 @@ static PyMethodDef DBObject_methods[] = {
     {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
     {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
+    {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 

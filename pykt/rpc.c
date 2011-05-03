@@ -5,12 +5,13 @@
 
 #define ECHO_URL "/rpc/echo"
 #define REPORT_URL "/rpc/report"
-#define INCREMENT_URL "/rpc/increment"
 #define STATUS_URL "/rpc/status"
 #define CLEAR_URL "/rpc/clear"
 #define ADD_URL "/rpc/add"
 #define REPLACE_URL "/rpc/replace"
 #define APPEND_URL "/rpc/append"
+#define INCREMENT_URL "/rpc/increment"
+#define INCREMENT_DOUBLE_URL "/rpc/increment_double"
 
 static inline int
 set_error(http_connection *con)
@@ -39,14 +40,18 @@ set_error(http_connection *con)
 }
 
 static inline PyObject*
-get_num(http_connection *con)
+get_num(http_connection *con, uint8_t isdouble)
 {
     PyObject *dict, *temp;
     dict = convert2dict(con->response_body);
     if(dict){
         temp = PyDict_GetItemString(dict, "num");
         if(temp){
-            return PyNumber_Int(temp);
+            if(isdouble){
+                return PyNumber_Float(temp);
+            }else{
+                return PyNumber_Int(temp);
+            }
         }
     }
     return NULL;
@@ -393,7 +398,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     if(request(con, 200) > 0){
-        result = get_num(con);
+        result = get_num(con, 0);
     }else{
         if(con->status_code == 450){
             set_error(con);
@@ -408,3 +413,83 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     return result;
 }
 
+inline PyObject* 
+rpc_call_increment_double(DBObject *db, PyObject *keyObj, double num, int expire)
+{
+    http_connection *con;
+    char *key, *encbuf;
+    char content_length[12];
+    char addnum[12];
+    char xt[14];
+    uint64_t expire_time = 0;
+    Py_ssize_t key_len;
+    size_t encbuf_len, xt_len = 0, addnum_len;
+    uint32_t body_len = 10;
+    PyObject *result = NULL;
+
+    if(!PyString_Check(keyObj)){
+        PyErr_SetString(PyExc_TypeError, "key must be string ");
+        return NULL;
+    }
+
+    con = db->con;
+    if(init_bucket(con, 16) < 0){
+        return NULL;
+    }
+    
+    //url encode key
+    PyString_AsStringAndSize(keyObj, &key, &key_len);
+    urlencode(key, key_len, &encbuf, &encbuf_len);
+    body_len += encbuf_len;
+
+    //num -> strnum
+    snprintf(addnum, sizeof (addnum), "%f", num);
+    addnum_len = strlen(addnum);
+    body_len += addnum_len;
+
+    //expire -> expirestr
+    if(expire > 0){
+        expire_time = get_expire_time(expire);
+        //set X-Kt-Kt
+        snprintf(xt, sizeof (xt), "%llu", expire_time);
+        //DEBUG("expire %s", xt);
+        xt_len = strlen(xt);
+        body_len += xt_len;
+        body_len += 5;
+    }
+
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), INCREMENT_DOUBLE_URL, LEN(INCREMENT_DOUBLE_URL));
+    //get content-length str
+    snprintf(content_length, sizeof (content_length), "%d", body_len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, "key\t", 4);
+    add_body(con, encbuf, encbuf_len);
+    add_body(con, CRLF, 2);
+    add_body(con, "num\t", 4);
+    add_body(con, addnum, addnum_len);
+    if(expire > 0){
+        add_body(con, CRLF, 2);
+        add_body(con, "xt\t", 3);
+        add_body(con, xt, xt_len);
+    }
+
+    if(request(con, 200) > 0){
+        result = get_num(con, 1);
+    }else{
+        if(con->status_code == 450){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_http_data(con);
+    PyMem_Free(encbuf);
+
+    return result;
+
+}
