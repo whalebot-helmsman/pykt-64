@@ -13,6 +13,13 @@ def pykt_set():
     assert ret == True
     db.close()
 
+def pykt_replace():
+    db = kt1()
+    db.open()
+    ret = db.replace(key, val)
+    assert ret == True
+    db.close()
+
 def kyoto_set():
     db = kt2()
     db.open()
@@ -56,6 +63,9 @@ if __name__ == "__main__":
     res = timeit.timeit("pykt_set()", "from __main__ import pykt_set",
             number=1000)
     print "pykt_set %f" % res
+    res = timeit.timeit("pykt_replace()", "from __main__ import pykt_replace",
+            number=1000)
+    print "pykt_replace %f" % res
     res = timeit.timeit("kyoto_set()", "from __main__ import kyoto_set",
             number=1000)
     print "kt_set %f" % res
