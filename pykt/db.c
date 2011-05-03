@@ -346,6 +346,23 @@ DBObject_increment_double(DBObject *self, PyObject *args, PyObject *kwargs)
     return rpc_call_increment_double(self, key, num, expire);
 }
 
+static inline PyObject* 
+DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *key, *oval = NULL, *nval = NULL, *db = NULL;;
+    int expire = 0;
+
+    static char *kwlist[] = {"key", "oval", "nval", "expire", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OOiO", kwlist, &key, &oval, &nval, expire, db)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_cas self %p", self);
+    return rpc_call_cas(self, key, db, oval, nval, expire);
+}
 
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
@@ -363,6 +380,7 @@ static PyMethodDef DBObject_methods[] = {
     {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
+    {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 
