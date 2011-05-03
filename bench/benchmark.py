@@ -3,8 +3,8 @@ from pykt import KyotoTycoon as kt1
 from kyototycoon import KyotoTycoon as kt2
 import timeit
 
-key = "A" * 128
-val = "B" * 1024 * 4 
+key = "A" * 12
+val = "B" * 1024  
 
 def pykt_set():
     db = kt1()
@@ -31,6 +31,13 @@ def kyoto_set():
     db = kt2()
     db.open()
     ret = db.set(key, val)
+    assert ret == True
+    db.close()
+
+def kyoto_append():
+    db = kt2()
+    db.open()
+    ret = db.append(key, val)
     assert ret == True
     db.close()
 
@@ -70,15 +77,18 @@ if __name__ == "__main__":
     res = timeit.timeit("pykt_set()", "from __main__ import pykt_set",
             number=1000)
     print "pykt_set %f" % res
-    res = timeit.timeit("pykt_replace()", "from __main__ import pykt_replace",
-            number=1000)
-    print "pykt_replace %f" % res
-    res = timeit.timeit("pykt_append()", "from __main__ import pykt_append",
-            number=1000)
-    print "pykt_append %f" % res
+    #res = timeit.timeit("pykt_replace()", "from __main__ import pykt_replace",
+    #        number=1000)
+    #print "pykt_replace %f" % res
+    #res = timeit.timeit("pykt_append()", "from __main__ import pykt_append",
+    #        number=1000)
+    #print "pykt_append %f" % res
     res = timeit.timeit("kyoto_set()", "from __main__ import kyoto_set",
             number=1000)
     print "kt_set %f" % res
+    #res = timeit.timeit("kyoto_append()", "from __main__ import kyoto_append",
+    #        number=1000)
+    #print "kt_append %f" % res
     
     res = timeit.timeit("pykt_get()", "from __main__ import pykt_get",
             number=1000)
