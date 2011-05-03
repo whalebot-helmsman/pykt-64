@@ -7,9 +7,6 @@ static inline int
 connect_socket(const char *host, int port);
 
 static inline int 
-send_request(http_connection *con);
-
-static inline int 
 recv_data(http_connection *con);
 
 static inline int 
@@ -163,7 +160,7 @@ request(http_connection *con, int status_code)
 
    DEBUG("request http_connection %p", con);
 
-   ret = send_request(con);
+   ret = send_data(con);
    
    if(ret < 0){
        //error
@@ -172,8 +169,8 @@ request(http_connection *con, int status_code)
    return recv_response(con, status_code);
 }
 
-static inline int 
-send_request(http_connection *con)
+inline int 
+send_data(http_connection *con)
 {
     int ret;
     
@@ -184,7 +181,7 @@ send_request(http_connection *con)
         case 0:
             //EWOULDBLOCK or EAGAIN
             call_wait_callback(con->fd, WAIT_WRITE);
-            return send_request(con);
+            return send_data(con);
         case -1:
             //IO Error
             return -1;

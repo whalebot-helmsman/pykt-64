@@ -65,6 +65,9 @@ free_http_data(http_connection *con);
 inline int  
 request(http_connection *connection, int status_code);
 
+inline int 
+send_data(http_connection *con);
+
 #endif 
 
 
