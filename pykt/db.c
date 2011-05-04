@@ -430,7 +430,7 @@ DBObject_dict_ass_sub(DBObject *self, PyObject *key, PyObject *value)
             return -1;
         }
         if(PyObject_IsTrue(result) < 1){
-            //set error???
+            PyErr_SetString(KtException, "no record");
             return -1;
         }
         Py_DECREF(result);
@@ -440,7 +440,7 @@ DBObject_dict_ass_sub(DBObject *self, PyObject *key, PyObject *value)
             return -1;
         }
         if(PyObject_IsTrue(result) < 1){
-            //set error???
+            PyErr_SetString(KtException, "do no add record");
             return -1;
         }
         Py_DECREF(result);
