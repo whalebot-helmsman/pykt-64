@@ -11,7 +11,7 @@ typedef struct {
     int port;
     double timeout;
     http_connection *con;
-
+    PyObject *dbObj;
 } DBObject;
 
 extern PyTypeObject DBObjectType;
