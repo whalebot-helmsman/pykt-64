@@ -222,6 +222,11 @@ DBObject_status(DBObject *self, PyObject *args)
         return NULL;
     }
     //DEBUG("optional db %s", db);
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
+    }
     return rpc_call_status(self, db_name);
 }
 
@@ -236,6 +241,11 @@ DBObject_clear(DBObject *self, PyObject *args)
     }
     if(!is_opened(self)){
         return NULL;
+    }
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
     }
     return rpc_call_clear(self, db_name);
 }
@@ -399,7 +409,28 @@ DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline Py_ssize_t
 DBObject_dict_length(DBObject *self)
 {
-    return 0;
+    PyObject *result = NULL, *db_name = NULL;
+    Py_ssize_t len = -1;
+
+    if(!is_opened(self)){
+        return len;
+    }
+    if(self->dbObj){
+        db_name = self->dbObj;
+    }
+
+    result = rpc_call_status(self, db_name);
+    if(result){
+        PyObject *temp = PyDict_GetItemString(result, "count");
+        if(temp){
+            PyObject *i = PyNumber_Int(temp);
+            len = PyNumber_AsSsize_t(i, NULL);
+            Py_DECREF(i);
+        }
+        Py_DECREF(result);    
+    }
+
+    return len;
 }
 
 static inline PyObject *
