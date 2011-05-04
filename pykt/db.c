@@ -396,6 +396,58 @@ DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
     return rpc_call_cas(self, key, db_name, oval, nval, expire);
 }
 
+static inline Py_ssize_t
+DBObject_dict_length(DBObject *self)
+{
+    return 0;
+}
+
+static inline PyObject *
+DBObject_dict_subscript(DBObject *self, PyObject *key)
+{
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_dict_subscript self %p", self);
+    return rest_call_get(self, key);
+}
+
+static inline int
+DBObject_dict_ass_sub(DBObject *self, PyObject *key, PyObject *value)
+{
+    PyObject *result;
+
+    if(!is_opened(self)){
+        return -1;
+    }
+    
+    DEBUG("DBObject_dict_ass_sub self %p", self);
+    if (value == NULL){
+        //DELETE
+        result = rest_call_delete(self, key);
+        if(result == NULL){
+            return -1;
+        }
+        if(PyObject_IsTrue(result) < 1){
+            //set error???
+            return -1;
+        }
+        Py_DECREF(result);
+    }else{
+        result = rest_call_put(self, key, value, 0, MODE_SET);
+        if(result == NULL){
+            return -1;
+        }
+        if(PyObject_IsTrue(result) < 1){
+            //set error???
+            return -1;
+        }
+        Py_DECREF(result);
+    }
+    return 0;
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -416,6 +468,12 @@ static PyMethodDef DBObject_methods[] = {
     {NULL, NULL}
 };
 
+static PyMappingMethods db_as_mapping = {
+    (lenfunc)DBObject_dict_length, /*mp_length*/
+    (binaryfunc)DBObject_dict_subscript, /*mp_subscript*/
+    (objobjargproc)DBObject_dict_ass_sub, /*mp_ass_subscript*/
+};
+
 PyTypeObject DBObjectType = {
 	PyObject_HEAD_INIT(&PyType_Type)
     0,
@@ -430,7 +488,7 @@ PyTypeObject DBObjectType = {
     0,                         /*tp_repr*/
     0,                         /*tp_as_number*/
     0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
+    &db_as_mapping,            /*tp_as_mapping*/
     0,                         /*tp_hash */
     0,                         /*tp_call*/
     0,                         /*tp_str*/
