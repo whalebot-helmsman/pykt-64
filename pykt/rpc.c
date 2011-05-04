@@ -891,7 +891,8 @@ rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = convert2dict(con->response_body);
+        result = convert2keylist(con->response_body);
+        //result = convert2dict(con->response_body);
     }else{
         if(con->status_code == RES_SUCCESS){
             set_error(con);
