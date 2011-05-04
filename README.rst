@@ -3,7 +3,7 @@ What's this
 
 This is a KyotoTycoon client for Python.
 
-It is written in C.
+It is fast, written in C.
 
 Require
 ---------------------------------
