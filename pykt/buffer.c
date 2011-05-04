@@ -62,6 +62,7 @@ write2buf(buffer *buf, const char *c, size_t  l) {
         if(buf->buf_size > buf->limit){
             buf->buf_size = buf->limit + 1;
         }
+        DEBUG("warning !!! realloc !! %p", buf);
         newbuf = (char*)PyMem_Realloc(buf->buf, buf->buf_size);
         if (!newbuf) {
             PyErr_SetString(PyExc_MemoryError,"out of memory");
