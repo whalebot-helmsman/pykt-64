@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pykt import KyotoTycoon, KtException
+from pykt import KyotoTycoon, KTException
 
 def test_init():
     db = KyotoTycoon()
@@ -364,7 +364,7 @@ def test_cas_few_param1():
     try:
         ret = db.cas("A", nval="C")
         assert False
-    except KtException:
+    except KTException:
         assert True
     except:
         assert False

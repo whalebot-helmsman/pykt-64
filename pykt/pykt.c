@@ -125,7 +125,7 @@ initpykt(void)
     PyModule_AddObject(m, "KyotoTycoon", (PyObject *)&DBObjectType);
 	
     Py_INCREF(KtException);
-	PyModule_AddObject(m, "KtException", KtException);
+	PyModule_AddObject(m, "KTException", KtException);
 
     PyModule_AddIntConstant(m, "WAIT_READ", WAIT_READ);
     PyModule_AddIntConstant(m, "WAIT_WRITE", WAIT_WRITE);
