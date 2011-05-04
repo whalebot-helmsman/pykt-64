@@ -1,14 +1,16 @@
 #include "pykt.h"
 #include "db.h"
 
-PyObject *wait_callback;
 PyObject *KtException;
+static PyObject *wait_callback = NULL;;
+static PyObject *serialize_func = NULL;
+static PyObject *deserialize_func = NULL;
 
-PyObject *
+static inline PyObject *
 set_wait_callback(PyObject *self, PyObject *args)
 {
     PyObject *temp;
-    if (!PyArg_ParseTuple(args, "O:watchdog", &temp))
+    if (!PyArg_ParseTuple(args, "O:set_wait_callback", &temp))
         return NULL;
     
     if(!PyCallable_Check(temp)){
@@ -23,20 +25,80 @@ set_wait_callback(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+static inline PyObject *
+set_serialize_func(PyObject *self, PyObject *args)
+{
+    PyObject *temp;
+    if (!PyArg_ParseTuple(args, "O:set_serializer", &temp))
+        return NULL;
+    
+    if(!PyCallable_Check(temp)){
+        PyErr_SetString(PyExc_TypeError, "must be callable");
+        return NULL;
+    }
+    if(serialize_func){
+        Py_DECREF(serialize_func);
+    }
+    serialize_func = temp;
+    Py_INCREF(serialize_func);
+    Py_RETURN_NONE;
+}
+
+static inline PyObject *
+set_deserialize_func(PyObject *self, PyObject *args)
+{
+    PyObject *temp;
+    if (!PyArg_ParseTuple(args, "O:set_deserializer", &temp))
+        return NULL;
+    
+    if(!PyCallable_Check(temp)){
+        PyErr_SetString(PyExc_TypeError, "must be callable");
+        return NULL;
+    }
+    if(deserialize_func){
+        Py_DECREF(deserialize_func);
+    }
+    deserialize_func = temp;
+    Py_INCREF(deserialize_func);
+    Py_RETURN_NONE;
+}
+
 inline void
 call_wait_callback(int fd, int type)
 {
     PyObject *result, *args;
     if(wait_callback){
         args = Py_BuildValue("(ii)", fd, type);
-        result = PyObject_CallFunction(wait_callback, NULL);
+        result = PyObject_CallObject(wait_callback, args);
         Py_DECREF(args);
         Py_XDECREF(result);
     }
 }
 
+inline PyObject *
+serialize_value(PyObject *obj)
+{
+    if(serialize_func){
+        return PyObject_CallFunctionObjArgs(serialize_func, obj, NULL);
+    }else{
+        return PyObject_Str(obj);
+    }
+}
+
+inline PyObject *
+deserialize_value(PyObject *obj)
+{
+    if(deserialize_func){
+        return PyObject_CallFunctionObjArgs(deserialize_func, obj, NULL);
+    }
+    Py_INCREF(obj);
+    return obj;
+}
+
 static PyMethodDef PyKtMethods[] = {
     {"set_wait_callback", set_wait_callback, METH_VARARGS, "set wait callback"},
+    {"set_serializer", set_serialize_func, METH_VARARGS, "set serialize func"},
+    {"set_deserializer", set_deserialize_func, METH_VARARGS, "set deserialize func"},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

@@ -38,10 +38,18 @@
 #define WAIT_READ 1
 #define WAIT_WRITE 2
 
-extern PyObject *wait_callback;
+//extern PyObject *wait_callback;
+//extern PyObject *serialize_func;
+//extern PyObject *deserialize_func;
 extern PyObject *KtException;
 
 inline void
 call_wait_callback(int fd, int type);
+
+inline PyObject *
+serialize_value(PyObject *obj);
+
+inline PyObject *
+deserialize_value(PyObject *obj);
 
 #endif 

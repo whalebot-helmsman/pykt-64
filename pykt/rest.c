@@ -41,7 +41,10 @@ rest_call_get(DBObject *db, PyObject *keyObj)
     end_header(con);
     
     if(request(con, 200) > 0){
-        result = getPyString(con->response_body);
+        PyObject *temp;
+        temp = getPyString(con->response_body);
+        result = deserialize_value(temp);
+        Py_DECREF(temp);
         DEBUG("response body %s", getString(con->response_body));
     }else{
         if(con->status_code == 404){
@@ -129,7 +132,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire, kt
         return NULL;
     }
 
-    temp_val = PyObject_Str(valueObj);
+    temp_val = serialize_value(valueObj);
     
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     PyString_AsStringAndSize(temp_val, &val, &val_len);

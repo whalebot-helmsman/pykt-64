@@ -111,7 +111,7 @@ set_param(buffer *body, char *key, size_t key_len, PyObject *valueObj)
     Py_ssize_t val_len;
     PyObject *temp_val;
     
-    temp_val = PyObject_Str(valueObj);
+    temp_val = serialize_value(valueObj);
     PyString_AsStringAndSize(temp_val, &val, &val_len);
     write2buf(body, key, key_len);
     write2buf(body, val, val_len);
@@ -160,6 +160,32 @@ set_param_num_double(buffer *body, double num)
     write2buf(body, addnum, addnum_len);
     return 1;
 }
+
+/*
+static inline int
+get_recods_size(PyObject *dict)
+{
+    PyObject *keyObj, *valueObj;
+    Py_ssize_t pos = 0;
+
+    while (PyDict_Next(dict, &pos, &keyObj, &valueObj)) {
+        char *key, *enckey;
+        Py_ssize_t key_len;
+        size_t enckey_len;
+        PyObject *key_str = PyObject_Str(keyObj);
+        PyObject *value_str = PyObject_Str(valueObj);
+        
+        //encode
+        PyString_AsStringAndSize(key_str, &key, &key_len);
+        urlencode(key, key_len, &enckey, &enckey_len);
+        PyMem_Free(enckey);
+
+        Py_XDECREF(key_str);
+        Py_XDECREF(value_str);
+    }
+    return 1;
+}
+*/
 
 inline PyObject* 
 rpc_call_echo(DBObject *db)
@@ -352,7 +378,7 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
         return NULL;
     }
     
-    temp_val = PyObject_Str(valueObj);
+    temp_val = serialize_value(valueObj);
     
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     PyString_AsStringAndSize(temp_val, &val, &val_len);
@@ -366,10 +392,8 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
         body_len += db_name_len;
         body_len += 5;
     }
-    //expire -> expirestr
     if(expire > 0){
         expire_time = get_expire_time(expire);
-        //set X-Kt-Kt
         snprintf(xt, sizeof (xt), "%llu", expire_time);
         xt_len = strlen(xt);
         body_len += xt_len;
@@ -607,7 +631,6 @@ rpc_call_increment_double(DBObject *db, PyObject *keyObj, PyObject *dbObj, doubl
     }
 
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), INCREMENT_DOUBLE_URL, LEN(INCREMENT_DOUBLE_URL));
-    //get content-length str
     snprintf(content_length, sizeof (content_length), "%d", body->len);
     add_content_length(con, content_length, strlen(content_length));
     add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
@@ -665,14 +688,14 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     }
     
     if(ovalObj && ovalObj != Py_None){
-        ovalS = PyObject_Str(ovalObj);
+        ovalS = serialize_value(ovalObj);
         PyString_AsStringAndSize(ovalS, &oval, &oval_len);
         body_len += oval_len;
         body_len += 7;
     }
 
     if(nvalObj && nvalObj != Py_None){
-        nvalS = PyObject_Str(nvalObj);
+        nvalS = serialize_value(nvalObj);
         PyString_AsStringAndSize(nvalS, &nval, &nval_len);
         body_len += nval_len;
         body_len += 7;
@@ -683,10 +706,8 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     urlencode(key, key_len, &encbuf, &encbuf_len);
     body_len += encbuf_len;
 
-    //expire -> expirestr
     if(expire > 0){
         expire_time = get_expire_time(expire);
-        //set X-Kt-Kt
         snprintf(xt, sizeof (xt), "%llu", expire_time);
         xt_len = strlen(xt);
         body_len += xt_len;
@@ -815,4 +836,117 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     return result;
 
 }*/
+
+/**
+* /rpc/set_bulk
+* Store records at once.
+* input: DB: (optional): the database identifier.
+* input: xt: (optional): the expiration time from now in seconds. If it is negative, the absolute value is treated as the epoch time. If it is omitted, no expiration time is specified.
+* input: atomic: (optional): to perform all operations atomically. If it is omitted, non-atomic operations are performed.
+* input: (optional): arbitrary records whose keys trail the character "_".
+* output: num: the number of stored reocrds.
+*/
+/*
+inline PyObject* 
+rpc_call_set_bulk(DBObject *db, PyObject *dbObj, int expire, int atomic, PyObject *recordObj)
+{
+
+    http_connection *con;
+    char *db_name;
+    Py_ssize_t db_name_len = 0;
+    char content_length[12];
+    char xt[14];
+    uint64_t expire_time = 0;
+    size_t xt_len = 0;
+    uint32_t body_len = 0;
+    PyObject *result = NULL;
+
+    if(dbObj && !PyString_Check(dbObj)){
+        PyErr_SetString(PyExc_TypeError, "db must be string ");
+        return NULL;
+    }
+    if(recordObj && !PyDict_Check(recordObj)){
+        PyErr_SetString(PyExc_TypeError, "record must be dict ");
+        return NULL;
+    }
+
+    con = db->con;
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+    
+    if(dbObj && dbObj != Py_None){
+        PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
+        body_len += db_name_len;
+        body_len += 5;
+    }
+
+    if(expire > 0){
+        expire_time = get_expire_time(expire);
+        snprintf(xt, sizeof (xt), "%llu", expire_time);
+        xt_len = strlen(xt);
+        body_len += xt_len;
+        body_len += 5;
+    }
+
+    if(atomic > 0){
+        body_len += 13;
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CAS_URL, LEN(CAS_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body_len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    if(db_name_len > 0){
+        add_body(con, "DB\t", 3);
+        add_body(con, db_name, db_name_len);
+        add_body(con, CRLF, 2);
+    }
+
+    if(xt_len > 0){
+        add_body(con, CRLF, 2);
+        add_body(con, "xt\t", 3);
+        add_body(con, xt, xt_len);
+    }
+
+    if(atomic > 0){
+        add_body(con, CRLF, 2);
+        add_body(con, "atomic\t", 7);
+        add_body(con, "true", 4);
+    }
+    //send data
+    if(send_data(con) < 0){
+        goto error;
+    }
+
+    free_http_data(con);
+    //create record
+    if(init_bucket(con, 1024) < 0){
+        goto error;
+    }
+
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_http_data(con);
+
+    return result;
+
+error:
+    free_http_data(con);
+
+    return result;
+}
+*/
 
