@@ -406,6 +406,50 @@ DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
     return rpc_call_cas(self, key, db_name, oval, nval, expire);
 }
 
+static inline PyObject* 
+DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *prefix, *db_name = NULL;;
+
+    static char *kwlist[] = {"prefix", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &prefix, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
+    }
+    
+    DEBUG("DBObject_match_prefix self %p", self);
+    return rpc_call_match_prefix(self, db_name, prefix);
+}
+
+
+static PyMethodDef DBObject_methods[] = {
+    {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
+    {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
+    {"get", (PyCFunction)DBObject_get, METH_VARARGS|METH_KEYWORDS, 0},
+    {"head", (PyCFunction)DBObject_head, METH_VARARGS|METH_KEYWORDS, 0},
+    {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
+    {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
+    {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
+    {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
+    {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
+    {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
+    {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
+    {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
+    {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
+    {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
+    {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
+    {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
+    {"match_prefix", (PyCFunction)DBObject_match_prefix, METH_VARARGS|METH_KEYWORDS, 0},
+    {NULL, NULL}
+};
+
 static inline Py_ssize_t
 DBObject_dict_length(DBObject *self)
 {
@@ -478,26 +522,6 @@ DBObject_dict_ass_sub(DBObject *self, PyObject *key, PyObject *value)
     }
     return 0;
 }
-
-static PyMethodDef DBObject_methods[] = {
-    {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
-    {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
-    {"get", (PyCFunction)DBObject_get, METH_VARARGS|METH_KEYWORDS, 0},
-    {"head", (PyCFunction)DBObject_head, METH_VARARGS|METH_KEYWORDS, 0},
-    {"set", (PyCFunction)DBObject_set, METH_VARARGS|METH_KEYWORDS, 0},
-    {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
-    {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
-    {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
-    {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
-    {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
-    {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
-    {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
-    {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
-    {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
-    {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
-    {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
-    {NULL, NULL}
-};
 
 static PyMappingMethods db_as_mapping = {
     (lenfunc)DBObject_dict_length, /*mp_length*/

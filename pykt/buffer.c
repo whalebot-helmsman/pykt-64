@@ -43,6 +43,7 @@ new_buffer(size_t buf_size, size_t limit)
     }else{
         buf->limit = LIMIT_MAX;
     }
+    DEBUG("new_buffer %p buf_size %d", buf, buf->buf_size);
     return buf;
 }
 
@@ -62,7 +63,7 @@ write2buf(buffer *buf, const char *c, size_t  l) {
         if(buf->buf_size > buf->limit){
             buf->buf_size = buf->limit + 1;
         }
-        DEBUG("warning !!! realloc !! %p", buf);
+        DEBUG("warning !!! write2buf realloc !! %p", buf);
         newbuf = (char*)PyMem_Realloc(buf->buf, buf->buf_size);
         if (!newbuf) {
             PyErr_SetString(PyExc_MemoryError,"out of memory");
@@ -85,6 +86,7 @@ write2buf(buffer *buf, const char *c, size_t  l) {
 inline void
 free_buffer(buffer *buf)
 {
+    DEBUG("free_buffer %p", buf);
     PyMem_Free(buf->buf);
     dealloc_buffer(buf);
 }
@@ -95,6 +97,7 @@ getPyString(buffer *buf)
     PyObject *o;
     o = PyString_FromStringAndSize(buf->buf, buf->len);
     //free_buffer(buf);
+    DEBUG("getPyString %p", buf);
     return o;
 }
 

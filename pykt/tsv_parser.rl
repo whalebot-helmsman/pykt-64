@@ -14,6 +14,7 @@
 
     action key {
         ctx->key_len = MARK_LEN(key_start, fpc);
+        MARK(value_start, fpc+1);
     }
 
     action mark_value {
@@ -42,7 +43,7 @@
     }
 
     CRLF = ('\r\n' | '\n');
-    TAB = ('\t' | ' ')+;
+    TAB = '\t';
 
     keystr = ([^\r\n \t]+);
     valstr = ([^\r\n]+);
@@ -53,8 +54,8 @@
     val = valstr | integer | double;
     
     key = keystr $err(error) >mark_key %key;
-    value = val  $err(error) >mark_value %value;
-    tsv = key TAB value ;
+    value = val  $err(error) >mark_value ;
+    tsv = key TAB value? %value;
 
     main := (tsv CRLF)* tsv? $err(error);
 }%%

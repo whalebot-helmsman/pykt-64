@@ -6,15 +6,25 @@ on_record(void *data, const char *key, size_t key_len, const char *val, size_t v
 {
     PyObject *keyObj, *valueObj, *dict;
     
+    //DEBUG("on_record %.*s : %.*s ", key_len, key, val_len, val);
+
     tsv_ctx *ctx = (tsv_ctx *)data;
     dict = (PyObject *)ctx->user;
     keyObj = PyString_FromStringAndSize(key, key_len); 
+    //DEBUG("on_record keyObj %p ", keyObj);
     if(keyObj == NULL){
         ctx->error = 1;
         PyErr_NoMemory();
         return ;
     }
-    valueObj = PyString_FromStringAndSize(val, val_len); 
+    
+    if(key == val || val_len == 0){
+        valueObj = PyString_FromString("");
+    }else{
+        valueObj = PyString_FromStringAndSize(val, val_len); 
+    }
+
+    //DEBUG("on_record valueObj %p ", valueObj);
     if(valueObj == NULL){
         ctx->error = 1;
         PyErr_NoMemory();

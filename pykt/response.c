@@ -91,8 +91,11 @@ headers_complete_cb (http_parser *p)
     con = (http_connection *)p->data;
 
     //DEBUG("headers_complete_cb length:%d", p->content_length);
-
-    buf = new_buffer(p->content_length, 0);
+    if(p->content_length){
+        buf = new_buffer(p->content_length + 1, 0);
+    }else{
+        buf = new_buffer(p->content_length, 0);
+    }
     con->response_body = buf;
     con->status_code = p->status_code;
     if(con->head){
