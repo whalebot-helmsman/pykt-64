@@ -17,6 +17,7 @@
 #define INCREMENT_DOUBLE_URL "/rpc/increment_double"
 #define CAS_URL "/rpc/cas"
 #define MATCH_PREFIX_URL "/rpc/match_prefix"
+#define MATCH_REGEX_URL "/rpc/match_regex"
 
 
 
@@ -883,6 +884,63 @@ rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj)
     set_param(body, "prefix\t", 7, prefixObj);
 
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), MATCH_PREFIX_URL, LEN(MATCH_PREFIX_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = convert2keylist(con->response_body);
+        //result = convert2dict(con->response_body);
+    }else{
+        if(con->status_code == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_match_regex(DBObject *db, PyObject *dbObj, PyObject *regexObj)
+{
+    http_connection *con;
+    char content_length[12];
+    buffer *body;
+    PyObject *result = NULL;
+
+    if(dbObj && !PyString_Check(dbObj)){
+        PyErr_SetString(PyExc_TypeError, "db must be string ");
+        return NULL;
+    }
+    if(regexObj && !PyString_Check(regexObj)){
+        PyErr_SetString(PyExc_TypeError, "regex must be string ");
+        return NULL;
+    }
+
+    con = db->con;
+    body = new_buffer(BODY_BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 16) < 0){
+        return NULL;
+    }
+    
+    if(dbObj && dbObj != Py_None){
+        set_param_db(body, dbObj);
+        write2buf(body, CRLF, 2);
+    }
+    set_param(body, "regex\t", 6, regexObj);
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), MATCH_REGEX_URL, LEN(MATCH_REGEX_URL));
     snprintf(content_length, sizeof (content_length), "%d", body->len);
     add_content_length(con, content_length, strlen(content_length));
     add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));

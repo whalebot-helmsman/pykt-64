@@ -39,5 +39,8 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
 inline PyObject* 
 rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj);
 
+inline PyObject* 
+rpc_call_match_regex(DBObject *db, PyObject *dbObj, PyObject *regexObj);
+
 #endif
 

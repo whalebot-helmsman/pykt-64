@@ -409,10 +409,10 @@ DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *prefix, *db_name = NULL;;
+    PyObject *prefixObj, *db_name = NULL;;
 
     static char *kwlist[] = {"prefix", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &prefix, &db_name)){
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &prefixObj, &db_name)){
         return NULL; 
     }
     if(!is_opened(self)){
@@ -425,9 +425,30 @@ DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     
     DEBUG("DBObject_match_prefix self %p", self);
-    return rpc_call_match_prefix(self, db_name, prefix);
+    return rpc_call_match_prefix(self, db_name, prefixObj);
 }
 
+static inline PyObject* 
+DBObject_match_regex(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *regexObj, *db_name = NULL;;
+
+    static char *kwlist[] = {"regex", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &regexObj, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
+    }
+    
+    DEBUG("DBObject_match_regex self %p", self);
+    return rpc_call_match_regex(self, db_name, regexObj);
+}
 
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
@@ -447,6 +468,7 @@ static PyMethodDef DBObject_methods[] = {
     {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
     {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_prefix", (PyCFunction)DBObject_match_prefix, METH_VARARGS|METH_KEYWORDS, 0},
+    {"match_regex", (PyCFunction)DBObject_match_regex, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}
 };
 
