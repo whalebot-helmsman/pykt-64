@@ -27,6 +27,7 @@ DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     }
     
     DEBUG("DBObject_new self %p", self);
+    self->dbObj = NULL;
     return (PyObject *)self;
 }
 
@@ -57,6 +58,10 @@ DBObject_dealloc(DBObject *self)
     if(self->con){
         close_http_connection(self->con);
         self->con = NULL;
+    }
+    if(self->dbObj){
+        Py_DECREF(self->dbObj);
+        self->dbObj = NULL;
     }
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -599,6 +604,44 @@ static PyMappingMethods db_as_mapping = {
     (objobjargproc)DBObject_dict_ass_sub, /*mp_ass_subscript*/
 };
 
+static inline PyObject *
+DBObject_getter_db(DBObject *self, void *closure)
+{
+    if(!self->dbObj){
+        Py_RETURN_NONE;
+    }
+    Py_INCREF(self->dbObj);
+    return self->dbObj;
+}
+
+static int
+DBObject_setter_db(DBObject *self, PyObject *value, void *closure)
+{
+    if (value == NULL) {
+        //DELETE
+        if(self->dbObj){
+            Py_DECREF(self->dbObj);
+            self->dbObj = NULL;
+            return 0;
+        }
+        return -1;
+    }
+        
+    if (!PyString_Check(value)) {
+        PyErr_SetString(PyExc_TypeError, "database identifier must be a string");
+        return -1;
+    }
+    Py_XDECREF(self->dbObj);
+    Py_INCREF(value);
+    self->dbObj = value;
+    return 0;
+}
+
+static PyGetSetDef DBObject_getseters[] = {
+    {"db",(getter)DBObject_getter_db, (setter)DBObject_setter_db, "db identifier name"},
+    {NULL}  /* Sentinel */
+};
+
 PyTypeObject DBObjectType = {
 	PyObject_HEAD_INIT(&PyType_Type)
     0,
@@ -628,9 +671,9 @@ PyTypeObject DBObjectType = {
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    DBObject_methods,             /* tp_methods */
-    0,             /* tp_members */
-    0,                         /* tp_getset */
+    DBObject_methods,          /* tp_methods */
+    0,                         /* tp_members */
+    DBObject_getseters,        /* tp_getset */
     0,                         /* tp_base */
     0,                         /* tp_dict */
     0,                         /* tp_descr_get */
