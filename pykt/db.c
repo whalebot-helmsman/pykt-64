@@ -430,6 +430,29 @@ DBObject_set_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static inline PyObject* 
+DBObject_remove_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *keys, *db_name = NULL;
+    int atomic = 0;
+
+    static char *kwlist[] = {"keys", "db", "atomic", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|Oi", kwlist, &keys, &db_name, &atomic)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
+    }
+    
+    DEBUG("DBObject_remove_bulk self %p", self);
+    return rpc_call_remove_bulk(self, keys, db_name, atomic);
+}
+
+static inline PyObject* 
 DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *prefixObj, *db_name = NULL;;
@@ -491,6 +514,7 @@ static PyMethodDef DBObject_methods[] = {
     {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
     {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
     {"set_bulk", (PyCFunction)DBObject_set_bulk, METH_VARARGS|METH_KEYWORDS, 0},
+    {"remove_bulk", (PyCFunction)DBObject_remove_bulk, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_prefix", (PyCFunction)DBObject_match_prefix, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_regex", (PyCFunction)DBObject_match_regex, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}

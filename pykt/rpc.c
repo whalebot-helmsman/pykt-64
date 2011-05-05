@@ -17,6 +17,7 @@
 #define INCREMENT_DOUBLE_URL "/rpc/increment_double"
 #define CAS_URL "/rpc/cas"
 #define SET_BULK_URL "/rpc/set_bulk"
+#define REMOVE_BULK_URL "/rpc/remove_bulk"
 #define MATCH_PREFIX_URL "/rpc/match_prefix"
 #define MATCH_REGEX_URL "/rpc/match_regex"
 
@@ -177,7 +178,7 @@ set_param_num_double(buffer *body, double num)
 }
 
 static inline void
-write_records(PyObject *dict, buffer *buf)
+write_bulk_records(PyObject *dict, buffer *buf)
 {
     PyObject *keyObj, *valueObj;
     Py_ssize_t size = 0, index = 1, pos = 0;
@@ -211,6 +212,36 @@ write_records(PyObject *dict, buffer *buf)
         Py_XDECREF(key_str);
         Py_XDECREF(value_str);
         index++;
+    }
+}
+
+static inline void
+write_bulk_keys(PyObject *list, buffer *buf)
+{
+    int i = 0;
+    Py_ssize_t size = 0;
+
+    size = PyList_GET_SIZE(list);
+
+    for(i = 0; i < size; i++){
+        char *key, *enckey;
+        Py_ssize_t key_len ;
+        size_t enckey_len;
+        PyObject *keyObj = PyList_GET_ITEM(list, i);
+        PyObject *key_str = PyObject_Str(keyObj);
+        //encode
+        PyString_AsStringAndSize(key_str, &key, &key_len);
+        urlencode(key, key_len, &enckey, &enckey_len);
+        write2buf(buf, "_", 1);
+        write2buf(buf, enckey, enckey_len);
+        write2buf(buf, "\t", 1);
+        if(i < size -1){
+            write2buf(buf, CRLF, 2);
+        }
+        PyMem_Free(enckey);
+
+        Py_XDECREF(key_str);
+
     }
 }
 
@@ -1045,7 +1076,7 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire
         write2buf(body, "true", 4);
         write2buf(body, CRLF, 2);
     }
-    write_records(recordObj, body);
+    write_bulk_records(recordObj, body);
 
     set_request_path(con, METHOD_POST, LEN(METHOD_POST), SET_BULK_URL, LEN(SET_BULK_URL));
     snprintf(content_length, sizeof (content_length), "%d", body->len);
@@ -1070,3 +1101,62 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire
     return result;
 }
 
+inline PyObject* 
+rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, PyObject *dbObj, int atomic)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    if(dbObj && !PyString_Check(dbObj)){
+        PyErr_SetString(PyExc_TypeError, "db must be string ");
+        return NULL;
+    }
+    if(keysObj && !PyList_Check(keysObj)){
+        PyErr_SetString(PyExc_TypeError, "keys must be dict ");
+        return NULL;
+    }
+
+    con = db->con;
+    body = new_buffer(BODY_BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    if(dbObj && dbObj != Py_None){
+        set_param_db(body, dbObj);
+        write2buf(body, CRLF, 2);
+    }
+    if(atomic){
+        write2buf(body, "atomic\t", 7);
+        write2buf(body, "true", 4);
+        write2buf(body, CRLF, 2);
+    }
+    write_bulk_keys(keysObj, body);
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), REMOVE_BULK_URL, LEN(REMOVE_BULK_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = get_num(con, 0);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_http_data(con);
+
+    return result;
+}
