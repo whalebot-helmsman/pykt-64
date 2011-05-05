@@ -1,7 +1,7 @@
 #include "http.h"
 #include "response.h"
 
-#define BUF_SIZE 1024 * 4
+#define BUF_SIZE 1024 * 64
 
 static inline int 
 connect_socket(const char *host, int port);
