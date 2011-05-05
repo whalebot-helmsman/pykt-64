@@ -185,9 +185,9 @@ write_records(PyObject *dict, buffer *buf)
     size = PyDict_Size(dict);
 
     while (PyDict_Next(dict, &pos, &keyObj, &valueObj)) {
-        char *key, *enckey, *val;
+        char *key, *enckey, *val, *encval;
         Py_ssize_t key_len, val_len;
-        size_t enckey_len;
+        size_t enckey_len, encval_len;
         PyObject *key_str = PyObject_Str(keyObj);
         PyObject *value_str = serialize_value(valueObj);
         
@@ -196,15 +196,17 @@ write_records(PyObject *dict, buffer *buf)
         urlencode(key, key_len, &enckey, &enckey_len);
 
         PyString_AsStringAndSize(value_str, &val, &val_len);
+        urlencode(val, val_len, &encval, &encval_len);
         
         write2buf(buf, "_", 1);
         write2buf(buf, enckey, enckey_len);
         write2buf(buf, "\t", 1);
-        write2buf(buf, val, val_len);
+        write2buf(buf, encval, encval_len);
         if(index < size){
             write2buf(buf, CRLF, 2);
         }
         PyMem_Free(enckey);
+        PyMem_Free(encval);
 
         Py_XDECREF(key_str);
         Py_XDECREF(value_str);

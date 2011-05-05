@@ -1,37 +1,48 @@
 # -*- coding: utf-8 -*-
+from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
 d = dict(A="B", C="D")
 d2 = {
-    "あいうえお":"1", 
-    "かきくけこ":"1", 
+    "あいうえお": "ABC", 
+    "かきくけこ": "てすと2", 
     }
 
+def clear():
+    db = KyotoTycoon()
+    db = db.open()
+    db.clear()
+    db.close()
+
+@with_setup(setup=clear)
+@raises(IOError)
 def test_err_set_bulk():
     db = KyotoTycoon()
-    try:
-        ret = db.set_bulk(d)
-        assert False
-    except IOError:
-        assert True
-    except:
-        assert False
+    ret = db.set_bulk(d)
 
-def test_set():
+@with_setup(setup=clear)
+def test_set_bulk():
     db = KyotoTycoon()
     db = db.open()
     ret = db.set_bulk(d)
-    assert ret == 2
+    ok_(ret == 2)
     ret = db.get("A")
-    assert ret == "B"
+    ok_(ret == "B")
     ret = db.get("C")
-    assert ret == "D"
+    ok_(ret == "D")
     db.close()
 
-def test_set_utf8():
+@with_setup(setup=clear)
+def test_set_bulk_utf8():
     db = KyotoTycoon()
     db = db.open()
     ret = db.set_bulk(d2)
-    assert ret == 2
+    ok_(ret == 2)
+    ret = db.get("あいうえお")
+    ok_(ret == "ABC")
+    ret = db.get("かきくけこ")
+    ok_(ret == "てすと2")
     db.close()
+
+
 
