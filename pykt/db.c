@@ -237,6 +237,26 @@ DBObject_clear(DBObject *self, PyObject *args)
 }
 
 static inline PyObject* 
+DBObject_synchronize(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    char *command = NULL;
+    Py_ssize_t command_len = 0;
+    int hard = 0;
+
+    static char *kwlist[] = {"hard", "command", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|is#", kwlist, &hard, &command, &command_len)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_synchronize self %p", self);
+    return rpc_call_sync(self, hard, command, command_len);
+
+}
+
+static inline PyObject* 
 DBObject_add(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key, *value;
@@ -471,6 +491,7 @@ static PyMethodDef DBObject_methods[] = {
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
     {"status", (PyCFunction)DBObject_status, METH_NOARGS, 0},
     {"clear", (PyCFunction)DBObject_clear, METH_NOARGS, 0},
+    {"synchronize", (PyCFunction)DBObject_synchronize, METH_VARARGS|METH_KEYWORDS, 0},
     {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
     {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
     {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},

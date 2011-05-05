@@ -19,6 +19,9 @@ inline PyObject*
 rpc_call_clear(DBObject *db);
 
 inline PyObject* 
+rpc_call_sync(DBObject *db, int hard, char *command, Py_ssize_t command_len);
+
+inline PyObject* 
 rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire);
 
 inline PyObject* 

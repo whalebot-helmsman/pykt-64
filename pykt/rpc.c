@@ -11,6 +11,7 @@
 #define REPORT_URL "/rpc/report"
 #define STATUS_URL "/rpc/status"
 #define CLEAR_URL "/rpc/clear"
+#define SYNC_URL "/rpc/synchronize"
 #define ADD_URL "/rpc/add"
 #define REPLACE_URL "/rpc/replace"
 #define APPEND_URL "/rpc/append"
@@ -84,29 +85,37 @@ init_bucket(http_connection *con, int size)
 }
 
 static inline int 
+set_param_raw(buffer *body, char *key, size_t key_len, char *val, size_t val_len)
+{
+    char *enc;
+    size_t enc_len;
+    urlencode(val, val_len, &enc, &enc_len);
+    //TODO write error?
+    write2buf(body, key, key_len);
+    write2buf(body, enc, enc_len);
+    PyMem_Free(enc);
+    return 1;
+}
+
+static inline int 
 set_param_db(buffer *body, PyObject *dbObj)
 {
     char *db_name;
     Py_ssize_t db_name_len;
+
     PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
-    //TODO write error?
-    write2buf(body, "DB\t", 3);
-    write2buf(body, db_name, db_name_len);
+    set_param_raw(body, "DB\t", 3, db_name, db_name_len);
     return 1;
 }
 
 static inline int 
 set_param_key(buffer *body, PyObject *keyObj)
 {
-    char *key, *enckey;
+    char *key;
     Py_ssize_t key_len;
-    size_t enckey_len;
 
     PyString_AsStringAndSize(keyObj, &key, &key_len);
-    urlencode(key, key_len, &enckey, &enckey_len);
-    write2buf(body, "key\t", 4);
-    write2buf(body, enckey, enckey_len);
-    PyMem_Free(enckey);
+    set_param_raw(body, "key\t", 4, key, key_len);
     return 1;
 }
 
@@ -117,10 +126,10 @@ set_param(buffer *body, char *key, size_t key_len, PyObject *valueObj)
     Py_ssize_t val_len;
     
     PyString_AsStringAndSize(valueObj, &val, &val_len);
-    write2buf(body, key, key_len);
-    write2buf(body, val, val_len);
+    set_param_raw(body, key, key_len, val, val_len);
     return 1;
 }
+
 
 static inline int 
 set_param_value(buffer *body, char *key, size_t key_len, PyObject *valueObj)
@@ -131,9 +140,7 @@ set_param_value(buffer *body, char *key, size_t key_len, PyObject *valueObj)
     
     temp_val = serialize_value(valueObj);
     PyString_AsStringAndSize(temp_val, &val, &val_len);
-    write2buf(body, key, key_len);
-    write2buf(body, val, val_len);
-    Py_DECREF(temp_val);
+    set_param_raw(body, key, key_len, val, val_len);
     return 1;
 }
 
@@ -429,6 +436,71 @@ rpc_call_clear(DBObject *db)
     free_http_data(con);
 
     return result;
+}
+
+inline PyObject* 
+rpc_call_sync(DBObject *db, int hard, char *command, Py_ssize_t command_len)
+{
+    http_connection *con;
+    PyObject *result = NULL;
+    char content_length[12];
+    buffer *body;
+    
+    PyObject *dbObj = db->dbObj;
+
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+
+    con = db->con;
+    if(init_bucket(con, 16) < 0){
+        return NULL;
+    }
+    uint8_t exists = 0;
+
+    if(dbObj){
+        set_param_db(body, dbObj);
+        exists = 1;
+    }
+    if(hard > 0){
+        if(exists){
+            write2buf(body, CRLF, 2);
+        }
+        write2buf(body, "hard\ttrue", 9);
+        exists = 1;
+    }
+    if(command > 0){
+        if(exists){
+            write2buf(body, CRLF, 2);
+        }
+        set_param_raw(body, "command\t", 8, command, command_len); 
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), SYNC_URL, LEN(SYNC_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    end_header(con);
+    if(body->len > 0){
+        add_body(con, body->buf, body->len);
+    }
+    
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+
 }
 
 static inline PyObject* 
