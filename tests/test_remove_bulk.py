@@ -14,7 +14,6 @@ def clear():
     db.clear()
     db.close()
 
-@with_setup(setup=clear)
 @raises(IOError)
 def test_err_open():
     db = KyotoTycoon()

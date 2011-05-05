@@ -42,7 +42,7 @@ DBObject_init(DBObject *self, PyObject *args, PyObject *kwargs)
     }
     if(temp){
         if(!PyString_Check(temp)){
-            PyErr_SetString(PyExc_TypeError, "db must be string");
+            PyErr_SetString(PyExc_TypeError, "database identifier must be a string");
             return -1;
         }
         self->dbObj = temp;
@@ -217,42 +217,23 @@ DBObject_remove(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_status(DBObject *self, PyObject *args)
 {
-    PyObject *db_name = NULL;
 
     DEBUG("DBObject_status self %p", self);
-    if (!PyArg_ParseTuple(args, "|O", &db_name)){
-        return NULL;
-    }
     if(!is_opened(self)){
         return NULL;
     }
-    //DEBUG("optional db %s", db);
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
-    return rpc_call_status(self, db_name);
+    return rpc_call_status(self);
 }
 
 static inline PyObject* 
 DBObject_clear(DBObject *self, PyObject *args)
 {
-    PyObject *db_name = NULL;
 
     DEBUG("DBObject_clear self %p", self);
-    if (!PyArg_ParseTuple(args, "|O", &db_name)){
-        return NULL;
-    }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
-    return rpc_call_clear(self, db_name);
+    return rpc_call_clear(self);
 }
 
 static inline PyObject* 
@@ -322,183 +303,143 @@ DBObject_replace(DBObject *self, PyObject *args, PyObject *kwargs)
 static inline PyObject* 
 DBObject_append(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *value, *db_name = NULL;
+    PyObject *key, *value;
     int expire = 0;
 
     DEBUG("DBObject_append self %p", self);
-    static char *kwlist[] = {"key", "value", "expire", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iO", kwlist, &key, &value, &expire, &db_name)){
+    static char *kwlist[] = {"key", "value", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|i", kwlist, &key, &value, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
-    return rpc_call_append(self, key, value, db_name, expire);
+    return rpc_call_append(self, key, value, expire);
 }
 
 static inline PyObject* 
 DBObject_increment(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *db_name = NULL;
+    PyObject *key;
     int num = 1, expire = 0;
 
-    static char *kwlist[] = {"key", "num", "expire", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iiO", kwlist, &key, &num, &expire, &db_name)){
+    static char *kwlist[] = {"key", "num", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &key, &num, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_increment self %p", self);
-    return rpc_call_increment(self, key, db_name, num, expire);
+    return rpc_call_increment(self, key, num, expire);
 }
 
 static inline PyObject* 
 DBObject_increment_double(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *db_name = NULL;
+    PyObject *key;
     int expire = 0;
     double num = 1.0;
 
-    static char *kwlist[] = {"key", "num", "expire", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|diO", kwlist, &key, &num, &expire, &db_name)){
+    static char *kwlist[] = {"key", "num", "expire", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|di", kwlist, &key, &num, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_increment_double self %p", self);
-    return rpc_call_increment_double(self, key, db_name, num, expire);
+    return rpc_call_increment_double(self, key, num, expire);
 }
 
 static inline PyObject* 
 DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *key, *oval = NULL, *nval = NULL, *db_name = NULL;;
+    PyObject *key, *oval = NULL, *nval = NULL;
     int expire = 0;
 
-    static char *kwlist[] = {"key", "oval", "nval", "expire", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OOiO", kwlist, &key, &oval, &nval, &expire, &db_name)){
+    static char *kwlist[] = {"key", "oval", "nval", "expire",  NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|OOi", kwlist, &key, &oval, &nval, &expire)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_cas self %p", self);
-    return rpc_call_cas(self, key, db_name, oval, nval, expire);
+    return rpc_call_cas(self, key, oval, nval, expire);
 }
 
 static inline PyObject* 
 DBObject_set_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *records, *db_name = NULL;;
+    PyObject *records;
     int expire = 0, atomic = 0;
 
-    static char *kwlist[] = {"records", "expire", "atomic", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iiO", kwlist, &records, &expire, &atomic, &db_name)){
+    static char *kwlist[] = {"records", "expire", "atomic", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|ii", kwlist, &records, &expire, &atomic)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_set_bulk self %p", self);
-    return rpc_call_set_bulk(self, records, db_name, expire, atomic);
+    return rpc_call_set_bulk(self, records, expire, atomic);
 }
 
 static inline PyObject* 
 DBObject_remove_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *keys, *db_name = NULL;
+    PyObject *keys;
     int atomic = 0;
 
-    static char *kwlist[] = {"keys", "db", "atomic", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|Oi", kwlist, &keys, &db_name, &atomic)){
+    static char *kwlist[] = {"keys", "atomic", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|i", kwlist, &keys, &atomic)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_remove_bulk self %p", self);
-    return rpc_call_remove_bulk(self, keys, db_name, atomic);
+    return rpc_call_remove_bulk(self, keys, atomic);
 }
 
 static inline PyObject* 
 DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *prefixObj, *db_name = NULL;;
+    PyObject *prefixObj;
 
-    static char *kwlist[] = {"prefix", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &prefixObj, &db_name)){
+    static char *kwlist[] = {"prefix", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &prefixObj)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_match_prefix self %p", self);
-    return rpc_call_match_prefix(self, db_name, prefixObj);
+    return rpc_call_match_prefix(self, prefixObj);
 }
 
 static inline PyObject* 
 DBObject_match_regex(DBObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject *regexObj, *db_name = NULL;;
+    PyObject *regexObj;
 
-    static char *kwlist[] = {"regex", "db", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|O", kwlist, &regexObj, &db_name)){
+    static char *kwlist[] = {"regex", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O", kwlist, &regexObj)){
         return NULL; 
     }
     if(!is_opened(self)){
         return NULL;
     }
-    if(db_name == NULL){
-        if(self->dbObj){
-            db_name = self->dbObj;
-        }
-    }
     
     DEBUG("DBObject_match_regex self %p", self);
-    return rpc_call_match_regex(self, db_name, regexObj);
+    return rpc_call_match_regex(self, regexObj);
 }
 
 static PyMethodDef DBObject_methods[] = {
@@ -510,8 +451,8 @@ static PyMethodDef DBObject_methods[] = {
     {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
-    {"status", (PyCFunction)DBObject_status, METH_VARARGS, 0},
-    {"clear", (PyCFunction)DBObject_clear, METH_VARARGS, 0},
+    {"status", (PyCFunction)DBObject_status, METH_NOARGS, 0},
+    {"clear", (PyCFunction)DBObject_clear, METH_NOARGS, 0},
     {"add", (PyCFunction)DBObject_add, METH_VARARGS|METH_KEYWORDS, 0},
     {"replace", (PyCFunction)DBObject_replace, METH_VARARGS|METH_KEYWORDS, 0},
     {"append", (PyCFunction)DBObject_append, METH_VARARGS|METH_KEYWORDS, 0},
@@ -528,17 +469,14 @@ static PyMethodDef DBObject_methods[] = {
 static inline Py_ssize_t
 DBObject_dict_length(DBObject *self)
 {
-    PyObject *result = NULL, *db_name = NULL;
+    PyObject *result = NULL;
     Py_ssize_t len = -1;
 
     if(!is_opened(self)){
         return len;
     }
-    if(self->dbObj){
-        db_name = self->dbObj;
-    }
 
-    result = rpc_call_status(self, db_name);
+    result = rpc_call_status(self);
     if(result){
         PyObject *temp = PyDict_GetItemString(result, "count");
         if(temp){

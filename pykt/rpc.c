@@ -331,18 +331,15 @@ rpc_call_report(DBObject *db)
 }
 
 inline PyObject* 
-rpc_call_status(DBObject *db, PyObject *dbObj)
+rpc_call_status(DBObject *db)
 {
 
     http_connection *con;
     PyObject *result = NULL;
     char content_length[12];
     buffer *body;
-
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
-        return NULL;
-    }
+    
+    PyObject *dbObj = db->dbObj;
 
     con = db->con;
     body = new_buffer(128, 0);
@@ -354,7 +351,7 @@ rpc_call_status(DBObject *db, PyObject *dbObj)
         return NULL;
     }
 
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
     }
 
@@ -383,13 +380,15 @@ rpc_call_status(DBObject *db, PyObject *dbObj)
 }
 
 inline PyObject* 
-rpc_call_clear(DBObject *db, PyObject *dbObj)
+rpc_call_clear(DBObject *db)
 {
 
     http_connection *con;
     PyObject *result = NULL;
     char content_length[12];
     buffer *body;
+    
+    PyObject *dbObj = db->dbObj;
 
     body = new_buffer(128, 0);
     if(body == NULL){
@@ -401,7 +400,7 @@ rpc_call_clear(DBObject *db, PyObject *dbObj)
         return NULL;
     }
 
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
     }
 
@@ -431,7 +430,7 @@ rpc_call_clear(DBObject *db, PyObject *dbObj)
 }
 
 static inline PyObject* 
-add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject *valueObj, int expire)
 {
     http_connection *con;
     char *key, *val, *encbuf, *db_name;
@@ -442,14 +441,12 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     size_t encbuf_len, xt_len = 0;
     uint32_t body_len = 12;
     PyObject *result = NULL, *temp_val;
+    
+    PyObject *dbObj = db->dbObj;
 
-    DEBUG("rpc_call_add %p %p %p %d", keyObj, valueObj, dbObj, expire);
+    DEBUG("rpc_call_add %p %p %d", keyObj, valueObj, expire);
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
-        return NULL;
-    }
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
         return NULL;
     }
     if(valueObj == Py_None){
@@ -472,7 +469,7 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     body_len += val_len;
 
     if(dbObj){
-        PyString_AsStringAndSize(temp_val, &db_name, &db_name_len);
+        PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
         body_len += db_name_len;
         body_len += 5;
     }
@@ -597,25 +594,25 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
 */
 
 inline PyObject* 
-rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+rpc_call_add(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
 {
-    return add_internal(db, ADD_URL, LEN(ADD_URL), keyObj, valueObj, dbObj, expire);
+    return add_internal(db, ADD_URL, LEN(ADD_URL), keyObj, valueObj, expire);
 }
 
 inline PyObject* 
-rpc_call_replace(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+rpc_call_replace(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
 {
-    return add_internal(db, REPLACE_URL, LEN(REPLACE_URL), keyObj, valueObj, dbObj, expire);
+    return add_internal(db, REPLACE_URL, LEN(REPLACE_URL), keyObj, valueObj, expire);
 }
 
 inline PyObject* 
-rpc_call_append(DBObject *db, PyObject *keyObj, PyObject *valueObj, PyObject *dbObj, int expire)
+rpc_call_append(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire)
 {
-    return add_internal(db, APPEND_URL, LEN(APPEND_URL), keyObj, valueObj, dbObj, expire);
+    return add_internal(db, APPEND_URL, LEN(APPEND_URL), keyObj, valueObj, expire);
 }
 
 inline PyObject* 
-rpc_call_increment(DBObject *db, PyObject *keyObj, PyObject *dbObj, int num, int expire)
+rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
 {
 
     http_connection *con;
@@ -623,12 +620,9 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, PyObject *dbObj, int num, int
     PyObject *result = NULL;
     buffer *body;
 
+    PyObject *dbObj = db->dbObj;
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
-        return NULL;
-    }
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
         return NULL;
     }
 
@@ -641,7 +635,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, PyObject *dbObj, int num, int
         return NULL;
     }
     
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
         write2buf(body, CRLF, 2);
     }
@@ -677,19 +671,16 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, PyObject *dbObj, int num, int
 }
 
 inline PyObject* 
-rpc_call_increment_double(DBObject *db, PyObject *keyObj, PyObject *dbObj, double num, int expire)
+rpc_call_increment_double(DBObject *db, PyObject *keyObj, double num, int expire)
 {
     http_connection *con;
     char content_length[12];
     buffer *body;
     PyObject *result = NULL;
 
+    PyObject *dbObj = db->dbObj;
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
-        return NULL;
-    }
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
         return NULL;
     }
 
@@ -702,7 +693,7 @@ rpc_call_increment_double(DBObject *db, PyObject *keyObj, PyObject *dbObj, doubl
         return NULL;
     }
     
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
         write2buf(body, CRLF, 2);
     }
@@ -739,7 +730,7 @@ rpc_call_increment_double(DBObject *db, PyObject *keyObj, PyObject *dbObj, doubl
 }
 
 inline PyObject* 
-rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj, PyObject *nvalObj, int expire)
+rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalObj, int expire)
 {
     http_connection *con;
     char *key, *oval, *nval, *encbuf, *db_name;
@@ -751,12 +742,9 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     uint32_t body_len = 4;
     PyObject *result = NULL, *ovalS = NULL, *nvalS = NULL;
 
+    PyObject *dbObj = db->dbObj;
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
-        return NULL;
-    }
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
         return NULL;
     }
 
@@ -765,7 +753,7 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
         return NULL;
     }
     
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
         body_len += db_name_len;
         body_len += 5;
@@ -922,17 +910,14 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
 }*/
 
 inline PyObject* 
-rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj)
+rpc_call_match_prefix(DBObject *db, PyObject *prefixObj)
 {
     http_connection *con;
     char content_length[12];
     buffer *body;
     PyObject *result = NULL;
 
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
-        return NULL;
-    }
+    PyObject *dbObj = db->dbObj;
     if(prefixObj && !PyString_Check(prefixObj)){
         PyErr_SetString(PyExc_TypeError, "prefix must be string ");
         return NULL;
@@ -947,7 +932,7 @@ rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj)
         return NULL;
     }
     
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
         write2buf(body, CRLF, 2);
     }
@@ -979,17 +964,14 @@ rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj)
 }
 
 inline PyObject* 
-rpc_call_match_regex(DBObject *db, PyObject *dbObj, PyObject *regexObj)
+rpc_call_match_regex(DBObject *db, PyObject *regexObj)
 {
     http_connection *con;
     char content_length[12];
     buffer *body;
     PyObject *result = NULL;
 
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
-        return NULL;
-    }
+    PyObject *dbObj = db->dbObj;
     if(regexObj && !PyString_Check(regexObj)){
         PyErr_SetString(PyExc_TypeError, "regex must be string ");
         return NULL;
@@ -1037,7 +1019,7 @@ rpc_call_match_regex(DBObject *db, PyObject *dbObj, PyObject *regexObj)
 
 
 inline PyObject* 
-rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire, int atomic)
+rpc_call_set_bulk(DBObject *db, PyObject *recordObj, int expire, int atomic)
 {
 
     http_connection *con;
@@ -1045,10 +1027,8 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire
     PyObject *result = NULL;
     buffer *body;
 
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
-        return NULL;
-    }
+    PyObject *dbObj = db->dbObj;
+    
     if(recordObj && !PyDict_Check(recordObj)){
         PyErr_SetString(PyExc_TypeError, "record must be dict ");
         return NULL;
@@ -1063,7 +1043,7 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire
         return NULL;
     }
 
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
         write2buf(body, CRLF, 2);
     }
@@ -1102,17 +1082,14 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire
 }
 
 inline PyObject* 
-rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, PyObject *dbObj, int atomic)
+rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, int atomic)
 {
     http_connection *con;
     char content_length[12];
     PyObject *result = NULL;
     buffer *body;
-
-    if(dbObj && !PyString_Check(dbObj)){
-        PyErr_SetString(PyExc_TypeError, "db must be string ");
-        return NULL;
-    }
+    PyObject *dbObj = db->dbObj;
+    
     if(keysObj && !PyList_Check(keysObj)){
         PyErr_SetString(PyExc_TypeError, "keys must be dict ");
         return NULL;
@@ -1127,7 +1104,7 @@ rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, PyObject *dbObj, int atomi
         return NULL;
     }
 
-    if(dbObj && dbObj != Py_None){
+    if(dbObj){
         set_param_db(body, dbObj);
         write2buf(body, CRLF, 2);
     }
@@ -1160,3 +1137,4 @@ rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, PyObject *dbObj, int atomi
 
     return result;
 }
+
