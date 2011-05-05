@@ -407,6 +407,29 @@ DBObject_cas(DBObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static inline PyObject* 
+DBObject_set_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    PyObject *records, *db_name = NULL;;
+    int expire = 0, atomic = 0;
+
+    static char *kwlist[] = {"records", "expire", "atomic", "db", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "O|iiO", kwlist, &records, &expire, &atomic, &db_name)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    if(db_name == NULL){
+        if(self->dbObj){
+            db_name = self->dbObj;
+        }
+    }
+    
+    DEBUG("DBObject_set_bulk self %p", self);
+    return rpc_call_set_bulk(self, records, db_name, expire, atomic);
+}
+
+static inline PyObject* 
 DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *prefixObj, *db_name = NULL;;
@@ -467,6 +490,7 @@ static PyMethodDef DBObject_methods[] = {
     {"increment", (PyCFunction)DBObject_increment, METH_VARARGS|METH_KEYWORDS, 0},
     {"increment_double", (PyCFunction)DBObject_increment_double, METH_VARARGS|METH_KEYWORDS, 0},
     {"cas", (PyCFunction)DBObject_cas, METH_VARARGS|METH_KEYWORDS, 0},
+    {"set_bulk", (PyCFunction)DBObject_set_bulk, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_prefix", (PyCFunction)DBObject_match_prefix, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_regex", (PyCFunction)DBObject_match_regex, METH_VARARGS|METH_KEYWORDS, 0},
     {NULL, NULL}

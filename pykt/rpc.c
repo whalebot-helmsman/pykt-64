@@ -16,6 +16,7 @@
 #define INCREMENT_URL "/rpc/increment"
 #define INCREMENT_DOUBLE_URL "/rpc/increment_double"
 #define CAS_URL "/rpc/cas"
+#define SET_BULK_URL "/rpc/set_bulk"
 #define MATCH_PREFIX_URL "/rpc/match_prefix"
 #define MATCH_REGEX_URL "/rpc/match_regex"
 
@@ -175,7 +176,43 @@ set_param_num_double(buffer *body, double num)
     return 1;
 }
 
-/*
+static inline void
+write_records(PyObject *dict, buffer *buf)
+{
+    PyObject *keyObj, *valueObj;
+    Py_ssize_t size = 0, index = 1, pos = 0;
+
+    size = PyDict_Size(dict);
+
+    while (PyDict_Next(dict, &pos, &keyObj, &valueObj)) {
+        char *key, *enckey, *val;
+        Py_ssize_t key_len, val_len;
+        size_t enckey_len;
+        PyObject *key_str = PyObject_Str(keyObj);
+        PyObject *value_str = serialize_value(valueObj);
+        
+        //encode
+        PyString_AsStringAndSize(key_str, &key, &key_len);
+        urlencode(key, key_len, &enckey, &enckey_len);
+
+        PyString_AsStringAndSize(value_str, &val, &val_len);
+        
+        write2buf(buf, "_", 1);
+        write2buf(buf, enckey, enckey_len);
+        write2buf(buf, "\t", 1);
+        write2buf(buf, val, val_len);
+        if(index < size){
+            write2buf(buf, CRLF, 2);
+        }
+        PyMem_Free(enckey);
+
+        Py_XDECREF(key_str);
+        Py_XDECREF(value_str);
+        index++;
+    }
+}
+
+/**
 static inline int
 get_recods_size(PyObject *dict)
 {
@@ -965,29 +1002,15 @@ rpc_call_match_regex(DBObject *db, PyObject *dbObj, PyObject *regexObj)
     return result;
 }
 
-/**
-* /rpc/set_bulk
-* Store records at once.
-* input: DB: (optional): the database identifier.
-* input: xt: (optional): the expiration time from now in seconds. If it is negative, the absolute value is treated as the epoch time. If it is omitted, no expiration time is specified.
-* input: atomic: (optional): to perform all operations atomically. If it is omitted, non-atomic operations are performed.
-* input: (optional): arbitrary records whose keys trail the character "_".
-* output: num: the number of stored reocrds.
-*/
-/*
+
 inline PyObject* 
-rpc_call_set_bulk(DBObject *db, PyObject *dbObj, int expire, int atomic, PyObject *recordObj)
+rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire, int atomic)
 {
 
     http_connection *con;
-    char *db_name;
-    Py_ssize_t db_name_len = 0;
     char content_length[12];
-    char xt[14];
-    uint64_t expire_time = 0;
-    size_t xt_len = 0;
-    uint32_t body_len = 0;
     PyObject *result = NULL;
+    buffer *body;
 
     if(dbObj && !PyString_Check(dbObj)){
         PyErr_SetString(PyExc_TypeError, "db must be string ");
@@ -999,66 +1022,39 @@ rpc_call_set_bulk(DBObject *db, PyObject *dbObj, int expire, int atomic, PyObjec
     }
 
     con = db->con;
+    body = new_buffer(BODY_BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
     if(init_bucket(con, 24) < 0){
         return NULL;
     }
-    
+
     if(dbObj && dbObj != Py_None){
-        PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
-        body_len += db_name_len;
-        body_len += 5;
+        set_param_db(body, dbObj);
+        write2buf(body, CRLF, 2);
     }
-
     if(expire > 0){
-        expire_time = get_expire_time(expire);
-        snprintf(xt, sizeof (xt), "%llu", expire_time);
-        xt_len = strlen(xt);
-        body_len += xt_len;
-        body_len += 5;
+        set_param_xt(body, expire);
+        write2buf(body, CRLF, 2);
     }
-
-    if(atomic > 0){
-        body_len += 13;
+    if(atomic){
+        write2buf(body, "atomic\t", 7);
+        write2buf(body, "true", 4);
+        write2buf(body, CRLF, 2);
     }
+    write_records(recordObj, body);
 
-    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CAS_URL, LEN(CAS_URL));
-    snprintf(content_length, sizeof (content_length), "%d", body_len);
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), SET_BULK_URL, LEN(SET_BULK_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
     add_content_length(con, content_length, strlen(content_length));
     add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
     end_header(con);
     
-    if(db_name_len > 0){
-        add_body(con, "DB\t", 3);
-        add_body(con, db_name, db_name_len);
-        add_body(con, CRLF, 2);
-    }
-
-    if(xt_len > 0){
-        add_body(con, CRLF, 2);
-        add_body(con, "xt\t", 3);
-        add_body(con, xt, xt_len);
-    }
-
-    if(atomic > 0){
-        add_body(con, CRLF, 2);
-        add_body(con, "atomic\t", 7);
-        add_body(con, "true", 4);
-    }
-    //send data
-    if(send_data(con) < 0){
-        goto error;
-    }
-
-    free_http_data(con);
-    //create record
-    if(init_bucket(con, 1024) < 0){
-        goto error;
-    }
-
+    add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = Py_True;
-        Py_INCREF(result);
+        result = get_num(con, 0);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
@@ -1070,11 +1066,5 @@ rpc_call_set_bulk(DBObject *db, PyObject *dbObj, int expire, int atomic, PyObjec
     free_http_data(con);
 
     return result;
-
-error:
-    free_http_data(con);
-
-    return result;
 }
-*/
 

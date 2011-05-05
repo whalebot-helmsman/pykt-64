@@ -37,6 +37,9 @@ inline PyObject*
 rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj, PyObject *nvalObj, int expire);
 
 inline PyObject* 
+rpc_call_set_bulk(DBObject *db, PyObject *recordObj, PyObject *dbObj, int expire, int atomic);
+
+inline PyObject* 
 rpc_call_match_prefix(DBObject *db, PyObject *dbObj, PyObject *prefixObj);
 
 inline PyObject* 
