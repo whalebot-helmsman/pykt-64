@@ -72,5 +72,24 @@ rpc_call_cur_step(DBObject *db, int cur);
 inline PyObject* 
 rpc_call_cur_step_back(DBObject *db, int cur);
 
+inline PyObject* 
+rpc_call_cur_set_value(DBObject *db, int cur, PyObject *valueObj, int step, int expire);
+
+inline PyObject* 
+rpc_call_cur_remove(DBObject *db, int cur);
+
+inline PyObject* 
+rpc_call_cur_get_key(DBObject *db, int cur, int step);
+
+inline PyObject* 
+rpc_call_cur_get_value(DBObject *db, int cur, int step);
+
+inline PyObject* 
+rpc_call_cur_get(DBObject *db, int cur, int step);
+
+inline PyObject* 
+rpc_call_cur_delete(DBObject *db, int cur);
+
 #endif
+
 

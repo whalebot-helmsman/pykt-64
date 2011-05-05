@@ -30,6 +30,12 @@
 #define CUR_JUMP_BACK_URL "/rpc/cur_jump_back"
 #define CUR_STEP_URL "/rpc/cur_step"
 #define CUR_STEP_BACK_URL "/rpc/cur_step_back"
+#define CUR_SET_VALUE_URL "/rpc/cur_set_value"
+#define CUR_REMOVE_URL "/rpc/cur_remove"
+#define CUR_GET_KEY_URL "/rpc/cur_get_key"
+#define CUR_GET_VALUE_URL "/rpc/cur_get_value"
+#define CUR_GET_URL "/rpc/cur_get"
+#define CUR_DELETE_URL "/rpc/cur_delete"
 
 
 static inline int
@@ -1623,3 +1629,294 @@ rpc_call_cur_step_back(DBObject *db, int cur)
 
     return result;
 }
+
+inline PyObject* 
+rpc_call_cur_set_value(DBObject *db, int cur, PyObject *valueObj, int step, int expire)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+    write2buf(body, CRLF, 2);
+    set_param_value(body, "value\t", 6, valueObj);
+    if(step > 0){
+        write2buf(body, CRLF, 2);
+        write2buf(body, "step\t", 5); 
+    }
+    if(expire){
+        write2buf(body, CRLF, 2);
+        set_param_xt(body, expire);
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_SET_VALUE_URL, LEN(CUR_SET_VALUE_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+
+}
+
+
+inline PyObject* 
+rpc_call_cur_remove(DBObject *db, int cur)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_REMOVE_URL, LEN(CUR_REMOVE_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_cur_get_key(DBObject *db, int cur, int step)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+    if(step > 0){
+        write2buf(body, CRLF, 2);
+        write2buf(body, "step\t", 5); 
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_GET_KEY_URL, LEN(CUR_GET_KEY_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_cur_get_value(DBObject *db, int cur, int step)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+    if(step > 0){
+        write2buf(body, CRLF, 2);
+        write2buf(body, "step\t", 5); 
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_GET_VALUE_URL, LEN(CUR_GET_VALUE_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+
+}
+
+inline PyObject* 
+rpc_call_cur_get(DBObject *db, int cur, int step)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+    if(step > 0){
+        write2buf(body, CRLF, 2);
+        write2buf(body, "step\t", 5); 
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_GET_URL, LEN(CUR_GET_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_cur_delete(DBObject *db, int cur)
+{
+
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    con = db->con;
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_cur(body, cur);
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), CUR_DELETE_URL, LEN(CUR_DELETE_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
