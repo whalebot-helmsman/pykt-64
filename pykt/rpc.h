@@ -13,6 +13,9 @@ inline PyObject*
 rpc_call_report(DBObject *db);
 
 inline PyObject* 
+rpc_call_play_script(DBObject *db, char *name, Py_ssize_t name_len,  PyObject *recordObj);
+
+inline PyObject* 
 rpc_call_status(DBObject *db);
 
 inline PyObject* 
@@ -47,6 +50,9 @@ rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, int atomic);
 
 inline PyObject* 
 rpc_call_get_bulk(DBObject *db, PyObject *keysObj, int atomic);
+
+inline PyObject* 
+rpc_call_vacuum(DBObject *db, int step);
 
 inline PyObject* 
 rpc_call_match_prefix(DBObject *db, PyObject *prefixObj);

@@ -144,6 +144,25 @@ DBObject_report(DBObject *self, PyObject *args)
 }
 
 static inline PyObject* 
+DBObject_play_script(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    char *name = NULL;
+    Py_ssize_t name_len;
+    PyObject *records = NULL;
+
+    static char *kwlist[] = {"name", "records", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s#|O", kwlist, &name, &name_len,  &records)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_play_script self %p", self);
+    return rpc_call_play_script(self, name, name_len, records);
+}
+
+static inline PyObject* 
 DBObject_set(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *key, *value;
@@ -447,6 +466,23 @@ DBObject_get_bulk(DBObject *self, PyObject *args, PyObject *kwargs)
 }
 
 static inline PyObject* 
+DBObject_get_vacuum(DBObject *self, PyObject *args, PyObject *kwargs)
+{
+    int step = 0;
+
+    static char *kwlist[] = {"step", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i", kwlist, &step)){
+        return NULL; 
+    }
+    if(!is_opened(self)){
+        return NULL;
+    }
+    
+    DEBUG("DBObject_vacuum self %p", self);
+    return rpc_call_vacuum(self, step);
+}
+
+static inline PyObject* 
 DBObject_match_prefix(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject *prefixObj;
@@ -489,6 +525,7 @@ static PyMethodDef DBObject_methods[] = {
     {"remove", (PyCFunction)DBObject_remove, METH_VARARGS|METH_KEYWORDS, 0},
     {"echo", (PyCFunction)DBObject_echo, METH_NOARGS, 0},
     {"report", (PyCFunction)DBObject_report, METH_NOARGS, 0},
+    {"play_script", (PyCFunction)DBObject_play_script, METH_VARARGS|METH_KEYWORDS, 0},
     {"status", (PyCFunction)DBObject_status, METH_NOARGS, 0},
     {"clear", (PyCFunction)DBObject_clear, METH_NOARGS, 0},
     {"synchronize", (PyCFunction)DBObject_synchronize, METH_VARARGS|METH_KEYWORDS, 0},

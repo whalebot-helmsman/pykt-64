@@ -9,6 +9,7 @@
 
 #define ECHO_URL "/rpc/echo"
 #define REPORT_URL "/rpc/report"
+#define PLAY_SCRIPT_URL "/rpc/play_script"
 #define STATUS_URL "/rpc/status"
 #define CLEAR_URL "/rpc/clear"
 #define SYNC_URL "/rpc/synchronize"
@@ -21,6 +22,7 @@
 #define SET_BULK_URL "/rpc/set_bulk"
 #define REMOVE_BULK_URL "/rpc/remove_bulk"
 #define GET_BULK_URL "/rpc/get_bulk"
+#define VACUUM_URL "/rpc/vacuum"
 #define MATCH_PREFIX_URL "/rpc/match_prefix"
 #define MATCH_REGEX_URL "/rpc/match_regex"
 
@@ -1272,3 +1274,119 @@ rpc_call_get_bulk(DBObject *db, PyObject *keysObj, int atomic)
     return result;
 }
 
+inline PyObject* 
+rpc_call_vacuum(DBObject *db, int step)
+{
+    http_connection *con;
+    PyObject *result = NULL;
+    char content_length[12];
+    buffer *body;
+    
+    PyObject *dbObj = db->dbObj;
+
+    body = new_buffer(BUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+
+    con = db->con;
+    if(init_bucket(con, 16) < 0){
+        return NULL;
+    }
+    uint8_t exists = 0;
+
+    if(dbObj){
+        set_param_db(body, dbObj);
+        exists = 1;
+    }
+    if(step > 0){
+        if(exists){
+            write2buf(body, CRLF, 2);
+        }
+        char stepnum[16];
+        size_t stepnum_len;
+
+        snprintf(stepnum, sizeof(stepnum), "%d", step);
+        stepnum_len = strlen(stepnum);
+        set_param_raw(body, "step\t", 5, stepnum, stepnum_len);
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), VACUUM_URL, LEN(VACUUM_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    end_header(con);
+    if(body->len > 0){
+        add_body(con, body->buf, body->len);
+    }
+    
+    if(request(con, 200) > 0){
+        result = Py_True;
+        Py_INCREF(result);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+
+}
+
+inline PyObject* 
+rpc_call_play_script(DBObject *db, char *name, Py_ssize_t name_len,  PyObject *recordObj)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+
+    
+    if(recordObj && !PyDict_Check(recordObj)){
+        PyErr_SetString(PyExc_TypeError, "record must be dict ");
+        return NULL;
+    }
+
+    con = db->con;
+    body = new_buffer(LBUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    set_param_raw(body, "name\t", 5, name, name_len);
+    if(recordObj){
+        write2buf(body, CRLF, 2);
+        write_bulk_records(recordObj, body);
+    }
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), PLAY_SCRIPT_URL, LEN(PLAY_SCRIPT_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = convert2valuedict(con->response_body);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+
+}
