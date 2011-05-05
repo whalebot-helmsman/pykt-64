@@ -60,5 +60,17 @@ rpc_call_match_prefix(DBObject *db, PyObject *prefixObj);
 inline PyObject* 
 rpc_call_match_regex(DBObject *db, PyObject *regexObj);
 
+inline PyObject* 
+rpc_call_cur_jump(DBObject *db, int cur, PyObject *keyObj);
+
+inline PyObject* 
+rpc_call_cur_jump_back(DBObject *db, int cur, PyObject *keyObj);
+
+inline PyObject* 
+rpc_call_cur_step(DBObject *db, int cur);
+
+inline PyObject* 
+rpc_call_cur_step_back(DBObject *db, int cur);
+
 #endif
 
