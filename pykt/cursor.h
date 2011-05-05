@@ -9,6 +9,7 @@ typedef struct {
     PyObject_HEAD
     int cur;
     DBObject *db;
+    PyObject* in_weakreflist;
 } CursorObject;
 
 extern PyTypeObject CursorObjectType;

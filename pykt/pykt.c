@@ -1,5 +1,6 @@
 #include "pykt.h"
 #include "db.h"
+#include "cursor.h"
 
 PyObject *KtException;
 static PyObject *wait_callback = NULL;;
@@ -111,6 +112,12 @@ initpykt(void)
     if(PyType_Ready(&DBObjectType) < 0){ 
         return;
     }
+
+    CursorObjectType.tp_new = PyType_GenericNew;
+    if(PyType_Ready(&CursorObjectType) < 0){ 
+        return;
+    }
+    
     KtException = PyErr_NewException("pykt.KtException",
 					  PyExc_IOError, NULL);
 	if (KtException == NULL){
@@ -123,6 +130,8 @@ initpykt(void)
     }
     Py_INCREF(&DBObjectType);
     PyModule_AddObject(m, "KyotoTycoon", (PyObject *)&DBObjectType);
+    Py_INCREF(&CursorObjectType);
+    PyModule_AddObject(m, "Cursor", (PyObject *)&CursorObjectType);
 	
     Py_INCREF(KtException);
 	PyModule_AddObject(m, "KTException", KtException);

@@ -1762,8 +1762,7 @@ rpc_call_cur_get_key(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = Py_True;
-        Py_INCREF(result);
+        result = convert2dict(con->response_body);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
@@ -1810,8 +1809,7 @@ rpc_call_cur_get_value(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = Py_True;
-        Py_INCREF(result);
+        result = convert2dict(con->response_body);;
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
@@ -1859,8 +1857,7 @@ rpc_call_cur_get(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = Py_True;
-        Py_INCREF(result);
+        result = convert2dict(con->response_body);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);

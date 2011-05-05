@@ -1,12 +1,13 @@
 #include "db.h"
 #include "rpc.h"
 #include "rest.h"
+#include "cursor.h"
 
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_PORT 1978
 #define DEFAULT_TIMEOUT 30
 
-static inline int
+inline int
 is_opened(DBObject *self)
 {
     if(self->con){
@@ -516,6 +517,21 @@ DBObject_match_regex(DBObject *self, PyObject *args, PyObject *kwargs)
     return rpc_call_match_regex(self, regexObj);
 }
 
+static inline PyObject* 
+DBObject_cursor(DBObject *self, PyObject *args)
+{
+    PyObject *factory;
+
+    if(!is_opened(self)){
+        return NULL;
+    }
+
+    factory = (PyObject*)&CursorObjectType;
+
+    return PyObject_CallFunction(factory, "O", self);
+    
+}
+
 static PyMethodDef DBObject_methods[] = {
     {"open", (PyCFunction)DBObject_open, METH_VARARGS|METH_KEYWORDS, 0},
     {"close", (PyCFunction)DBObject_close, METH_NOARGS, 0},
@@ -540,6 +556,7 @@ static PyMethodDef DBObject_methods[] = {
     {"get_bulk", (PyCFunction)DBObject_get_bulk, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_prefix", (PyCFunction)DBObject_match_prefix, METH_VARARGS|METH_KEYWORDS, 0},
     {"match_regex", (PyCFunction)DBObject_match_regex, METH_VARARGS|METH_KEYWORDS, 0},
+    {"cursor", (PyCFunction)DBObject_cursor, METH_NOARGS, 0},
     {NULL, NULL}
 };
 

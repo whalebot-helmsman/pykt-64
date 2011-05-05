@@ -16,5 +16,7 @@ typedef struct {
 
 extern PyTypeObject DBObjectType;
 
+inline int
+is_opened(DBObject *self);
 
 #endif
