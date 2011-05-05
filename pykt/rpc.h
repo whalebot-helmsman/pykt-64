@@ -43,6 +43,9 @@ inline PyObject*
 rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, int atomic);
 
 inline PyObject* 
+rpc_call_get_bulk(DBObject *db, PyObject *keysObj, int atomic);
+
+inline PyObject* 
 rpc_call_match_prefix(DBObject *db, PyObject *prefixObj);
 
 inline PyObject* 

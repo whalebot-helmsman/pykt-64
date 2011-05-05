@@ -9,6 +9,9 @@ inline PyObject *
 convert2dict(buffer *buf);
 
 inline PyObject * 
+convert2valuedict(buffer *buf);
+
+inline PyObject * 
 convert2keylist(buffer *buf);
 
 #endif

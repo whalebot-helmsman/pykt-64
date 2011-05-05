@@ -10,7 +10,7 @@ on_record_keylist(void *data, const char *key, size_t key_len, const char *val, 
     tsv_ctx *ctx = (tsv_ctx *)data;
     list = (PyObject *)ctx->user;
     if(strncmp("_", key, 1) == 0){
-        DEBUG("key %.*s", key_len, key);
+        //DEBUG("key %.*s", key_len, key);
         char temp[key_len-1];
         size_t temp_len = key_len -1;
 
@@ -26,6 +26,57 @@ on_record_keylist(void *data, const char *key, size_t key_len, const char *val, 
             ctx->error = 1;
         }
         Py_DECREF(keyObj);
+    }
+}
+
+static inline void 
+on_record_value(void *data, const char *key, size_t key_len, const char *val, size_t val_len)
+{
+    PyObject *keyObj, *valueObj, *dict;
+    
+
+    tsv_ctx *ctx = (tsv_ctx *)data;
+    dict = (PyObject *)ctx->user;
+    if(strncmp("_", key, 1) == 0){
+        char tempkey[key_len-1];
+        size_t tempkey_len = key_len -1;
+        char tempval[val_len];
+        size_t tempval_len = val_len;
+
+        memcpy(tempkey, key+1, tempkey_len);
+        int len1 = urldecode(tempkey, tempkey_len);
+        keyObj = PyString_FromStringAndSize(tempkey, len1);
+
+        //DEBUG("on_record keyObj %p ", keyObj);
+        if(keyObj == NULL){
+            ctx->error = 1;
+            PyErr_NoMemory();
+            return ;
+        }
+        
+        if(key == val || val_len == 0){
+            valueObj = PyString_FromString("");
+        }else{
+            memcpy(tempval, val, tempval_len);
+            int len2 = urldecode(tempval, tempval_len);
+            valueObj = PyString_FromStringAndSize(tempval, len2); 
+        }
+
+        //DEBUG("on_record valueObj %p ", valueObj);
+        if(valueObj == NULL){
+            ctx->error = 1;
+            PyErr_NoMemory();
+            Py_DECREF(keyObj);
+            return ;
+        }
+        if(PyDict_SetItem(dict, keyObj, valueObj) < 0){
+            ctx->error = 1;
+            Py_DECREF(keyObj);
+            Py_DECREF(valueObj);
+            return;
+        }
+        Py_DECREF(keyObj);
+        Py_DECREF(valueObj);
     }
 }
 
@@ -90,6 +141,38 @@ convert2dict(buffer *buf)
     memset(ctx, 0, sizeof(tsv_ctx));
     tsv_init(ctx);
     ctx->on_record = on_record;
+    ctx->user = dict;
+    nread = tsv_execute(ctx, buf->buf, buf->len, off);
+    
+    if(ctx->error){
+        //TODO Error
+    }
+
+    PyMem_Free(ctx);
+    return (PyObject *)ctx->user;
+}
+
+inline PyObject * 
+convert2valuedict(buffer *buf)
+{
+    tsv_ctx *ctx;
+    PyObject *dict;
+    size_t nread, off = 0;
+
+    ctx = (tsv_ctx *)PyMem_Malloc(sizeof(tsv_ctx));
+    if(ctx == NULL){
+        PyErr_NoMemory();
+        return NULL;
+    }
+    dict = PyDict_New();
+    if(dict == NULL){
+        PyMem_Free(ctx);
+        PyErr_NoMemory();
+        return NULL;
+    }
+    memset(ctx, 0, sizeof(tsv_ctx));
+    tsv_init(ctx);
+    ctx->on_record = on_record_value;
     ctx->user = dict;
     nread = tsv_execute(ctx, buf->buf, buf->len, off);
     

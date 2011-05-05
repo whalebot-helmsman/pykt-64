@@ -4,7 +4,8 @@
 #include "tsv.h"
 #include "buffer.h"
 
-#define BODY_BUF_SIZE 1024 * 8
+#define BUF_SIZE 1024 * 8
+#define LBUF_SIZE 1024 * 512
 
 #define ECHO_URL "/rpc/echo"
 #define REPORT_URL "/rpc/report"
@@ -18,6 +19,7 @@
 #define CAS_URL "/rpc/cas"
 #define SET_BULK_URL "/rpc/set_bulk"
 #define REMOVE_BULK_URL "/rpc/remove_bulk"
+#define GET_BULK_URL "/rpc/get_bulk"
 #define MATCH_PREFIX_URL "/rpc/match_prefix"
 #define MATCH_REGEX_URL "/rpc/match_regex"
 
@@ -547,7 +549,7 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -627,7 +629,7 @@ rpc_call_increment(DBObject *db, PyObject *keyObj, int num, int expire)
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -685,7 +687,7 @@ rpc_call_increment_double(DBObject *db, PyObject *keyObj, double num, int expire
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -855,7 +857,7 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *dbObj, PyObject *ovalObj,
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -924,7 +926,7 @@ rpc_call_match_prefix(DBObject *db, PyObject *prefixObj)
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -978,7 +980,7 @@ rpc_call_match_regex(DBObject *db, PyObject *regexObj)
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(BUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -1035,7 +1037,7 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, int expire, int atomic)
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(LBUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -1076,6 +1078,7 @@ rpc_call_set_bulk(DBObject *db, PyObject *recordObj, int expire, int atomic)
         }
     }
     
+    free_buffer(body);
     free_http_data(con);
 
     return result;
@@ -1096,7 +1099,7 @@ rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, int atomic)
     }
 
     con = db->con;
-    body = new_buffer(BODY_BUF_SIZE, 0);
+    body = new_buffer(LBUF_SIZE, 0);
     if(body == NULL){
         return NULL;
     }
@@ -1133,6 +1136,65 @@ rpc_call_remove_bulk(DBObject *db, PyObject *keysObj, int atomic)
         }
     }
     
+    free_buffer(body);
+    free_http_data(con);
+
+    return result;
+}
+
+inline PyObject* 
+rpc_call_get_bulk(DBObject *db, PyObject *keysObj, int atomic)
+{
+    http_connection *con;
+    char content_length[12];
+    PyObject *result = NULL;
+    buffer *body;
+    PyObject *dbObj = db->dbObj;
+    
+    if(keysObj && !PyList_Check(keysObj)){
+        PyErr_SetString(PyExc_TypeError, "keys must be dict ");
+        return NULL;
+    }
+
+    con = db->con;
+    body = new_buffer(LBUF_SIZE, 0);
+    if(body == NULL){
+        return NULL;
+    }
+    if(init_bucket(con, 24) < 0){
+        return NULL;
+    }
+
+    if(dbObj){
+        set_param_db(body, dbObj);
+        write2buf(body, CRLF, 2);
+    }
+    if(atomic){
+        write2buf(body, "atomic\t", 7);
+        write2buf(body, "true", 4);
+        write2buf(body, CRLF, 2);
+    }
+    write_bulk_keys(keysObj, body);
+
+    set_request_path(con, METHOD_POST, LEN(METHOD_POST), GET_BULK_URL, LEN(GET_BULK_URL));
+    snprintf(content_length, sizeof (content_length), "%d", body->len);
+    add_content_length(con, content_length, strlen(content_length));
+    add_header_oneline(con, KT_CONTENT_TYPE, LEN(KT_CONTENT_TYPE));
+    end_header(con);
+    
+    add_body(con, body->buf, body->len);
+
+    if(request(con, 200) > 0){
+        result = convert2valuedict(con->response_body);
+    }else{
+        if(con->response_status == RES_SUCCESS){
+            set_error(con);
+        }else{
+            PyErr_SetString(KtException, "could not set error ");
+        }
+    }
+    
+    free_buffer(body);
     free_http_data(con);
 
     return result;
