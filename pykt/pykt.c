@@ -129,7 +129,7 @@ initpykt(void)
 
     PyModule_AddIntConstant(m, "WAIT_READ", WAIT_READ);
     PyModule_AddIntConstant(m, "WAIT_WRITE", WAIT_WRITE);
-    
+    PyModule_AddStringConstant(m, "__version__", VERSION);    
     
 
 }

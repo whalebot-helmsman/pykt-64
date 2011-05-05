@@ -20,7 +20,7 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 
-#define VERSION 0.0.1
+#define VERSION "0.0.1"
 
 #ifdef DEVELOP
 #define DEBUG(...) \
