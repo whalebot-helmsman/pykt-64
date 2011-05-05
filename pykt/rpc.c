@@ -1774,7 +1774,10 @@ rpc_call_cur_get_key(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = convert2dict(con->response_body);
+        PyObject*temp = convert2dict(con->response_body);
+        result = PyDict_GetItemString(temp, "key");
+        Py_INCREF(result);
+        Py_DECREF(temp);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
@@ -1821,7 +1824,10 @@ rpc_call_cur_get_value(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = convert2dict(con->response_body);;
+        PyObject *temp = convert2dict(con->response_body);
+        result = PyDict_GetItemString(temp, "value");
+        Py_INCREF(result);
+        Py_DECREF(temp);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
@@ -1869,7 +1875,13 @@ rpc_call_cur_get(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        result = convert2dict(con->response_body);
+        PyObject *temp = convert2dict(con->response_body);
+        PyObject *key = PyDict_GetItemString(temp, "key");
+        PyObject *value = PyDict_GetItemString(temp, "value");
+        Py_INCREF(key);
+        Py_INCREF(value);
+        result = PyTuple_Pack(2, key, value);
+        Py_DECREF(temp);
     }else{
         if(con->response_status == RES_SUCCESS){
             set_error(con);
