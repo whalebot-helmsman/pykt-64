@@ -832,12 +832,12 @@ inline PyObject*
 rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalObj, int expire)
 {
     http_connection *con;
-    char *key, *oval, *nval, *encbuf, *db_name;
-    Py_ssize_t key_len, oval_len = 0, nval_len = 0, db_name_len = 0;
+    char *key, *oval = NULL, *nval = NULL, *encbuf, *db_name;
+    Py_ssize_t key_len, db_name_len = 0;
     char content_length[12];
     char xt[14];
     uint64_t expire_time = 0;
-    size_t encbuf_len, xt_len = 0;
+    size_t encbuf_len, oval_len = 0, nval_len = 0, xt_len = 0;
     uint32_t body_len = 4;
     PyObject *result = NULL, *ovalS = NULL, *nvalS = NULL;
 
@@ -859,15 +859,21 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     }
     
     if(ovalObj && ovalObj != Py_None){
+        char *temp1;
+        Py_ssize_t temp1_len;
         ovalS = serialize_value(ovalObj);
-        PyString_AsStringAndSize(ovalS, &oval, &oval_len);
+        PyString_AsStringAndSize(ovalS, &temp1, &temp1_len);
+        urlencode(temp1, temp1_len, &oval, &oval_len);
         body_len += oval_len;
         body_len += 7;
     }
 
     if(nvalObj && nvalObj != Py_None){
+        char *temp2;
+        Py_ssize_t temp2_len;
         nvalS = serialize_value(nvalObj);
-        PyString_AsStringAndSize(nvalS, &nval, &nval_len);
+        PyString_AsStringAndSize(nvalS, &temp2, &temp2_len);
+        urlencode(temp2, temp2_len, &nval, &nval_len);
         body_len += nval_len;
         body_len += 7;
     }
@@ -928,6 +934,12 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     
     free_http_data(con);
     PyMem_Free(encbuf);
+    if(oval){
+        PyMem_Free(oval);
+    }
+    if(nval){
+        PyMem_Free(nval);
+    }
     Py_XDECREF(ovalS);
     Py_XDECREF(nvalS);
 

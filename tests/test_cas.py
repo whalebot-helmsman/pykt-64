@@ -43,4 +43,13 @@ def test_cas_few_param2():
     ok_(ret == None)
     db.close()
 
-#TODO utf8 test
+@with_setup(setup=clear)
+def test_cas_utf8():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set("あいうえお", "かきくけこ")
+    ret = db.cas("あいうえお", oval="かきくけこ", nval="さしすせそ")
+    ok_(ret == True)
+    ret = db.get("あいうえお")
+    ok_(ret == "さしすせそ")
+    db.close()
