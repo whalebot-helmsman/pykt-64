@@ -10,6 +10,8 @@ Require
 
 pykt requires **Python 2.x >= 2.5**. 
 
+kyototycoon 0.9.39 +.
+
 Installation
 ---------------------------------
 
