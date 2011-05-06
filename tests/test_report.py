@@ -15,6 +15,14 @@ def test_report():
     ok_(isinstance(ret, dict))
     db.close()
 
+def test_report_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.report()
+    ok_(ret)
+    ok_(isinstance(ret, dict))
+    db.close()
+
 def test_report_loop():
     db = KyotoTycoon()
     db = db.open()

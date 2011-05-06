@@ -39,7 +39,10 @@ def test_set_db():
     db.db = "test"
     ok_(db.db == "test")
 
-def test_get_db():
+def test_get_db1():
     db = KyotoTycoon()
     ok_(db.db == None)
 
+def test_get_db2():
+    db = KyotoTycoon("test")
+    ok_(db.db == "test")

@@ -25,6 +25,18 @@ def test_match_regex1():
     ok_(ret == ["ABC"])
     db.close()
 
+@nottest
+@with_setup(setup=clear)
+def test_match_regex_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("ABC", "B")
+    db.set("BC", "B")
+    db.set("C", "B")
+    ret = db.match_regex("A")
+    ok_(ret == ["ABC"])
+    db.close()
+
 @with_setup(setup=clear)
 def test_match_regex2():
     db = KyotoTycoon()

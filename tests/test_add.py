@@ -24,6 +24,16 @@ def test_add():
     db.close()
 
 @with_setup(setup=clear)
+def test_add_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.add("A", "B")
+    ok_(ret)
+    ret = db.get("A")
+    ok_(ret == "B")
+    db.close()
+
+@with_setup(setup=clear)
 def test_add_utf8():
     db = KyotoTycoon()
     db = db.open()

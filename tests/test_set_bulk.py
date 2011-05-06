@@ -32,6 +32,14 @@ def test_set_bulk():
     ok_(ret == "D")
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_set_bulk_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.set_bulk(d)
+    ok_(False)
+
 @with_setup(setup=clear)
 def test_set_bulk_utf8():
     db = KyotoTycoon()

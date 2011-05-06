@@ -27,6 +27,14 @@ def test_err_type():
     db.open()
     ret = db.get_bulk(d)
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_get_bulk_with_db():
+    db = KyotoTycoon("test")
+    db.open()
+    db.get_bulk(d.keys())
+    ok_(False)
+
 @with_setup(setup=clear)
 def test_get_bulk():
     db = KyotoTycoon()

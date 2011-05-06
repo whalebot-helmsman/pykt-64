@@ -24,6 +24,15 @@ def test_cas():
     ok_(ret == "C")
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_cas_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("A", "B")
+    db.cas("A", oval="B", nval="C")
+    ok_(False)
+
 @with_setup(setup=clear)
 @raises(KTException)
 def test_cas_fail():

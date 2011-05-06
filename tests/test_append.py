@@ -23,6 +23,14 @@ def test_append():
     ok_(ret == "B")
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_append_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.append("A", "B")
+    ok_(False)
+
 @with_setup(setup=clear)
 def test_append_utf8():
     db = KyotoTycoon()

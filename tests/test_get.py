@@ -15,6 +15,15 @@ def test_err_get():
     ret = db.get("A")
 
 @with_setup(setup=clear)
+def test_get_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("A", "B")
+    ret = db.get("A")
+    ok_(ret == "B")
+    db.close()
+
+@with_setup(setup=clear)
 def test_get():
     db = KyotoTycoon()
     db = db.open()

@@ -25,6 +25,17 @@ def test_replace():
     db.close()
 
 @with_setup(setup=clear)
+def test_replace_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("A", "1")
+    ret = db.replace("A", "B")
+    ok_(ret)
+    ret = db.get("A")
+    ok_(ret == "B")
+    db.close()
+
+@with_setup(setup=clear)
 def test_replace_utf8():
     db = KyotoTycoon()
     db = db.open()

@@ -14,6 +14,18 @@ def test_err_prefix():
     db = KyotoTycoon()
     ret = db.match_prefix("A")
 
+@nottest
+@with_setup(setup=clear)
+def test_match_prefix_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("ABC", "B")
+    db.set("BC", "B")
+    db.set("C", "B")
+    ret = db.match_prefix("A")
+    ok_(ret == ["ABC"])
+    db.close()
+
 @with_setup(setup=clear)
 def test_match_prefix1():
     db = KyotoTycoon()

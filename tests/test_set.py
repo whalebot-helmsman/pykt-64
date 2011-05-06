@@ -24,6 +24,16 @@ def test_set():
     db.close()
 
 @with_setup(setup=clear)
+def test_set_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.set("A", "B")
+    ok_(ret)
+    ret = db.get("A")
+    ok_(ret == "B")
+    db.close()
+
+@with_setup(setup=clear)
 def test_set_utf8():
     db = KyotoTycoon()
     db = db.open()

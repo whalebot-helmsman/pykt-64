@@ -14,6 +14,13 @@ def test_echo():
     ok_(ret == True) 
     db.close()
 
+def test_echo_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.echo()
+    ok_(ret == True) 
+    db.close()
+
 def test_echo_loop():
     db = KyotoTycoon()
     db = db.open()

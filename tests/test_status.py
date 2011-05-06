@@ -15,6 +15,14 @@ def test_status():
     ok_(isinstance(ret, dict))
     db.close()
 
+def test_status_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    ret = db.status()
+    ok_(ret)
+    ok_(isinstance(ret, dict))
+    db.close()
+
 def test_status_loop():
     db = KyotoTycoon()
     db = db.open()

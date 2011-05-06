@@ -39,6 +39,13 @@ def test_remove_bulk():
     ok_(ret == None)
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_remove_bulk_with_db():
+    db = KyotoTycoon("test")
+    db.open()
+    db.remove_bulk(d.keys())
+    ok_(False)
 
 @with_setup(setup=clear)
 def test_remove_bulk_utf8():

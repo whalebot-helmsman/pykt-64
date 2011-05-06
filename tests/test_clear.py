@@ -19,6 +19,18 @@ def test_clear():
     ok_(ret == None)
     db.close()
 
+def test_clear_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("A", "B")
+    ret = db.get("A")
+    ok_(ret == "B")
+    ret = db.clear()
+    ok_(ret == True)
+    ret = db.get("A")
+    ok_(ret == None)
+    db.close()
+
 def test_loop():
     db = KyotoTycoon()
     db = db.open()

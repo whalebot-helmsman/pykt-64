@@ -27,6 +27,19 @@ def test_remove():
     db.close()
 
 @with_setup(setup=clear)
+def test_remove_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.set("A", "B")
+    ret = db.get("A")
+    ok_(ret == "B")
+    ret = db.remove("A")
+    ok_(ret == True)
+    ret = db.get("A")
+    ok_(ret == None)
+    db.close()
+
+@with_setup(setup=clear)
 def test_remove_utf8():
     db = KyotoTycoon()
     db = db.open()

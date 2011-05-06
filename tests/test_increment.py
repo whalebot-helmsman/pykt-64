@@ -23,6 +23,14 @@ def test_increment():
     ok_(ret == 2)
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_increment_with_db():
+    db = KyotoTycoon("test")
+    db = db.open()
+    db.increment("I")
+    ok_(False)
+
 @with_setup(setup=clear)
 def test_increment_utf8():
     db = KyotoTycoon()
