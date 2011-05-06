@@ -149,7 +149,7 @@ convert2dict(buffer *buf)
     }
 
     PyMem_Free(ctx);
-    return (PyObject *)ctx->user;
+    return dict;
 }
 
 inline PyObject * 
@@ -181,7 +181,7 @@ convert2valuedict(buffer *buf)
     }
 
     PyMem_Free(ctx);
-    return (PyObject *)ctx->user;
+    return dict;
 }
 
 inline PyObject * 
@@ -214,6 +214,6 @@ convert2keylist(buffer *buf)
     }
 
     PyMem_Free(ctx);
-    return (PyObject *)ctx->user;
+    return list;
 }
 
