@@ -14,46 +14,54 @@ def clear():
     db.clear()
     db.close()
 
-@with_setup(setup=clear)
 @raises(IOError)
-def test_err_set_bulk():
+def test_err_open():
     db = KyotoTycoon()
-    ret = db.set_bulk(d)
+    ret = db.get_bulk(d.keys())
+
 
 @with_setup(setup=clear)
-def test_set_bulk():
+@raises(TypeError)
+def test_err_type():
     db = KyotoTycoon()
-    db = db.open()
+    db.open()
+    ret = db.get_bulk(d)
+
+@with_setup(setup=clear)
+def test_get_bulk():
+    db = KyotoTycoon()
+    db.open()
     ret = db.set_bulk(d)
     ok_(ret == 2)
-    ret = db.get("A")
-    ok_(ret == "B")
-    ret = db.get("C")
-    ok_(ret == "D")
+    ret = db.get_bulk(d.keys())
+    ok_(isinstance(ret, dict))
+    ok_(ret == d)
     db.close()
 
 @with_setup(setup=clear)
-def test_set_bulk_utf8():
+def test_get_bulk_utf8():
     db = KyotoTycoon()
-    db = db.open()
+    db.open()
     ret = db.set_bulk(d2)
     ok_(ret == 2)
-    ret = db.get("あいうえお")
-    ok_(ret == "ABC")
-    ret = db.get("かきくけこ")
-    ok_(ret == "てすと2")
+    ret = db.get_bulk(d2.keys())
+    ok_(isinstance(ret, dict))
+    ok_(ret == d2)
     db.close()
 
+
 @with_setup(setup=clear)
-def test_set_bulk_atomic():
+def test_get_bulk_atomic():
     db = KyotoTycoon()
-    db = db.open()
-    ret = db.set_bulk(d, atomic=True)
+    db.open()
+    ret = db.set_bulk(d2, atomic=True)
     ok_(ret == 2)
-    ret = db.get("A")
-    ok_(ret == "B")
-    ret = db.get("C")
-    ok_(ret == "D")
+    ret = db.get_bulk(d2.keys(), atomic=True)
+    ok_(isinstance(ret, dict))
+    ok_(ret == d2)
     db.close()
+
+
+
 
 
