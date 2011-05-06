@@ -12,6 +12,40 @@ recv_data(http_connection *con);
 static inline int 
 recv_response(http_connection *con, int status_code);
 
+static inline int
+internal_select(int fd, int timeout, int write)
+{
+    int ret;
+    fd_set fds;
+    struct timeval tv;
+
+    if (timeout <= 0){
+        return 0;
+    }
+    if (fd < 0){
+        return 0;
+    }
+
+    tv.tv_sec = timeout;
+    tv.tv_usec = (int)((timeout - tv.tv_sec) * 1e6);
+    FD_ZERO(&fds);
+    FD_SET(fd, &fds);
+
+    if (write){
+        ret = select(fd + 1, NULL, &fds, NULL, &tv);
+    }else{
+        ret = select(fd + 1, &fds, NULL, NULL, &tv);
+    }
+    if (ret < 0){
+        return -1;
+    }
+    if (ret == 0){
+        return 1;
+    }
+    return 0;
+}
+
+
 inline http_connection *
 open_http_connection(const char *host, int port)
 {
@@ -135,6 +169,13 @@ connect_socket(const char *host, int port)
         
         if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag,
                 sizeof(int)) == -1) {
+            close(fd);
+            PyErr_SetFromErrno(PyExc_IOError);
+            goto error;
+        }
+        
+        // set non_blocking
+        if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
             close(fd);
             PyErr_SetFromErrno(PyExc_IOError);
             goto error;

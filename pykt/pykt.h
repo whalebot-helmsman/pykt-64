@@ -2,6 +2,7 @@
 #define PYKT_H
 
 #include <Python.h>
+#include <structmember.h>
 
 #include <assert.h>
 #include <fcntl.h>   
@@ -19,6 +20,8 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
+#include <sys/select.h>
+#include <sys/time.h>
 
 #define VERSION "0.0.1"
 
