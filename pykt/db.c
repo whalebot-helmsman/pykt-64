@@ -91,7 +91,7 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
         port = DEFAULT_PORT;
     }
 
-    con = open_http_connection(host, port);
+    con = open_http_connection(host, port, timeout);
     if(con == NULL){
         return NULL;
     }

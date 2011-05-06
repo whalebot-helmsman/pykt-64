@@ -4,7 +4,7 @@
 #define BUF_SIZE 1024 * 64
 
 static inline int 
-connect_socket(const char *host, int port);
+connect_socket(const char *host, int port, int timeout);
 
 static inline int 
 recv_data(http_connection *con);
@@ -13,7 +13,7 @@ static inline int
 recv_response(http_connection *con, int status_code);
 
 static inline int
-internal_select(int fd, int timeout, int write)
+call_select(int fd, int timeout, int write)
 {
     int ret;
     fd_set fds;
@@ -47,7 +47,7 @@ internal_select(int fd, int timeout, int write)
 
 
 inline http_connection *
-open_http_connection(const char *host, int port)
+open_http_connection(const char *host, int port, int timeout)
 {
 
     http_connection *con = NULL;
@@ -69,7 +69,7 @@ open_http_connection(const char *host, int port)
 
     DEBUG("open_http_connection new %p", con);
 
-    fd = connect_socket(host, port);
+    fd = connect_socket(host, port, timeout);
     if(fd < 0){
         if(con){
             PyMem_Free(con);
@@ -123,7 +123,7 @@ close_http_connection(http_connection *con)
 
 
 static inline int 
-connect_socket(const char *host, int port)
+connect_socket(const char *host, int port, int timeout)
 {
     struct addrinfo hints, *res = NULL, *ai = NULL;
     int flag = 1;
@@ -131,7 +131,7 @@ connect_socket(const char *host, int port)
     int fd = -1;
     char strport[7];
     
-    DEBUG("connect_socket %s:%d", host, port);
+    DEBUG("connect_socket %s:%d:%d", host, port, timeout);
    
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
