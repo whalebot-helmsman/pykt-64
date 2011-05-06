@@ -14,7 +14,7 @@ def test_err_prefix():
     db = KyotoTycoon()
     ret = db.match_prefix("A")
 
-@nottest
+@raises(KTException)
 @with_setup(setup=clear)
 def test_match_prefix_with_db():
     db = KyotoTycoon("test")

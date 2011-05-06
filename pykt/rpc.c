@@ -1075,7 +1075,7 @@ rpc_call_match_prefix(DBObject *db, PyObject *prefixObj)
         result = convert2keylist(con->response_body);
         //result = convert2dict(con->response_body);
     }else{
-        if(con->status_code == RES_SUCCESS){
+        if(con->response_status == RES_SUCCESS){
             set_error(con);
         }else{
             PyErr_SetString(KtException, "could not set error ");
@@ -1129,7 +1129,7 @@ rpc_call_match_regex(DBObject *db, PyObject *regexObj)
         result = convert2keylist(con->response_body);
         //result = convert2dict(con->response_body);
     }else{
-        if(con->status_code == RES_SUCCESS){
+        if(con->response_status == RES_SUCCESS){
             set_error(con);
         }else{
             PyErr_SetString(KtException, "could not set error ");
