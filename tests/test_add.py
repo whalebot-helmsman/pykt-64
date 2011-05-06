@@ -53,3 +53,25 @@ def test_add_large():
     ok_(ret == "L" * 1024 * 1024 * 1)
     db.close()
 
+@raises(KTException)
+@with_setup(setup=clear)
+def test_dup():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.add("A", "B")
+    ok_(ret == True)
+    ok_(db.get("A") == "B")
+    ret = db.add("A", "B")
+
+
+@with_setup(setup=clear)
+def test_loop():
+    db = KyotoTycoon()
+    db = db.open()
+    for i in xrange(100):
+        k = str(i)
+        ret = db.add(k, "B")
+        ok_(ret)
+        ret = db.get(k)
+        ok_(ret == "B")
+    db.close()

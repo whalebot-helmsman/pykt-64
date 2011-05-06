@@ -9,61 +9,69 @@ def clear():
     db.close()
 
 @raises(IOError)
-def test_err_add():
+def test_err_append():
     db = KyotoTycoon()
-    db.add("A", "B")
+    db.append("A", "B")
 
 @with_setup(setup=clear)
-def test_replace():
+def test_append():
     db = KyotoTycoon()
     db = db.open()
-    db.set("A", "1")
-    ret = db.replace("A", "B")
+    ret = db.append("A", "B")
     ok_(ret)
     ret = db.get("A")
     ok_(ret == "B")
     db.close()
 
 @with_setup(setup=clear)
-def test_replace_utf8():
+def test_append_utf8():
     db = KyotoTycoon()
     db = db.open()
-    db.set("あいうえお", "1")
-    ret = db.replace("あいうえお", "かきくけこ")
+    ret = db.append("あいうえお", "かきくけこ")
     ok_(ret) 
     ret = db.get("あいうえお")
     ok_(ret == "かきくけこ")
     db.close()
 
 @with_setup(setup=clear)
-def test_replace_large_key():
+def test_append_large_key():
     db = KyotoTycoon()
     db = db.open()
-    db.set("L" * 1024 * 4, "1")
-    ret = db.replace("L" * 1024 * 4, "L")
+    ret = db.append("L" * 1024 * 4, "L")
     ok_(ret) 
     ret = db.get("L" * 1024 * 4)
     ok_(ret == "L")
     db.close()
 
 @with_setup(setup=clear)
-def test_replace_large():
+def test_append_large():
     db = KyotoTycoon()
     db = db.open()
-    db.set("L", 1)
-    ret = db.replace("L", "L" * 1024 * 1024 * 1)
+    ret = db.append("L", "L" * 1024 * 1024 * 1)
     ok_(ret) 
     ret = db.get("L")
     ok_(ret == "L" * 1024 * 1024 * 1)
     db.close()
 
-@raises(KTException)
 @with_setup(setup=clear)
-def test_no_key():
+def test_duble():
     db = KyotoTycoon()
     db = db.open()
-    ret = db.replace("A", "B")
-    ok_(ret)
-    ret = db.get("A")
-    ok_(ret == "B")
+    ret = db.append("A", "B")
+    ok_(ret == True)
+    ok_(db.get("A") == "B")
+    ret = db.append("A", "B")
+    ok_(ret == True)
+    ok_(db.get("A") == "BB")
+
+
+@with_setup(setup=clear)
+def test_loop():
+    db = KyotoTycoon()
+    db = db.open()
+    for i in xrange(100):
+        ret = db.append("A", "B")
+        ok_(ret)
+        ret = db.get("A")
+        ok_(ret == "B" * (i+1))
     db.close()

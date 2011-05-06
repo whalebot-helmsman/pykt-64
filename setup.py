@@ -42,7 +42,7 @@ setup(name='pykt',
             #include_dirs=include_dirs,
             #library_dirs=library_dirs,
             #libraries=["profiler"],
-            define_macros=[("DEVELOP",None)],
+            #define_macros=[("DEVELOP",None)],
             )
         ],
 

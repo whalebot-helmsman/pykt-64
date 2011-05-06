@@ -532,12 +532,12 @@ static inline PyObject*
 add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject *valueObj, int expire)
 {
     http_connection *con;
-    char *key, *val, *encbuf, *db_name;
-    Py_ssize_t key_len, val_len, db_name_len = 0;
+    char *key, *val, *enckey, *encval, *db_name = NULL;
+    Py_ssize_t key_len, val_len;
     char content_length[12];
     char xt[14];
     uint64_t expire_time = 0;
-    size_t encbuf_len, xt_len = 0;
+    size_t enckey_len, encval_len, db_name_len = 0, xt_len = 0;
     uint32_t body_len = 12;
     PyObject *result = NULL, *temp_val;
     
@@ -563,12 +563,16 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     PyString_AsStringAndSize(keyObj, &key, &key_len);
     PyString_AsStringAndSize(temp_val, &val, &val_len);
     
-    urlencode(key, key_len, &encbuf, &encbuf_len);
-    body_len += encbuf_len;
-    body_len += val_len;
+    urlencode(key, key_len, &enckey, &enckey_len);
+    urlencode(val, val_len, &encval, &encval_len);
+    body_len += enckey_len;
+    body_len += encval_len;
 
     if(dbObj){
-        PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
+        char *temp;
+        Py_ssize_t temp_len;
+        PyString_AsStringAndSize(dbObj, &temp, &temp_len);
+        urlencode(temp, temp_len, &db_name, &db_name_len);
         body_len += db_name_len;
         body_len += 5;
     }
@@ -593,10 +597,10 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     }
 
     add_body(con, "key\t", 4);
-    add_body(con, encbuf, encbuf_len);
+    add_body(con, enckey, enckey_len);
     add_body(con, CRLF, 2);
     add_body(con, "value\t", 6);
-    add_body(con, val, val_len);
+    add_body(con, encval, encval_len);
 
     if(xt_len > 0){
         add_body(con, CRLF, 2);
@@ -616,7 +620,11 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     }
     
     free_http_data(con);
-    PyMem_Free(encbuf);
+    PyMem_Free(enckey);
+    PyMem_Free(encval);
+    if(db_name_len > 0){
+        PyMem_Free(db_name);
+    }
     Py_DECREF(temp_val);
 
     return result;
@@ -832,12 +840,12 @@ inline PyObject*
 rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalObj, int expire)
 {
     http_connection *con;
-    char *key, *oval = NULL, *nval = NULL, *encbuf, *db_name;
-    Py_ssize_t key_len, db_name_len = 0;
+    char *key, *oval = NULL, *nval = NULL, *encbuf, *db_name = NULL;
+    Py_ssize_t key_len;
     char content_length[12];
     char xt[14];
     uint64_t expire_time = 0;
-    size_t encbuf_len, oval_len = 0, nval_len = 0, xt_len = 0;
+    size_t encbuf_len, oval_len = 0, nval_len = 0, xt_len = 0, db_name_len = 0;
     uint32_t body_len = 4;
     PyObject *result = NULL, *ovalS = NULL, *nvalS = NULL;
 
@@ -853,7 +861,10 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     }
     
     if(dbObj){
-        PyString_AsStringAndSize(dbObj, &db_name, &db_name_len);
+        char *temp;
+        Py_ssize_t temp_len;
+        PyString_AsStringAndSize(dbObj, &temp, &temp_len);
+        urlencode(temp, temp_len, &db_name, &db_name_len);
         body_len += db_name_len;
         body_len += 5;
     }
@@ -934,6 +945,9 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     
     free_http_data(con);
     PyMem_Free(encbuf);
+    if(db_name_len > 0){
+        PyMem_Free(db_name);
+    }
     if(oval){
         PyMem_Free(oval);
     }
