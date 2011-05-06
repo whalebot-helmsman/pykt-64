@@ -28,9 +28,13 @@ CursorObject_init(CursorObject *self, PyObject *args, PyObject *kwargs)
 static inline void
 CusorObject_dealloc(CursorObject *self)
 {
-
-    PyObject *result = rpc_call_cur_delete(self->db, self->cur);
-    Py_XDECREF(result);
+    
+    /* 
+    if(is_opened(self->db)){
+        //Not impl ???
+        PyObject *result = rpc_call_cur_delete(self->db, self->cur);
+        Py_XDECREF(result);
+    }*/
     Py_CLEAR(self->db);
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -174,7 +178,7 @@ static PyMethodDef CursorObject_methods[] = {
     {"get_key", (PyCFunction)CursorObject_get_key, METH_VARARGS|METH_KEYWORDS, 0},
     {"get_value", (PyCFunction)CursorObject_get_value, METH_VARARGS|METH_KEYWORDS, 0},
     {"get", (PyCFunction)CursorObject_get, METH_VARARGS|METH_KEYWORDS, 0},
-    {"delete", (PyCFunction)CursorObject_delete, METH_NOARGS, 0},
+    //{"delete", (PyCFunction)CursorObject_delete, METH_NOARGS, 0},
     {NULL, NULL}
 };
 
