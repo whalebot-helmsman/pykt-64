@@ -29,6 +29,7 @@ static inline void
 CusorObject_dealloc(CursorObject *self)
 {
     
+    DEBUG("CursorObject_dealloc %p CUR: %d", self, self->cur);
     /* 
     if(is_opened(self->db)){
         //Not impl ???

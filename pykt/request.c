@@ -5,7 +5,7 @@ set_request_path(http_connection *con, char *method, size_t method_len, char *pa
 {
     data_bucket *bucket = con->bucket;
     
-    DEBUG("request URL %s", path);
+    //DEBUG("request URL %s", path);
     set2bucket(bucket, method, method_len);
     set2bucket(bucket, path, path_len);
     set2bucket(bucket, HTTP_11, LEN(HTTP_11));

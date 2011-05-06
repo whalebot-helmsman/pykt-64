@@ -543,7 +543,7 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     
     PyObject *dbObj = db->dbObj;
 
-    DEBUG("rpc_call_add %p %p %d", keyObj, valueObj, expire);
+    //DEBUG("rpc_call_add %p %p %d", keyObj, valueObj, expire);
     if(!PyString_Check(keyObj)){
         PyErr_SetString(PyExc_TypeError, "key must be string ");
         return NULL;

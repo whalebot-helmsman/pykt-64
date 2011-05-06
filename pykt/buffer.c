@@ -97,7 +97,7 @@ getPyString(buffer *buf)
     PyObject *o;
     o = PyString_FromStringAndSize(buf->buf, buf->len);
     //free_buffer(buf);
-    DEBUG("getPyString %p", buf);
+    //DEBUG("getPyString %p", buf);
     return o;
 }
 
@@ -118,8 +118,6 @@ getString(buffer *buf)
     buf->buf[buf->len] = '\0';
     return buf->buf;
 }
-
-
 
 
 

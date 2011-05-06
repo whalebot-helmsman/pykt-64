@@ -43,7 +43,7 @@ open_http_connection(const char *host, int port)
     }
     
     con->fd = fd;
-    DEBUG("open  con fd:%d", con->fd);
+    DEBUG("open http_connection  %p fd:%d", con, con->fd);
     return con;
 }
 
@@ -103,7 +103,7 @@ connect_socket(const char *host, int port)
     Py_END_ALLOW_THREADS
 
     if (err == -1) {
-        DEBUG("error getaddrinfo");
+        //DEBUG("error getaddrinfo");
         PyErr_SetFromErrno(PyExc_IOError);
         return -1;
     }
@@ -253,8 +253,9 @@ recv_data(http_connection *con)
     Py_BEGIN_ALLOW_THREADS
     r = read(con->fd, buf, sizeof(buf));
     Py_END_ALLOW_THREADS
-
-    DEBUG("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
+    
+    //response dump
+    //DEBUG("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
 
     switch(r){
         case 0:

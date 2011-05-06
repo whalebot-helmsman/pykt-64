@@ -45,7 +45,7 @@ rest_call_get(DBObject *db, PyObject *keyObj)
         temp = getPyString(con->response_body);
         result = deserialize_value(temp);
         Py_DECREF(temp);
-        DEBUG("response body %s", getString(con->response_body));
+        //DEBUG("response body %s", getString(con->response_body));
     }else{
         if(con->status_code == 404){
             PyErr_Clear();
@@ -138,7 +138,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire, kt
     PyString_AsStringAndSize(temp_val, &val, &val_len);
 
     urlencode(key, key_len, &encbuf, &encbuf_len);
-    DEBUG("urlencode key %s", encbuf);
+    //DEBUG("urlencode key %s", encbuf);
 
     set_request_path(con, METHOD_PUT, LEN(METHOD_PUT), encbuf, encbuf_len);
     
@@ -160,7 +160,7 @@ rest_call_put(DBObject *db, PyObject *keyObj, PyObject *valueObj, int expire, kt
         expire_time = get_expire_time(expire);
         //set X-Kt-Kt
         snprintf(xt, sizeof (xt), "%llu", expire_time);
-        DEBUG("expire %s", xt);
+        //DEBUG("expire %s", xt);
         add_kt_xt(con, xt, strlen(xt));
     }
     
