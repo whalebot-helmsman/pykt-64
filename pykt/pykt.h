@@ -38,7 +38,7 @@
     } while(0)
 #else
 #define DEBUG(...) do{}while(0)
-#define DEUMP(...) do{}while(0)
+#define DUMP(...) do{}while(0)
 #endif
 
 #define LEN(x) sizeof(x) -1
