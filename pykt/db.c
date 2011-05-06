@@ -72,11 +72,10 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
 {
     char *host = NULL;
     int port = 0;
-    double timeout;
     http_connection *con;
 
-    static char *kwlist[] = {"host", "port", "timeout", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sid", kwlist, &host, &port, &timeout)){
+    static char *kwlist[] = {"host", "port", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|si", kwlist, &host, &port)){
         return NULL; 
     }
     
@@ -89,16 +88,12 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     if(port == 0){
         port = DEFAULT_PORT;
     }
-    if(!timeout){
-        timeout = DEFAULT_TIMEOUT;
-    }
     con = open_http_connection(host, port);
     if(con == NULL){
         return NULL;
     }
     self->host = host;
     self->port = port;
-    self->timeout = timeout;
     self->con = con;
 	Py_INCREF(self);
     return (PyObject *)self;
