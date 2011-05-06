@@ -33,7 +33,7 @@ open_http_connection(const char *host, int port)
     con->have_kt_error = 0;
     con->status_code = 0;
 
-    DEBUG("open_http_connection %p", con);
+    DEBUG("open_http_connection new %p", con);
 
     fd = connect_socket(host, port);
     if(fd < 0){
@@ -41,7 +41,7 @@ open_http_connection(const char *host, int port)
     }
     
     con->fd = fd;
-    DEBUG("open http_connection  %p fd:%d", con, con->fd);
+    DEBUG("open http_connection connected %p fd:%d", con, con->fd);
     return con;
 }
 
