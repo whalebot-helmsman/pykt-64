@@ -29,8 +29,16 @@
         printf(__VA_ARGS__); \
         printf("\n"); \
     } while(0)
+#define DUMP(...) \
+    do { \
+        printf("-------------------------------------------------------\n"); \
+        printf(__VA_ARGS__); \
+        printf("\n"); \
+        printf("-------------------------------------------------------\n"); \
+    } while(0)
 #else
 #define DEBUG(...) do{}while(0)
+#define DEUMP(...) do{}while(0)
 #endif
 
 #define LEN(x) sizeof(x) -1

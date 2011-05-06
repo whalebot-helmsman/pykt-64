@@ -266,7 +266,7 @@ recv_data(http_connection *con)
     Py_END_ALLOW_THREADS
     
     //response dump
-    //DEBUG("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
+    DUMP("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
 
     switch(r){
         case 0:

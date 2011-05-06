@@ -42,7 +42,7 @@ setup(name='pykt',
             #include_dirs=include_dirs,
             #library_dirs=library_dirs,
             #libraries=["profiler"],
-            define_macros=[("DEVELOP",None)],
+            #define_macros=[("DEVELOP",None)],
             )
         ],
 
@@ -50,8 +50,6 @@ setup(name='pykt',
             'Development Status :: 4 - Beta',
             'License :: OSI Approved :: BSD License',
             'Operating System :: POSIX :: Linux',
-            'Operating System :: MacOS :: MacOS X',
-            'Operating System :: POSIX :: BSD :: FreeBSD',
             'Programming Language :: C',
         ],
 )

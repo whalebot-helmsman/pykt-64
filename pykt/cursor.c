@@ -150,7 +150,7 @@ CursorObject_get(CursorObject *self, PyObject *args, PyObject *kwargs)
     int step = 0;
 
     static char *kwlist[] = {"step", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ii", kwlist, &step)){
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i", kwlist, &step)){
         return NULL; 
     }
 
@@ -171,9 +171,9 @@ CursorObject_delete(CursorObject *self, PyObject *args)
 
 static PyMethodDef CursorObject_methods[] = {
     {"jump", (PyCFunction)CursorObject_jump, METH_VARARGS|METH_KEYWORDS, 0},
-    {"jump_back", (PyCFunction)CursorObject_jump_back, METH_VARARGS|METH_KEYWORDS, 0},
+    //{"jump_back", (PyCFunction)CursorObject_jump_back, METH_VARARGS|METH_KEYWORDS, 0},
     {"step", (PyCFunction)CursorObject_step, METH_NOARGS, 0},
-    {"step_back", (PyCFunction)CursorObject_step_back, METH_NOARGS, 0},
+    //{"step_back", (PyCFunction)CursorObject_step_back, METH_NOARGS, 0},
     {"set_value", (PyCFunction)CursorObject_set_value, METH_VARARGS|METH_KEYWORDS, 0},
     {"remove", (PyCFunction)CursorObject_remove, METH_NOARGS, 0},
     {"get_key", (PyCFunction)CursorObject_get_key, METH_VARARGS|METH_KEYWORDS, 0},
