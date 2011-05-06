@@ -39,3 +39,14 @@ def test_head_notfound():
     ret = db.head("A"* 10)
     ok_(ret == False)
     db.close()
+
+@with_setup(setup=clear)
+def test_head_loop():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set("A", "B")
+    for i in xrange(100):
+        ret = db.head("A")
+        ok_(ret == True)
+    db.close()
+

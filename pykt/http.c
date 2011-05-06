@@ -26,6 +26,8 @@ open_http_connection(const char *host, int port)
         return NULL;
     }
     memset(con, 0, sizeof(http_connection));
+    con->fd = -1;
+    con->bucket = NULL;
     con->response_status = RES_INIT;
     con->head = 0;
     con->have_kt_error = 0;
@@ -35,10 +37,6 @@ open_http_connection(const char *host, int port)
 
     fd = connect_socket(host, port);
     if(fd < 0){
-        if(con){
-            //TODO IOError 
-            close_http_connection(con);
-        }
         return NULL;
     }
     
@@ -50,6 +48,9 @@ open_http_connection(const char *host, int port)
 inline void
 free_http_data(http_connection *con)
 {
+    if(con == NULL){
+        return;
+    }
     DEBUG("free_http_data %p", con);
     if(con->bucket){
         free_data_bucket(con->bucket);
@@ -64,12 +65,16 @@ free_http_data(http_connection *con)
 inline int
 close_http_connection(http_connection *con)
 {
+
     int ret = 0;
-    DEBUG("close_http_connection %p", con);
+    if(con == NULL){
+        return 0;
+    }
+    DEBUG("close_http_connection %p, fd: %d", con, con->fd);
     
     free_http_data(con);
 
-    if(con->fd > 0){
+    if(con->fd >= 0){
         close(con->fd);
         DEBUG("close con fd:%d", con->fd);
         con->fd = -1;
@@ -83,10 +88,10 @@ close_http_connection(http_connection *con)
 static inline int 
 connect_socket(const char *host, int port)
 {
-    struct addrinfo hints, *res, *ai;
+    struct addrinfo hints, *res = NULL, *ai = NULL;
     int flag = 1;
     int err;
-    int fd;
+    int fd = -1;
     char strport[7];
     
     DEBUG("connect_socket %s:%d", host, port);
@@ -122,14 +127,14 @@ connect_socket(const char *host, int port)
                 sizeof(int)) == -1) {
             close(fd);
             PyErr_SetFromErrno(PyExc_IOError);
-            return -1;
+            goto error;
         }
         
         if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &flag,
                 sizeof(int)) == -1) {
             close(fd);
             PyErr_SetFromErrno(PyExc_IOError);
-            return -1;
+            goto error;
         }
 
         Py_BEGIN_ALLOW_THREADS
@@ -146,11 +151,17 @@ connect_socket(const char *host, int port)
     if (ai == NULL)  {
         close(fd);
         PyErr_SetString(PyExc_IOError,"failed to connect\n");
-        return -1;
+        goto error;
     }
 
     freeaddrinfo(res);
+    DEBUG("connect success %d", fd);
     return fd;
+error:
+    if(res){
+        freeaddrinfo(res);
+    }
+    return -1;
 }
 
 inline int  

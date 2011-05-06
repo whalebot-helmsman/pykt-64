@@ -49,3 +49,14 @@ def test_get_mapping_protocol():
     ok_(ret == "B")
     db.close()
 
+@with_setup(setup=clear)
+def test_get_loop():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set("A", "B")
+    for i in xrange(100):
+        ret = db.get("A")
+        ok_(ret == "B")
+    db.close()
+
+

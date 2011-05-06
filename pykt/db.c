@@ -29,6 +29,7 @@ DBObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     
     DEBUG("DBObject_new self %p", self);
     self->dbObj = NULL;
+    self->con = NULL;
     return (PyObject *)self;
 }
 

@@ -11,5 +11,14 @@ def test_echo():
     db = KyotoTycoon()
     db = db.open()
     ret = db.echo()
+    ok_(ret == True) 
     db.close()
-    ok_(ret) 
+
+def test_echo_loop():
+    db = KyotoTycoon()
+    db = db.open()
+    for i in xrange(100):
+        ret = db.echo()
+        ok_(ret == True) 
+    db.close()
+

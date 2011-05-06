@@ -39,10 +39,27 @@ def test_remove_utf8():
     ok_(ret == None) 
     db.close()
 
+@with_setup(setup=clear)
 def test_remove_notfound():
     db = KyotoTycoon()
     db = db.open()
     ret = db.remove("A"* 10)
     ok_(ret == False)
     db.close()
+
+@with_setup(setup=clear)
+def test_remove_loop():
+    db = KyotoTycoon()
+    db = db.open()
+
+    for i in xrange(100):
+        db.set("A", "B")
+        ret = db.get("A")
+        ok_(ret == "B")
+        ret = db.remove("A")
+        ok_(ret == True)
+        ret = db.get("A")
+        ok_(ret == None)
+    db.close()
+
 

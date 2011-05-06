@@ -11,14 +11,35 @@ def test_open():
     db = db.open()
     ok_(db != None)
 
+@raises(IOError)
+def test_open_err():
+    db = KyotoTycoon()
+    db.open("A", 7777)
+    db.close()
+
 def test_close():
     db = KyotoTycoon()
     db = db.open()
     ret = db.close()
-    ok_(ret)
+    ok_(ret == True)
 
 def test_non_connect_close():
     db = KyotoTycoon()
     ret = db.close()
     ok_(ret == False)
+
+def test_double_close():
+    db = KyotoTycoon()
+    ret = db.close()
+    ret = db.close()
+    ok_(ret == False)
+
+def test_set_db():
+    db = KyotoTycoon()
+    db.db = "test"
+    ok_(db.db == "test")
+
+def test_get_db():
+    db = KyotoTycoon()
+    ok_(db.db == None)
 
