@@ -175,11 +175,12 @@ connect_socket(const char *host, int port, int timeout)
         }
         
         // set non_blocking
+        /*
         if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
             close(fd);
             PyErr_SetFromErrno(PyExc_IOError);
             goto error;
-        }
+        }*/
 
         Py_BEGIN_ALLOW_THREADS
         err = connect(fd, ai->ai_addr, ai->ai_addrlen);
