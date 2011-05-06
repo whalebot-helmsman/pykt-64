@@ -95,9 +95,9 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     if(con == NULL){
         return NULL;
     }
-    self->host = host;
-    self->port = port;
-    self->timeout = timeout;
+    //self->host = host;
+    //self->port = port;
+    //self->timeout = timeout;
     self->con = con;
 	Py_INCREF(self);
     return (PyObject *)self;
