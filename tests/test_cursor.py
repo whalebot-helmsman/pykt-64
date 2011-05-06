@@ -48,6 +48,7 @@ def test_cursor_jump_nodata():
     c.jump()
     ok_(False)
 
+"""
 @nottest
 @with_setup(setup=clear)
 def test_cursor_jump_back():
@@ -61,6 +62,7 @@ def test_cursor_jump_back():
     k3, v3 = c.get(True)
     ok_(k1 == k3)
     ok_(v1 == v3)
+"""
 
 @with_setup(setup=clear)
 def test_cursor_step():
