@@ -9,6 +9,8 @@ typedef struct {
     PyObject_HEAD
     char *host;
     int port;
+    int timeout;
+    int non_blocking;
     http_connection *con;
     PyObject *dbObj;
 } DBObject;
