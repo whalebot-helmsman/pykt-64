@@ -27,6 +27,7 @@ header_value_cb(http_parser *p, const char *buf, size_t len)
     if(con->have_kt_error){
         PyObject *value = PyString_FromStringAndSize(buf, len);
         PyErr_SetObject(KtException, value);
+        Py_DECREF(value);
         con->response_status = RES_KT_ERROR;
         con->have_kt_error = 0;
         return 0;

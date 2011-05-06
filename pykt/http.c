@@ -16,7 +16,7 @@ inline http_connection *
 open_http_connection(const char *host, int port)
 {
 
-    http_connection *con;
+    http_connection *con = NULL;
     int fd;
     DEBUG("open_http_connection args %s:%d", host, port);
 
@@ -37,6 +37,9 @@ open_http_connection(const char *host, int port)
 
     fd = connect_socket(host, port);
     if(fd < 0){
+        if(con){
+            PyMem_Free(con);
+        }
         return NULL;
     }
     

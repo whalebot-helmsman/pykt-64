@@ -43,6 +43,7 @@ set_error(http_connection *con)
 {
     PyObject *dict, *temp;
     char *msg;
+    int ret = -1;
 
     dict = convert2dict(con->response_body);
     if(dict){
@@ -51,35 +52,38 @@ set_error(http_connection *con)
             msg = PyString_AsString(temp);
             if(msg){
                 PyErr_SetString(KtException, msg);
-                return 1;
+                ret = 1;
             }else{
                 //TypeError
-                return -1;
+                ret = -1;
             }
 
         }
+        Py_DECREF(dict);
+    }else{
+        PyErr_SetString(KtException, "could not set error ");
+        ret = -1;
     }
-    PyErr_SetString(KtException, "could not set error ");
-    
-    return -1;
+    return ret;
 }
 
 static inline PyObject*
 get_num(http_connection *con, uint8_t isdouble)
 {
-    PyObject *dict, *temp;
+    PyObject *dict, *temp, *result = NULL;
     dict = convert2dict(con->response_body);
     if(dict){
         temp = PyDict_GetItemString(dict, "num");
         if(temp){
             if(isdouble){
-                return PyNumber_Float(temp);
+                result = PyNumber_Float(temp);
             }else{
-                return PyNumber_Int(temp);
+                result = PyNumber_Int(temp);
             }
         }
+        Py_DECREF(dict);
     }
-    return NULL;
+    return result;
 
 }
 
@@ -1788,7 +1792,7 @@ rpc_call_cur_get_key(DBObject *db, int cur, int step)
     add_body(con, body->buf, body->len);
 
     if(request(con, 200) > 0){
-        PyObject*temp = convert2dict(con->response_body);
+        PyObject *temp = convert2dict(con->response_body);
         result = PyDict_GetItemString(temp, "key");
         Py_INCREF(result);
         Py_DECREF(temp);
@@ -1892,8 +1896,6 @@ rpc_call_cur_get(DBObject *db, int cur, int step)
         PyObject *temp = convert2dict(con->response_body);
         PyObject *key = PyDict_GetItemString(temp, "key");
         PyObject *value = PyDict_GetItemString(temp, "value");
-        Py_INCREF(key);
-        Py_INCREF(value);
         result = PyTuple_Pack(2, key, value);
         Py_DECREF(temp);
     }else{

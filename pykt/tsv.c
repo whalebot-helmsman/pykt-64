@@ -83,7 +83,7 @@ on_record_value(void *data, const char *key, size_t key_len, const char *val, si
 static inline void 
 on_record(void *data, const char *key, size_t key_len, const char *val, size_t val_len)
 {
-    PyObject *keyObj, *valueObj, *dict;
+    PyObject *keyObj = NULL, *valueObj = NULL, *dict = NULL;
     
     //DEBUG("on_record %.*s : %.*s ", key_len, key, val_len, val);
 
