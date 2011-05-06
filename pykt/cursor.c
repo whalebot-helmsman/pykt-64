@@ -18,10 +18,10 @@ CursorObject_init(CursorObject *self, PyObject *args, PyObject *kwargs)
 
     Py_INCREF(db);
     self->db = db;
-    self->in_weakreflist = NULL;
     curnum++;
     i = (uintptr_t)db >> 8;
-    self->cur = i + curnum;
+    self->cur = (i + curnum) >> 2;
+    DEBUG("CursorObject_init %p CUR: %d", self, self->cur);
     return 0;
 }
 
@@ -29,11 +29,9 @@ static inline void
 CusorObject_dealloc(CursorObject *self)
 {
 
-    Py_XDECREF(self->db);
-    if (self->in_weakreflist != NULL) {
-        PyObject_ClearWeakRefs((PyObject*)self);
-    }
-
+    PyObject *result = rpc_call_cur_delete(self->db, self->cur);
+    Py_XDECREF(result);
+    Py_CLEAR(self->db);
     self->ob_type->tp_free((PyObject*)self);
 }
 
@@ -204,12 +202,12 @@ PyTypeObject CursorObjectType = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE|Py_TPFLAGS_HAVE_WEAKREFS,        /*tp_flags*/
+    Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,        /*tp_flags*/
     "Cursor",           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
-    offsetof(CursorObject, in_weakreflist),      /* tp_weaklistoffset */
+    0,                       /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     CursorObject_methods,                          /* tp_methods */
