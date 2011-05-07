@@ -10,6 +10,16 @@ static PyObject *serialize_func = NULL;
 static PyObject *deserialize_func = NULL;
 
 static inline PyObject *
+clear_wait_callback(PyObject *self, PyObject *args)
+{
+    if(wait_callback){
+        Py_CLEAR(wait_callback);
+        wait_callback = NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+static inline PyObject *
 set_wait_callback(PyObject *self, PyObject *args)
 {
     PyObject *temp;
@@ -100,6 +110,7 @@ deserialize_value(PyObject *obj)
 
 static PyMethodDef PyKtMethods[] = {
     {"set_wait_callback", set_wait_callback, METH_VARARGS, "set wait callback"},
+    {"clear_wait_callback", clear_wait_callback, METH_VARARGS, "clear wait callback"},
     {"set_serializer", set_serialize_func, METH_VARARGS, "set serialize func"},
     {"set_deserializer", set_deserialize_func, METH_VARARGS, "set deserialize func"},
     {NULL, NULL, 0, NULL}        /* Sentinel */

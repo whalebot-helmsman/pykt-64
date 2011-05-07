@@ -1,4 +1,5 @@
-from pykt import set_wait_callback
+from pykt import set_wait_callback, clear_wait_callback
+
 
 def test_wait_callback_fail():
     try:
@@ -15,5 +16,6 @@ def test_wait_callback():
     def callback(fd, state):
         pass
     set_wait_callback(callback)
+    clear_wait_callback()
     
 
