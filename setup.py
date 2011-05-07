@@ -29,7 +29,7 @@ setup(name='pykt',
         author='yutaka matsubara',
         author_email='yutaka.matsubara@gmail.com',
         license='BSD',
-        platforms='Linux, Darwin',
+        platforms='Linux',
         test_suite = 'nose.collector',        
         packages= ["pykt"],
         ext_modules = [
@@ -47,10 +47,12 @@ setup(name='pykt',
         ],
 
         classifiers=[
-            'Development Status :: 4 - Beta',
+            "Intended Audience :: Developers",
             'License :: OSI Approved :: BSD License',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: C',
+            "Topic :: Database :: Front-Ends",
+            "Topic :: Software Development :: Libraries"
         ],
 )
 

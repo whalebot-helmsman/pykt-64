@@ -1,7 +1,7 @@
 What's this
 ---------------------------------
 
-This is a KyotoTycoon client for Python.
+This is a `KyotoTycoon`_ client for Python.
 
 It is fast, written in C.
 
@@ -23,5 +23,7 @@ Install from source::
 
   $ python setup.py install
 
+
+.. _KyotoTycoon: http://fallabs.com/kyototycoon/
 
 
