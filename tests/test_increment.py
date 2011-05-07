@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
+import time
 
 def clear():
     db = KyotoTycoon()
@@ -48,3 +49,15 @@ def test_increment_arg():
     ret = db.increment("I", 100)
     ok_(ret == 101)
     db.close()
+
+@with_setup(setup=clear)
+def test_increment_expire():
+    db = KyotoTycoon()
+    db = db.open()
+    ret = db.increment("A", expire=2)
+    ok_(ret)
+    time.sleep(3)
+    ret = db.get("A")
+    ok_(ret == None)
+    db.close()
+

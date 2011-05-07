@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
+import time
+
 
 def clear():
     db = KyotoTycoon()
@@ -84,3 +86,31 @@ def test_cas_loop():
         ret = db.get("A")
         ok_(ret == b)
     db.close()
+
+@with_setup(setup=clear)
+def test_cas_expire():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set("A", "B")
+    ret = db.cas("A", oval="B", nval="C", expire=2)
+    ok_(ret)
+    time.sleep(3)
+    ret = db.get("A")
+    ok_(ret == None)
+    db.close()
+
+@with_setup(setup=clear)
+def test_cas_expire_not_expire():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set("A", "B")
+    ret = db.cas("A", oval="B", nval="C", expire=2)
+    ok_(ret)
+    time.sleep(2)
+    ret = db.get("A")
+    ok_(ret == "C")
+    time.sleep(2)
+    ret = db.get("A")
+    ok_(ret == None)
+    db.close()
+

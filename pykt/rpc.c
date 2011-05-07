@@ -163,11 +163,9 @@ set_param_value(buffer *body, char *key, size_t key_len, PyObject *valueObj)
 static inline int
 set_param_xt(buffer *body, int expire)
 {
-    char xt[32];
-    uint64_t expire_time = 0;
+    char xt[16];
     size_t xt_len = 0;
-    expire_time = get_expire_time(expire);
-    snprintf(xt, sizeof (xt), "%llu", expire_time);
+    snprintf(xt, sizeof (xt), "%d", expire);
     xt_len = strlen(xt);
     write2buf(body, "xt\t", 3);
     write2buf(body, xt, xt_len);
@@ -540,7 +538,6 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
     Py_ssize_t key_len, val_len;
     char content_length[12];
     char xt[14];
-    uint64_t expire_time = 0;
     size_t enckey_len, encval_len, db_name_len = 0, xt_len = 0;
     uint32_t body_len = 12;
     PyObject *result = NULL, *temp_val;
@@ -581,8 +578,7 @@ add_internal(DBObject *db, char *url, size_t url_len, PyObject *keyObj, PyObject
         body_len += 5;
     }
     if(expire > 0){
-        expire_time = get_expire_time(expire);
-        snprintf(xt, sizeof (xt), "%llu", expire_time);
+        snprintf(xt, sizeof(xt), "%d", expire);
         xt_len = strlen(xt);
         body_len += xt_len;
         body_len += 5;
@@ -848,7 +844,6 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     Py_ssize_t key_len;
     char content_length[12];
     char xt[14];
-    uint64_t expire_time = 0;
     size_t encbuf_len, oval_len = 0, nval_len = 0, xt_len = 0, db_name_len = 0;
     uint32_t body_len = 4;
     PyObject *result = NULL, *ovalS = NULL, *nvalS = NULL;
@@ -899,8 +894,7 @@ rpc_call_cas(DBObject *db, PyObject *keyObj, PyObject *ovalObj, PyObject *nvalOb
     body_len += encbuf_len;
 
     if(expire > 0){
-        expire_time = get_expire_time(expire);
-        snprintf(xt, sizeof (xt), "%llu", expire_time);
+        snprintf(xt, sizeof (xt), "%d", expire);
         xt_len = strlen(xt);
         body_len += xt_len;
         body_len += 5;

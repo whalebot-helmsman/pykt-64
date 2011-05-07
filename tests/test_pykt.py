@@ -13,8 +13,10 @@ def test_wait_callback_fail():
 
 
 def test_wait_callback():
+    
     def callback(fd, state):
-        pass
+        print fd, state
+
     set_wait_callback(callback)
     clear_wait_callback()
     

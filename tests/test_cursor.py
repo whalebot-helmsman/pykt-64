@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import *
 from pykt import KyotoTycoon, KTException, Cursor
+import time
 
 d = dict(A="B", C="D", E="F", G="H")
 d2 = {
@@ -209,6 +210,23 @@ def test_cursor_set_value_step():
     ok_(k == "E")
     ok_(v == "F")
     ok_(db.get("A") == "C")
+
+@with_setup(setup=clear)
+def test_cursor_set_value_expire():
+    db = KyotoTycoon()
+    db = db.open()
+    db.set_bulk(d)
+    c = db.cursor()
+    c.jump()
+    k, v = c.get()
+    ok_(k == "A")
+    ok_(v == "B")
+    ret = c.set_value("C", expire=2)
+    ok_(ret == True)
+    time.sleep(3)
+    k, v = c.get()
+    ok_(k == "E")
+    ok_(v == "F")
 
 @with_setup(setup=clear)
 def test_cursor_remove():
