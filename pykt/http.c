@@ -443,7 +443,9 @@ recv_data(http_connection *con)
     switch(r){
         case 0:
             //close  
-            return 1;
+            PyErr_SetString(PyExc_IOError,"connection closed");
+            con->response_status = RES_HTTP_ERROR;
+            return -1;
         case -1:
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 call_wait_callback(con->fd, WAIT_READ);
