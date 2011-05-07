@@ -69,7 +69,7 @@ set_deserialize_func(PyObject *self, PyObject *args)
 inline void
 call_wait_callback(int fd, int type)
 {
-    PyObject *result, *args;
+    PyObject *result = NULL, *args = NULL;
     if(wait_callback){
         args = Py_BuildValue("(ii)", fd, type);
         result = PyObject_CallObject(wait_callback, args);
