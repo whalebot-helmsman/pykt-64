@@ -4,8 +4,8 @@
 
 PyObject *KtException;
 PyObject *TimeoutException;
+PyObject *wait_callback = NULL;;
 
-static PyObject *wait_callback = NULL;;
 static PyObject *serialize_func = NULL;
 static PyObject *deserialize_func = NULL;
 

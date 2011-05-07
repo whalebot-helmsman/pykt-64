@@ -46,7 +46,6 @@ typedef struct {
     char *host;
     int port;
     int timeout;
-    int non_blocking;
 
     int fd;
     data_bucket *bucket;
@@ -59,7 +58,7 @@ typedef struct {
 } http_connection;
 
 inline http_connection *
-open_http_connection(char *host, int port, int timeout, int non_blocking);
+open_http_connection(char *host, int port, int timeout);
 
 inline int
 close_http_connection(http_connection *con);

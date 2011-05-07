@@ -47,14 +47,76 @@ call_select(http_connection *con, int write)
     return 0;
 }
 
+static inline int 
+writev_bucket(http_connection *con)
+{
+    int ret = 0;
+    int i = 0, timeout = 0;
+    data_bucket *bucket = con->bucket;
+    
+    DEBUG("writev_bucket total_size:%d iov_cnt:%d", bucket->total_size, bucket->iov_cnt);
+
+    Py_BEGIN_ALLOW_THREADS
+    if(wait_callback){ 
+        ret = writev(con->fd, bucket->iov, bucket->iov_cnt);
+    }else{
+        timeout = call_select(con, 1);
+        if(!timeout){
+            ret = writev(con->fd, bucket->iov, bucket->iov_cnt);
+        }
+    }
+    Py_END_ALLOW_THREADS
+    
+    if(timeout == 1){
+        PyErr_SetString(TimeoutException, "timed out");
+        return -1; 
+    }
+
+    switch(ret){
+        case 0:
+            bucket->sended = 1;
+            return 1;
+        case -1:
+            //error
+            if (errno == EAGAIN || errno == EWOULDBLOCK) { 
+                // try again later
+                return 0;
+            }else{
+                //ERROR
+                PyErr_SetFromErrno(PyExc_IOError);
+                return -1;
+            }
+            break;
+        default:
+            if(bucket->total > ret){
+                for(; i < bucket->iov_cnt;i++){
+                    if(ret > bucket->iov[i].iov_len){
+                        //already write
+                        ret -= bucket->iov[i].iov_len;
+                        bucket->iov[i].iov_len = 0;
+                    }else{
+                        bucket->iov[i].iov_base += ret;
+                        bucket->iov[i].iov_len = bucket->iov[i].iov_len - ret;
+                        break;
+                    }
+                }
+                bucket->total = bucket->total - ret;
+                return writev_bucket(con);
+            }
+            bucket->sended = 1;
+
+    }
+
+    return 1;
+}
 
 inline http_connection *
-open_http_connection(char *host, int port, int timeout, int non_blocking)
+open_http_connection(char *host, int port, int timeout)
 {
 
     http_connection *con = NULL;
     int fd = -1;
-    DEBUG("open_http_connection args %s:%d", host, port);
+    DEBUG("open_http_connection args %s:%d timeout:%d", host, port, timeout);
 
     con = PyMem_Malloc(sizeof(http_connection));
     if(con == NULL){
@@ -72,7 +134,6 @@ open_http_connection(char *host, int port, int timeout, int non_blocking)
     con->port = port;
     con->timeout = timeout;
 
-
     DEBUG("open_http_connection new %p", con);
 
     fd = connect_socket(con);
@@ -84,7 +145,6 @@ open_http_connection(char *host, int port, int timeout, int non_blocking)
     }
     
     con->fd = fd;
-    con->non_blocking = non_blocking;
     DEBUG("open http_connection connected %p fd:%d", con, con->fd);
     return con;
 }
@@ -160,28 +220,26 @@ internal_connect(http_connection *con, const struct sockaddr *addr, socklen_t ad
     return res;
 }
 
+
 static inline int 
 connect_socket(http_connection *con)
 {
     struct addrinfo hints, *res = NULL, *ai = NULL;
     int flag = 1, err, fd = -1;
     char strport[7];
-
-    char *host = con->host;
-    int port = con->port;
     int timeup = 0;
 
-    DEBUG("connect_socket %s:%d:%d", host, port, timeout);
+    DEBUG("connect_socket %s:%d timeout:%d", con->host, con->port, con->timeout);
    
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; 
     
-    snprintf(strport, sizeof (strport), "%d", port);
+    snprintf(strport, sizeof(strport), "%d", con->port);
     
     Py_BEGIN_ALLOW_THREADS
-    err = getaddrinfo(host, strport, &hints, &res);
+    err = getaddrinfo(con->host, strport, &hints, &res);
     Py_END_ALLOW_THREADS
 
     if (err == -1) {
@@ -214,11 +272,13 @@ connect_socket(http_connection *con)
             goto error;
         }
         
-        // set non_blocking
-        if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
-            close(fd);
-            PyErr_SetFromErrno(PyExc_IOError);
-            goto error;
+        if(con->timeout > 0){
+            // set non_blocking
+            if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
+                close(fd);
+                PyErr_SetFromErrno(PyExc_IOError);
+                goto error;
+            }
         }
         con->fd = fd;
         Py_BEGIN_ALLOW_THREADS
@@ -243,6 +303,14 @@ connect_socket(http_connection *con)
         close(fd);
         PyErr_SetString(PyExc_IOError,"failed to connect\n");
         goto error;
+    }
+
+    if(wait_callback){
+        if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
+            close(fd);
+            PyErr_SetFromErrno(PyExc_IOError);
+            goto error;
+        }
     }
 
     freeaddrinfo(res);
@@ -277,9 +345,7 @@ send_data(http_connection *con)
 {
     int ret;
     
-    data_bucket *bucket = con->bucket;
-    
-    ret = writev_bucket(bucket);
+    ret = writev_bucket(con);
     switch(ret){
         case 0:
             //EWOULDBLOCK or EAGAIN
@@ -350,13 +416,27 @@ static inline int
 recv_data(http_connection *con)
 {
     char buf[BUF_SIZE];
-    ssize_t r;
-    int nread;
-
+    ssize_t r = 0;
+    int nread, timeout = 0;
+    
     Py_BEGIN_ALLOW_THREADS
-    r = read(con->fd, buf, sizeof(buf));
+    if(wait_callback){
+        r = read(con->fd, buf, sizeof(buf));
+    }else{
+        timeout = call_select(con, 0);
+        if(!timeout){
+            r = read(con->fd, buf, sizeof(buf));
+        }
+    }
     Py_END_ALLOW_THREADS
     
+    //timeout
+    if(timeout == 1){
+        PyErr_SetString(TimeoutException, "timed out");
+        con->response_status = RES_HTTP_ERROR;
+        return -1;
+    }
+
     //response dump
     DUMP("read data fd:%d read:%d \n%.*s", con->fd, r, r, buf);
 

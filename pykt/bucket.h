@@ -6,7 +6,6 @@
 typedef struct iovec iovec_t;
 
 typedef struct {
-    int fd;
     iovec_t *iov;
     uint32_t iov_cnt;
     uint32_t iov_size;
@@ -16,7 +15,7 @@ typedef struct {
 } data_bucket;
 
 inline data_bucket *
-create_data_bucket(int fd, int cnt);
+create_data_bucket(int cnt);
 
 inline void
 free_data_bucket(data_bucket *bucket);
@@ -24,7 +23,7 @@ free_data_bucket(data_bucket *bucket);
 inline void
 set2bucket(data_bucket *bucket, char *buf, const size_t len);
 
-inline int 
-writev_bucket(data_bucket *bucket);
+//inline int 
+//writev_bucket(data_bucket *bucket);
 
 #endif

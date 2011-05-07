@@ -92,7 +92,7 @@ init_bucket(http_connection *con, int size)
 {
     data_bucket *bucket;
 
-    bucket = create_data_bucket(con->fd, size);
+    bucket = create_data_bucket(size);
     if(bucket == NULL){
         return -1;
     }

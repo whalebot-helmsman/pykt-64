@@ -52,6 +52,8 @@
 //extern PyObject *wait_callback;
 //extern PyObject *serialize_func;
 //extern PyObject *deserialize_func;
+
+extern PyObject *wait_callback;
 extern PyObject *KtException;
 extern PyObject *TimeoutException;
 

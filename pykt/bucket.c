@@ -1,56 +1,7 @@
 #include "bucket.h"
 
-inline int 
-writev_bucket(data_bucket *bucket){
-    int ret;
-    int i = 0;
-    
-    DEBUG("writev_bucket total_size:%d iov_cnt:%d", bucket->total_size, bucket->iov_cnt);
-
-    Py_BEGIN_ALLOW_THREADS
-    ret = writev(bucket->fd, bucket->iov, bucket->iov_cnt);
-    Py_END_ALLOW_THREADS
-    
-    switch(ret){
-        case 0:
-            bucket->sended = 1;
-            return 1;
-        case -1:
-            //error
-            if (errno == EAGAIN || errno == EWOULDBLOCK) { 
-                // try again later
-                return 0;
-            }else{
-                //ERROR
-                PyErr_SetFromErrno(PyExc_IOError);
-                return -1;
-            }
-            break;
-        default:
-            if(bucket->total > ret){
-                for(; i < bucket->iov_cnt;i++){
-                    if(ret > bucket->iov[i].iov_len){
-                        //already write
-                        ret -= bucket->iov[i].iov_len;
-                        bucket->iov[i].iov_len = 0;
-                    }else{
-                        bucket->iov[i].iov_base += ret;
-                        bucket->iov[i].iov_len = bucket->iov[i].iov_len - ret;
-                        break;
-                    }
-                }
-                bucket->total = bucket->total - ret;
-                return writev_bucket(bucket);
-            }
-            bucket->sended = 1;
-
-    }
-
-    return 1;
-}
-
 inline data_bucket *
-create_data_bucket(int fd, int cnt)
+create_data_bucket(int cnt)
 {
 
     data_bucket *bucket;
@@ -63,7 +14,6 @@ create_data_bucket(int fd, int cnt)
     }
     memset(bucket, 0, sizeof(data_bucket));
     
-    bucket->fd = fd;
     iov = (iovec_t *)PyMem_Malloc(sizeof(iovec_t) * cnt);
     if(iov == NULL){
         PyMem_Free(bucket);
