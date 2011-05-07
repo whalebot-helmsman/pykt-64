@@ -49,11 +49,11 @@ call_select(http_connection *con, int write)
 
 
 inline http_connection *
-open_http_connection(char *host, int port, int timeout)
+open_http_connection(char *host, int port, int timeout, int non_blocking)
 {
 
     http_connection *con = NULL;
-    int fd;
+    int fd = -1;
     DEBUG("open_http_connection args %s:%d", host, port);
 
     con = PyMem_Malloc(sizeof(http_connection));
@@ -84,6 +84,7 @@ open_http_connection(char *host, int port, int timeout)
     }
     
     con->fd = fd;
+    con->non_blocking = non_blocking;
     DEBUG("open http_connection connected %p fd:%d", con, con->fd);
     return con;
 }

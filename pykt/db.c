@@ -74,10 +74,11 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
     char *host = NULL;
     int port = 0;
     int timeout = 1;
+    int non_blocking = 0;
     http_connection *con;
 
-    static char *kwlist[] = {"host", "port", "timeout", NULL};
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|sii", kwlist, &host, &port, &timeout)){
+    static char *kwlist[] = {"host", "port", "timeout", "non_blocking", NULL};
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|siii", kwlist, &host, &port, &timeout, &non_blocking)){
         return NULL; 
     }
     
@@ -91,7 +92,7 @@ DBObject_open(DBObject *self, PyObject *args, PyObject *kwargs)
         port = DEFAULT_PORT;
     }
 
-    con = open_http_connection(host, port, timeout);
+    con = open_http_connection(host, port, timeout, non_blocking);
     if(con == NULL){
         return NULL;
     }
