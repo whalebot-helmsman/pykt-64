@@ -53,6 +53,7 @@
 //extern PyObject *serialize_func;
 //extern PyObject *deserialize_func;
 extern PyObject *KtException;
+extern PyObject *TimeoutException;
 
 inline void
 call_wait_callback(int fd, int type);

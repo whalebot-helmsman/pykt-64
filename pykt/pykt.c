@@ -3,6 +3,8 @@
 #include "cursor.h"
 
 PyObject *KtException;
+PyObject *TimeoutException;
+
 static PyObject *wait_callback = NULL;;
 static PyObject *serialize_func = NULL;
 static PyObject *deserialize_func = NULL;
@@ -123,6 +125,12 @@ initpykt(void)
 	if (KtException == NULL){
 		return;
     }
+
+    TimeoutException = PyErr_NewException("pykt.TimeoutException",
+					  KtException, NULL);
+	if (TimeoutException == NULL){
+		return;
+    }
     
     m = Py_InitModule3("pykt", PyKtMethods, "");
     if(m == NULL){
@@ -135,6 +143,8 @@ initpykt(void)
 	
     Py_INCREF(KtException);
 	PyModule_AddObject(m, "KTException", KtException);
+    Py_INCREF(TimeoutException);
+	PyModule_AddObject(m, "TimeoutException", TimeoutException);
 
     PyModule_AddIntConstant(m, "WAIT_READ", WAIT_READ);
     PyModule_AddIntConstant(m, "WAIT_WRITE", WAIT_WRITE);

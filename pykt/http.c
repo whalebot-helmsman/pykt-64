@@ -13,11 +13,13 @@ static inline int
 recv_response(http_connection *con, int status_code);
 
 static inline int
-call_select(int fd, int timeout, int write)
+call_select(http_connection *con, int write)
 {
     int ret;
     fd_set fds;
     struct timeval tv;
+    int fd = con->fd;
+    int timeout = con->timeout;
 
     if (timeout <= 0){
         return 0;
@@ -126,9 +128,35 @@ close_http_connection(http_connection *con)
 }
 
 static inline int
-internal_connect()
+internal_connect(http_connection *con, const struct sockaddr *addr, socklen_t addrlen, int *timeup)
 {
-    return 0;
+    int res, timeout = 0;
+
+    res = connect(con->fd, addr, addrlen);
+    if(con->timeout > 0){
+        if(res < 0 && errno == EINPROGRESS && con->fd < FD_SETSIZE){
+            timeout = call_select(con, 1);
+            if (timeout == 0){
+                socklen_t res_size = sizeof(res);
+                (void)getsockopt(con->fd, SOL_SOCKET, SO_ERROR, &res, &res_size);
+                if (res == EISCONN){
+                    res = 0;
+                }
+                errno = res;
+            }else if (timeout == -1){
+                //select error
+                res = errno;
+            }else{
+                //timeout
+                res = EWOULDBLOCK;
+            }
+        }
+    }
+    if(res < 0){
+        res = errno;
+    }
+    *timeup = timeout;
+    return res;
 }
 
 static inline int 
@@ -140,7 +168,7 @@ connect_socket(http_connection *con)
 
     char *host = con->host;
     int port = con->port;
-    int timeout = con->timeout;
+    int timeup = 0;
 
     DEBUG("connect_socket %s:%d:%d", host, port, timeout);
    
@@ -186,17 +214,23 @@ connect_socket(http_connection *con)
         }
         
         // set non_blocking
-        /*
         if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1){
             close(fd);
             PyErr_SetFromErrno(PyExc_IOError);
             goto error;
-        }*/
-
+        }
+        con->fd = fd;
         Py_BEGIN_ALLOW_THREADS
-        err = connect(fd, ai->ai_addr, ai->ai_addrlen);
+        //err = connect(fd, ai->ai_addr, ai->ai_addrlen);
+        err = internal_connect(con, ai->ai_addr, ai->ai_addrlen, &timeup);
         Py_END_ALLOW_THREADS
-        if (err < 0) {
+        
+        if (timeup == 1){
+            close(fd);
+            fd = -1;
+            continue;
+        }
+        if (err != 0) {
             close(fd);
             fd = -1;
             continue;
@@ -217,6 +251,7 @@ error:
     if(res){
         freeaddrinfo(res);
     }
+    con->fd = -1;
     return -1;
 }
 
