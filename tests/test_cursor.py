@@ -5,9 +5,9 @@ import time
 
 d = dict(A="B", C="D", E="F", G="H")
 d2 = {
-    "あいうえお": "ABC", 
-    "かきくけこ": "てすと2", 
-    "さしすせそ": "てすと2", 
+    "あいうえお": "ABC",
+    "かきくけこ": "てすと2",
+    "さしすせそ": "てすと2",
     }
 
 def clear():
@@ -71,12 +71,12 @@ def test_cursor_step():
     db = db.open()
     db.set_bulk(d)
     c = db.cursor()
-    ret = c.jump()
+    c.jump()
     k, v = c.get()
     c.step()
     k, v = c.get()
-    ok_(k == "E")
-    ok_(v == "F")
+    ok_(k == "C")
+    ok_(v == "D")
 
 @with_setup(setup=clear)
 def test_cursor_get():
@@ -177,7 +177,7 @@ def test_cursor_set_value():
     k, v = c.get()
     ok_(k == "A")
     ok_(v == "C")
-    
+
 @with_setup(setup=clear)
 def test_cursor_set_value_utf8():
     db = KyotoTycoon()
