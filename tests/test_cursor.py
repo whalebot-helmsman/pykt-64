@@ -238,8 +238,8 @@ def test_cursor_remove():
     ret = c.remove()
     ok_(ret == True)
     k, v = c.get()
-    ok_(k == "E")
-    ok_(v == "F")
+    ok_(k == "C")
+    ok_(v == "D")
     ok_(db.get("A") == None)
 
 @raises(KTException)
