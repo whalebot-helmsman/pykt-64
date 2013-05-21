@@ -103,11 +103,11 @@ def test_cursor_get_step():
     ok_(k == "A")
     ok_(v == "B")
     k, v = c.get(True)
-    ok_(k == "E")
-    ok_(v == "F")
-    k, v = c.get(True)
     ok_(k == "C")
     ok_(v == "D")
+    k, v = c.get(True)
+    ok_(k == "E")
+    ok_(v == "F")
 
 
 @with_setup(setup=clear)
