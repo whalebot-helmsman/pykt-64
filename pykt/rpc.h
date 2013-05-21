@@ -61,34 +61,34 @@ inline PyObject*
 rpc_call_match_regex(DBObject *db, PyObject *regexObj);
 
 inline PyObject* 
-rpc_call_cur_jump(DBObject *db, int cur, PyObject *keyObj);
+rpc_call_cur_jump(DBObject *db, unsigned long int cur, PyObject *keyObj);
 
 inline PyObject* 
-rpc_call_cur_jump_back(DBObject *db, int cur, PyObject *keyObj);
+rpc_call_cur_jump_back(DBObject *db, unsigned long int cur, PyObject *keyObj);
 
 inline PyObject* 
-rpc_call_cur_step(DBObject *db, int cur);
+rpc_call_cur_step(DBObject *db, unsigned long int cur);
 
 inline PyObject* 
-rpc_call_cur_step_back(DBObject *db, int cur);
+rpc_call_cur_step_back(DBObject *db, unsigned long int cur);
 
 inline PyObject* 
-rpc_call_cur_set_value(DBObject *db, int cur, PyObject *valueObj, int step, int expire);
+rpc_call_cur_set_value(DBObject *db, unsigned long int cur, PyObject *valueObj, int step, int expire);
 
 inline PyObject* 
-rpc_call_cur_remove(DBObject *db, int cur);
+rpc_call_cur_remove(DBObject *db, unsigned long int cur);
 
 inline PyObject* 
-rpc_call_cur_get_key(DBObject *db, int cur, int step);
+rpc_call_cur_get_key(DBObject *db, unsigned long int cur, int step);
 
 inline PyObject* 
-rpc_call_cur_get_value(DBObject *db, int cur, int step);
+rpc_call_cur_get_value(DBObject *db, unsigned long int cur, int step);
 
 inline PyObject* 
-rpc_call_cur_get(DBObject *db, int cur, int step);
+rpc_call_cur_get(DBObject *db, unsigned long int cur, int step);
 
 inline PyObject* 
-rpc_call_cur_delete(DBObject *db, int cur);
+rpc_call_cur_delete(DBObject *db, unsigned long int cur);
 
 #endif
 

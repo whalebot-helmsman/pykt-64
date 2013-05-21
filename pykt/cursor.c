@@ -21,7 +21,7 @@ CursorObject_init(CursorObject *self, PyObject *args, PyObject *kwargs)
     curnum++;
     i = (uintptr_t)db >> 8;
     self->cur = (i + curnum) >> 2;
-    DEBUG("CursorObject_init %p CUR: %d", self, self->cur);
+    DEBUG("CursorObject_init %p CUR: %lu", self, self->cur);
     return 0;
 }
 
@@ -29,7 +29,7 @@ static inline void
 CusorObject_dealloc(CursorObject *self)
 {
     
-    DEBUG("CursorObject_dealloc %p CUR: %d", self, self->cur);
+    DEBUG("CursorObject_dealloc %p CUR: %lu", self, self->cur);
     /* 
     if(is_opened(self->db)){
         //Not impl ???

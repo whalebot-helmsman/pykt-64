@@ -201,12 +201,12 @@ set_param_num_double(buffer *body, double num)
 }
 
 static inline int
-set_param_cur(buffer *body, int cur)
+set_param_cur(buffer *body, unsigned long int cur)
 {
     char c[32];
     size_t c_len = 0;
 
-    snprintf(c, sizeof(c), "%d", cur);
+    snprintf(c, sizeof(c), "%lu", cur);
     c_len = strlen(c);
     write2buf(body, "CUR\t", 4);
     write2buf(body, c, c_len);
@@ -1439,7 +1439,7 @@ rpc_call_play_script(DBObject *db, char *name, Py_ssize_t name_len,  PyObject *r
 }
 
 inline PyObject* 
-rpc_call_cur_jump(DBObject *db, int cur, PyObject *keyObj)
+rpc_call_cur_jump(DBObject *db, unsigned long int cur, PyObject *keyObj)
 {
     http_connection *con;
     char content_length[12];
@@ -1497,7 +1497,7 @@ rpc_call_cur_jump(DBObject *db, int cur, PyObject *keyObj)
 }
 
 inline PyObject* 
-rpc_call_cur_jump_back(DBObject *db, int cur, PyObject *keyObj)
+rpc_call_cur_jump_back(DBObject *db, unsigned long int cur, PyObject *keyObj)
 {
     http_connection *con;
     char content_length[12];
@@ -1555,7 +1555,7 @@ rpc_call_cur_jump_back(DBObject *db, int cur, PyObject *keyObj)
 }
 
 inline PyObject* 
-rpc_call_cur_step(DBObject *db, int cur)
+rpc_call_cur_step(DBObject *db, unsigned long int cur)
 {
     http_connection *con;
     char content_length[12];
@@ -1605,7 +1605,7 @@ rpc_call_cur_step(DBObject *db, int cur)
 }
 
 inline PyObject* 
-rpc_call_cur_step_back(DBObject *db, int cur)
+rpc_call_cur_step_back(DBObject *db, unsigned long int cur)
 {
     http_connection *con;
     char content_length[12];
@@ -1655,7 +1655,7 @@ rpc_call_cur_step_back(DBObject *db, int cur)
 }
 
 inline PyObject* 
-rpc_call_cur_set_value(DBObject *db, int cur, PyObject *valueObj, int step, int expire)
+rpc_call_cur_set_value(DBObject *db, unsigned long int cur, PyObject *valueObj, int step, int expire)
 {
     http_connection *con;
     char content_length[12];
@@ -1711,7 +1711,7 @@ rpc_call_cur_set_value(DBObject *db, int cur, PyObject *valueObj, int step, int 
 
 
 inline PyObject* 
-rpc_call_cur_remove(DBObject *db, int cur)
+rpc_call_cur_remove(DBObject *db, unsigned long int cur)
 {
     http_connection *con;
     char content_length[12];
@@ -1755,7 +1755,7 @@ rpc_call_cur_remove(DBObject *db, int cur)
 }
 
 inline PyObject* 
-rpc_call_cur_get_key(DBObject *db, int cur, int step)
+rpc_call_cur_get_key(DBObject *db, unsigned long int cur, int step)
 {
     http_connection *con;
     char content_length[12];
@@ -1805,7 +1805,7 @@ rpc_call_cur_get_key(DBObject *db, int cur, int step)
 }
 
 inline PyObject* 
-rpc_call_cur_get_value(DBObject *db, int cur, int step)
+rpc_call_cur_get_value(DBObject *db, unsigned long int cur, int step)
 {
     http_connection *con;
     char content_length[12];
@@ -1856,7 +1856,7 @@ rpc_call_cur_get_value(DBObject *db, int cur, int step)
 }
 
 inline PyObject* 
-rpc_call_cur_get(DBObject *db, int cur, int step)
+rpc_call_cur_get(DBObject *db, unsigned long int cur, int step)
 {
     http_connection *con;
     char content_length[12];
@@ -1907,7 +1907,7 @@ rpc_call_cur_get(DBObject *db, int cur, int step)
 }
 
 inline PyObject* 
-rpc_call_cur_delete(DBObject *db, int cur)
+rpc_call_cur_delete(DBObject *db, unsigned long int cur)
 {
 
     http_connection *con;

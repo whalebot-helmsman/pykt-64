@@ -7,7 +7,7 @@
 
 typedef struct {
     PyObject_HEAD
-    int cur;
+    unsigned long int cur;
     DBObject *db;
 } CursorObject;
 
