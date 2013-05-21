@@ -11,7 +11,11 @@ def start_db():
     args            =   [ _EXECUTABLE, '-port', _PORT, '-log', '/tmp/pykt_tests', _IN_MEMORY_TREE ]
     global _DB_Process
     _DB_Process     =   subprocess.Popen(args)
-    time.sleep(0.01)
+    time.sleep(0.6)
+    status  =   _DB_Process.poll()
+    if status is not None:
+        _DB_Process =   None
+        raise ValueError('cannot start server, someone already bind socket for port %s. That may cause data trashing' % (_PORT, ))
 
 def stop_db():
     global _DB_Process
@@ -26,4 +30,3 @@ def clear():
     db = db.open()
     db.clear()
     db.close()
-
