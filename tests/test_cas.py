@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
@@ -10,7 +10,7 @@ def test_err_cas():
     db = KyotoTycoon()
     db.cas("A")
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas():
     db = KyotoTycoon()
     db = db.open()
@@ -22,7 +22,7 @@ def test_cas():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -30,7 +30,7 @@ def test_cas_with_db():
     db.cas("A", oval="B", nval="C")
     ok_(False)
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 @raises(KTException)
 def test_cas_fail():
     db = KyotoTycoon()
@@ -38,7 +38,7 @@ def test_cas_fail():
     db.set("A", "B")
     ret = db.cas("A", oval="C", nval="C")
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 @raises(KTException)
 def test_cas_few_param1():
     db = KyotoTycoon()
@@ -46,7 +46,7 @@ def test_cas_few_param1():
     db.set("A", "B")
     db.cas("A", nval="C")
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_few_param2():
     db = KyotoTycoon()
     db = db.open()
@@ -57,7 +57,7 @@ def test_cas_few_param2():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -68,7 +68,7 @@ def test_cas_utf8():
     ok_(ret == "さしすせそ")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_loop():
     db = KyotoTycoon()
     db = db.open()
@@ -82,7 +82,7 @@ def test_cas_loop():
         ok_(ret == b)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_expire():
     db = KyotoTycoon()
     db = db.open()
@@ -94,7 +94,7 @@ def test_cas_expire():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_cas_expire_not_expire():
     db = KyotoTycoon()
     db = db.open()

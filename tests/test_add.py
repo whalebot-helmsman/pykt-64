@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
@@ -9,7 +9,7 @@ def test_err_add():
     db = KyotoTycoon()
     db.add("A", "B")
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add():
     db = KyotoTycoon()
     db = db.open()
@@ -19,7 +19,7 @@ def test_add():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -29,7 +29,7 @@ def test_add_with_db():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -39,7 +39,7 @@ def test_add_utf8():
     ok_(ret == "かきくけこ")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_large_key():
     db = KyotoTycoon()
     db = db.open()
@@ -49,7 +49,7 @@ def test_add_large_key():
     ok_(ret == "L")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_large():
     db = KyotoTycoon()
     db = db.open()
@@ -60,7 +60,7 @@ def test_add_large():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_dup():
     db = KyotoTycoon()
     db = db.open()
@@ -70,7 +70,7 @@ def test_dup():
     ret = db.add("A", "B")
 
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_loop():
     db = KyotoTycoon()
     db = db.open()
@@ -82,7 +82,7 @@ def test_loop():
         ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_expire():
     db = KyotoTycoon()
     db = db.open()
@@ -93,7 +93,7 @@ def test_add_expire():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear, teardown = stop_db)
 def test_add_expire_not_expire():
     db = KyotoTycoon()
     db = db.open()

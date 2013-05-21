@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
@@ -9,7 +9,7 @@ def test_err_append():
     db = KyotoTycoon()
     db.append("A", "B")
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append():
     db = KyotoTycoon()
     db = db.open()
@@ -20,14 +20,14 @@ def test_append():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_with_db():
     db = KyotoTycoon("test")
     db = db.open()
     ret = db.append("A", "B")
     ok_(False)
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -37,7 +37,7 @@ def test_append_utf8():
     ok_(ret == "かきくけこ")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_large_key():
     db = KyotoTycoon()
     db = db.open()
@@ -47,7 +47,7 @@ def test_append_large_key():
     ok_(ret == "L")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_large():
     db = KyotoTycoon()
     db = db.open()
@@ -57,7 +57,7 @@ def test_append_large():
     ok_(ret == "L" * 1024 * 1024 * 1)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_duble():
     db = KyotoTycoon()
     db = db.open()
@@ -69,7 +69,7 @@ def test_duble():
     ok_(db.get("A") == "BB")
 
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_loop():
     db = KyotoTycoon()
     db = db.open()
@@ -80,7 +80,7 @@ def test_loop():
         ok_(ret == "B" * (i+1))
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_expire():
     db = KyotoTycoon()
     db = db.open()
@@ -91,7 +91,7 @@ def test_append_expire():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup=clear,teardown=stop_db)
 def test_append_expire_not_expire():
     db = KyotoTycoon()
     db = db.open()
