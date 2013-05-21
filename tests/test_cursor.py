@@ -158,9 +158,9 @@ def test_cursor_get_value_step():
     v = c.get_value(True)
     ok_(v == "B")
     v = c.get_value(True)
-    ok_(v == "F")
-    v = c.get_value(True)
     ok_(v == "D")
+    v = c.get_value(True)
+    ok_(v == "F")
 
 @with_setup(setup=clear)
 def test_cursor_set_value():
