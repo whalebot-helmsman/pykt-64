@@ -224,9 +224,10 @@ def test_cursor_set_value_expire():
     ret = c.set_value("C", expire=2)
     ok_(ret == True)
     time.sleep(3)
+    ok_(db.get("A") == None)
     k, v = c.get()
-    ok_(k == "E")
-    ok_(v == "F")
+    ok_(k == "C")
+    ok_(v == "D")
 
 @with_setup(setup=clear)
 def test_cursor_remove():
