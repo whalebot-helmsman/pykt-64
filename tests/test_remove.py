@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -8,7 +8,7 @@ def test_err_remove():
     db = KyotoTycoon()
     ret = db.remove("A")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_remove():
     db = KyotoTycoon()
     db = db.open()
@@ -21,7 +21,7 @@ def test_remove():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_remove_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -34,7 +34,7 @@ def test_remove_with_db():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_remove_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -47,7 +47,7 @@ def test_remove_utf8():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_remove_notfound():
     db = KyotoTycoon()
     db = db.open()
@@ -55,7 +55,7 @@ def test_remove_notfound():
     ok_(ret == False)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_remove_loop():
     db = KyotoTycoon()
     db = db.open()

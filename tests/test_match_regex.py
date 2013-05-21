@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -9,7 +9,7 @@ def test_err_regex():
     db = KyotoTycoon()
     ret = db.match_prefix("A")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_regex1():
     db = KyotoTycoon()
     db = db.open()
@@ -21,7 +21,7 @@ def test_match_regex1():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_regex_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -31,7 +31,7 @@ def test_match_regex_with_db():
     db.match_regex("A")
     ok_(false)
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_regex2():
     db = KyotoTycoon()
     db = db.open()
@@ -42,7 +42,7 @@ def test_match_regex2():
     ok_(ret == ["AAA", "ABC"])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_regex3():
     db = KyotoTycoon()
     db = db.open()
@@ -53,7 +53,7 @@ def test_match_regex3():
     ok_(ret == ["AAA"])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_notfound():
     db = KyotoTycoon()
     db = db.open()
@@ -63,7 +63,7 @@ def test_notfound():
     ok_(ret == [])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_regex_utf8():
     db = KyotoTycoon()
     db = db.open()

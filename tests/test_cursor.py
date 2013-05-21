@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException, Cursor
 import time
@@ -18,7 +18,7 @@ def test_cursor_err():
     db.cursor()
 
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor():
     db = KyotoTycoon()
     db = db.open()
@@ -26,7 +26,7 @@ def test_cursor():
     c = db.cursor()
     ok_(isinstance(c, Cursor))
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_jump():
     db = KyotoTycoon()
     db = db.open()
@@ -36,7 +36,7 @@ def test_cursor_jump():
     ok_(ret == True)
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_jump_nodata():
     db = KyotoTycoon()
     db = db.open()
@@ -46,7 +46,7 @@ def test_cursor_jump_nodata():
 
 """
 @nottest
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_jump_back():
     db = KyotoTycoon()
     db = db.open()
@@ -60,7 +60,7 @@ def test_cursor_jump_back():
     ok_(v1 == v3)
 """
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_step():
     db = KyotoTycoon()
     db = db.open()
@@ -73,7 +73,7 @@ def test_cursor_step():
     ok_(k == "C")
     ok_(v == "D")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get():
     db = KyotoTycoon()
     db = db.open()
@@ -87,7 +87,7 @@ def test_cursor_get():
     ok_(k == "A")
     ok_(v == "B")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get_step():
     db = KyotoTycoon()
     db = db.open()
@@ -105,7 +105,7 @@ def test_cursor_get_step():
     ok_(v == "F")
 
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get_key():
     db = KyotoTycoon()
     db = db.open()
@@ -117,7 +117,7 @@ def test_cursor_get_key():
     k = c.get_key()
     ok_(k == "A")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get_key_step():
     db = KyotoTycoon()
     db = db.open()
@@ -131,7 +131,7 @@ def test_cursor_get_key_step():
     k = c.get_key(True)
     ok_(k == "E")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get_value():
     db = KyotoTycoon()
     db = db.open()
@@ -143,7 +143,7 @@ def test_cursor_get_value():
     v = c.get_value()
     ok_(v == "B")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_get_value_step():
     db = KyotoTycoon()
     db = db.open()
@@ -157,7 +157,7 @@ def test_cursor_get_value_step():
     v = c.get_value(True)
     ok_(v == "F")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_set_value():
     db = KyotoTycoon()
     db = db.open()
@@ -173,7 +173,7 @@ def test_cursor_set_value():
     ok_(k == "A")
     ok_(v == "C")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_set_value_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -189,7 +189,7 @@ def test_cursor_set_value_utf8():
     ok_(k == "A")
     ok_(v == "あいうえお")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_set_value_step():
     db = KyotoTycoon()
     db = db.open()
@@ -206,7 +206,7 @@ def test_cursor_set_value_step():
     ok_(v == "D")
     ok_(db.get("A") == "C")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_set_value_expire():
     db = KyotoTycoon()
     db = db.open()
@@ -224,7 +224,7 @@ def test_cursor_set_value_expire():
     ok_(k == "C")
     ok_(v == "D")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_remove():
     db = KyotoTycoon()
     db = db.open()
@@ -239,7 +239,7 @@ def test_cursor_remove():
     ok_(db.get("A") == None)
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_cursor_remove_fail():
     db = KyotoTycoon()
     db = db.open()

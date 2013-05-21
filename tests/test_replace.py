@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
@@ -9,7 +9,7 @@ def test_err_add():
     db = KyotoTycoon()
     db.add("A", "B")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace():
     db = KyotoTycoon()
     db = db.open()
@@ -20,7 +20,7 @@ def test_replace():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -31,7 +31,7 @@ def test_replace_with_db():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -42,7 +42,7 @@ def test_replace_utf8():
     ok_(ret == "かきくけこ")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_large_key():
     db = KyotoTycoon()
     db = db.open()
@@ -53,7 +53,7 @@ def test_replace_large_key():
     ok_(ret == "L")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_large():
     db = KyotoTycoon()
     db = db.open()
@@ -65,7 +65,7 @@ def test_replace_large():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_no_key():
     db = KyotoTycoon()
     db = db.open()
@@ -75,7 +75,7 @@ def test_no_key():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_expire():
     db = KyotoTycoon()
     db = db.open()
@@ -87,7 +87,7 @@ def test_replace_expire():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_replace_expire_not_expire():
     db = KyotoTycoon()
     db = db.open()

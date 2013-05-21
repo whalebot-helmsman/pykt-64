@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
@@ -9,7 +9,7 @@ def test_err_increment():
     db = KyotoTycoon()
     ret = db.increment("I")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_increment():
     db = KyotoTycoon()
     db = db.open()
@@ -20,14 +20,14 @@ def test_increment():
     db.close()
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_increment_with_db():
     db = KyotoTycoon("test")
     db = db.open()
     db.increment("I")
     ok_(False)
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_increment_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -35,7 +35,7 @@ def test_increment_utf8():
     ok_(ret == 1)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_increment_arg():
     db = KyotoTycoon()
     db = db.open()
@@ -45,7 +45,7 @@ def test_increment_arg():
     ok_(ret == 101)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_increment_expire():
     db = KyotoTycoon()
     db = db.open()

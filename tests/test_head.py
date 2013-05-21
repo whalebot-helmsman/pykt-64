@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -9,7 +9,7 @@ def test_err_head():
     db = KyotoTycoon()
     ret = db.head("A")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_head():
     db = KyotoTycoon()
     db = db.open()
@@ -18,7 +18,7 @@ def test_head():
     ok_(ret  == True)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_head_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -27,7 +27,7 @@ def test_head_with_db():
     ok_(ret  == True)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_head_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -36,7 +36,7 @@ def test_head_utf8():
     ok_(ret == True)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_head_notfound():
     db = KyotoTycoon()
     db = db.open()
@@ -44,7 +44,7 @@ def test_head_notfound():
     ok_(ret == False)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_head_loop():
     db = KyotoTycoon()
     db = db.open()

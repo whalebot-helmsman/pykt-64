@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -10,7 +10,7 @@ def test_err_prefix():
     ret = db.match_prefix("A")
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_prefix_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -21,7 +21,7 @@ def test_match_prefix_with_db():
     ok_(ret == ["ABC"])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_prefix1():
     db = KyotoTycoon()
     db = db.open()
@@ -32,7 +32,7 @@ def test_match_prefix1():
     ok_(ret == ["ABC"])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_prefix2():
     db = KyotoTycoon()
     db = db.open()
@@ -43,7 +43,7 @@ def test_match_prefix2():
     ok_(ret == ["AAA", "ABC"])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_prefix_notfound():
     db = KyotoTycoon()
     db = db.open()
@@ -53,7 +53,7 @@ def test_prefix_notfound():
     ok_(ret == [])
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_match_prefix_utf8():
     db = KyotoTycoon()
     db = db.open()

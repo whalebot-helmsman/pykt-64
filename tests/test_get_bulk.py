@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from setup_teardown import clear
+from setup_teardown import clear, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -15,7 +15,7 @@ def test_err_open():
     ret = db.get_bulk(d.keys())
 
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 @raises(TypeError)
 def test_err_type():
     db = KyotoTycoon()
@@ -23,14 +23,14 @@ def test_err_type():
     ret = db.get_bulk(d)
 
 @raises(KTException)
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_bulk_with_db():
     db = KyotoTycoon("test")
     db.open()
     db.get_bulk(d.keys())
     ok_(False)
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_bulk():
     db = KyotoTycoon()
     db.open()
@@ -41,7 +41,7 @@ def test_get_bulk():
     ok_(ret == d)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_bulk_utf8():
     db = KyotoTycoon()
     db.open()
@@ -53,7 +53,7 @@ def test_get_bulk_utf8():
     db.close()
 
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_bulk_atomic():
     db = KyotoTycoon()
     db.open()

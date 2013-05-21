@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import start_db, stop_db
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
@@ -6,6 +7,7 @@ def test_init():
     db = KyotoTycoon()
     ok_(db != None)
 
+@with_setup(setup=start_db,teardown=stop_db)
 def test_open():
     db = KyotoTycoon()
     db = db.open()
@@ -17,6 +19,7 @@ def test_open_err():
     db.open("A", 7777)
     db.close()
 
+@with_setup(setup=start_db,teardown=stop_db)
 def test_close():
     db = KyotoTycoon()
     db = db.open()

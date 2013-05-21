@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear, stop_db
 from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
@@ -9,7 +10,7 @@ def test_err_get():
     db = KyotoTycoon()
     ret = db.get("A")
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_with_db():
     db = KyotoTycoon("test")
     db = db.open()
@@ -18,7 +19,7 @@ def test_get_with_db():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get():
     db = KyotoTycoon()
     db = db.open()
@@ -27,7 +28,7 @@ def test_get():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_notfound():
     db = KyotoTycoon()
     db = db.open()
@@ -35,7 +36,7 @@ def test_get_notfound():
     ok_(ret == None)
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_utf8():
     db = KyotoTycoon()
     db = db.open()
@@ -44,7 +45,7 @@ def test_get_utf8():
     ok_(ret == "かきくけこ")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_mapping_protocol():
     db = KyotoTycoon()
     db = db.open()
@@ -53,7 +54,7 @@ def test_get_mapping_protocol():
     ok_(ret == "B")
     db.close()
 
-@with_setup(setup=clear)
+@with_setup(setup = clear, teardown = stop_db)
 def test_get_loop():
     db = KyotoTycoon()
     db = db.open()
