@@ -132,9 +132,9 @@ def test_cursor_get_key_step():
     k = c.get_key(True)
     ok_(k == "A")
     k = c.get_key(True)
-    ok_(k == "E")
-    k = c.get_key(True)
     ok_(k == "C")
+    k = c.get_key(True)
+    ok_(k == "E")
 
 @with_setup(setup=clear)
 def test_cursor_get_value():
