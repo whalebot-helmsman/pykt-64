@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
-
-def clear():
-    db = KyotoTycoon()
-    db = db.open()
-    db.clear()
-    db.close()
 
 @raises(IOError)
 def test_err_append():
@@ -37,7 +32,7 @@ def test_append_utf8():
     db = KyotoTycoon()
     db = db.open()
     ret = db.append("あいうえお", "かきくけこ")
-    ok_(ret) 
+    ok_(ret)
     ret = db.get("あいうえお")
     ok_(ret == "かきくけこ")
     db.close()
@@ -47,7 +42,7 @@ def test_append_large_key():
     db = KyotoTycoon()
     db = db.open()
     ret = db.append("L" * 1024 * 4, "L")
-    ok_(ret) 
+    ok_(ret)
     ret = db.get("L" * 1024 * 4)
     ok_(ret == "L")
     db.close()
@@ -57,7 +52,7 @@ def test_append_large():
     db = KyotoTycoon()
     db = db.open()
     ret = db.append("L", "L" * 1024 * 1024 * 1)
-    ok_(ret) 
+    ok_(ret)
     ret = db.get("L")
     ok_(ret == "L" * 1024 * 1024 * 1)
     db.close()

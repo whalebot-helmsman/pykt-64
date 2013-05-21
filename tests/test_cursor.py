@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException, Cursor
 import time
@@ -9,12 +10,6 @@ d2 = {
     "かきくけこ": "てすと2",
     "さしすせそ": "てすと2",
     }
-
-def clear():
-    db = KyotoTycoon()
-    db = db.open()
-    db.clear()
-    db.close()
 
 @nottest
 @raises(IOError)

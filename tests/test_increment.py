@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 import time
-
-def clear():
-    db = KyotoTycoon()
-    db = db.open()
-    db.clear()
-    db.close()
 
 @raises(IOError)
 def test_err_increment():

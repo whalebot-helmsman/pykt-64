@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
-
-def clear():
-    db = KyotoTycoon()
-    db = db.open()
-    db.clear()
-    db.close()
 
 @raises(IOError)
 def test_err_remove():
@@ -45,11 +40,11 @@ def test_remove_utf8():
     db = db.open()
     db.set("あいうえお", "かきくけこ")
     ret = db.get("あいうえお")
-    ok_(ret == "かきくけこ") 
+    ok_(ret == "かきくけこ")
     ret = db.remove("あいうえお")
-    ok_(ret == True) 
+    ok_(ret == True)
     ret = db.get("あいうえお")
-    ok_(ret == None) 
+    ok_(ret == None)
     db.close()
 
 @with_setup(setup=clear)

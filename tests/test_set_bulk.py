@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
+from setup_teardown import clear
 from nose.tools import *
 from pykt import KyotoTycoon, KTException
 
 d = dict(A="B", C="D")
 d2 = {
-    "あいうえお": "ABC", 
-    "かきくけこ": "てすと2", 
+    "あいうえお": "ABC",
+    "かきくけこ": "てすと2",
     }
-
-def clear():
-    db = KyotoTycoon()
-    db = db.open()
-    db.clear()
-    db.close()
 
 @with_setup(setup=clear)
 @raises(IOError)
