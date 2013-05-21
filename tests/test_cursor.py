@@ -207,8 +207,8 @@ def test_cursor_set_value_step():
     ret = c.set_value("C", True)
     ok_(ret == True)
     k, v = c.get()
-    ok_(k == "E")
-    ok_(v == "F")
+    ok_(k == "C")
+    ok_(v == "D")
     ok_(db.get("A") == "C")
 
 @with_setup(setup=clear)
