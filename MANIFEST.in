@@ -1,4 +1,4 @@
 include README.rst
 include LICENSE
 include ChangeLog
-recursive-include pykt/ *.h
+include pykt/*.h
